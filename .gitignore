@@ -2,3 +2,4 @@ venv
 .idea
 *.sqlite3
 irpf.secret
+*migrations
