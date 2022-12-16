@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os.path
 from pathlib import Path
+
+from b3irpf.utils import SecretKey
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-lo3r+27o^=70=1_oo#%&o4c3n&$*1f%ld+s7$lf7+_yp5t#w!9'
+SECRET_KEY = str(SecretKey(BASE_DIR / "irpf.secret"))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
