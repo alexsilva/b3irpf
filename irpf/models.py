@@ -9,7 +9,8 @@ class Negotiation(models.Model):
 	kind = models.CharField(verbose_name="Tipo de Movimentação",
 	                        max_length=16)
 
-	institution = models.CharField(verbose_name="Instituição")
+	institution = models.CharField(verbose_name="Instituição",
+	                               max_length=512)
 
 	code = models.CharField(verbose_name="Código de negociação",
 	                        max_length=8)
