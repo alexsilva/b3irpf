@@ -20,14 +20,14 @@ class ListActionModelPlugin(BaseAdminPlugin):
 	def get_import_action(self):
 		url = self.get_admin_url("import_listmodel", self.model_app_label)
 		return {
-			'title': "Importa lista de dados",
+			'title': "Importar lista de dados",
 			'url': url
 		}
 
 	def get_report_action(self):
 		url = self.get_admin_url("reportirpf", self.model_app_label)
 		return {
-			'title': "Relário do IRPF",
+			'title': "Relatório do IRPF",
 			'url': url
 		}
 
