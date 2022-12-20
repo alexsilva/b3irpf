@@ -1,6 +1,20 @@
 from django.db import models
 
 
+class Institution(models.Model):
+	code = models.CharField(verbose_name="Código de negociação",
+	                        max_length=8)
+	name = models.CharField(verbose_name="Nome", max_length=512)
+	cnpj = models.CharField(verbose_name="CNPJ", max_length=32)
+
+	def __str__(self):
+		return f"{self.name} ({self.cnpj})"
+
+	class Meta:
+		verbose_name = "Instituição"
+		verbose_name_plural = "Instituições"
+
+
 class Negotiation(models.Model):
 	"""Data do Negócio / Tipo de Movimentação / Mercado / Prazo/Vencimento / Instituição /
 	Código de Negociação / Quantidade / Preço / Valor"""
