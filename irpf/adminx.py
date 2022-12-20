@@ -11,6 +11,7 @@ class EnterpriseAdmin:
 @sites.register(Negotiation)
 class NegotiationAdmin:
 	list_filter = ("kind",)
+	search_fields = ("code",)
 	list_display = (
 		"code",
 		"kind",
