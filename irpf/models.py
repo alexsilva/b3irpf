@@ -1,6 +1,6 @@
 from django.db import models
 
-from irpf.fields import CharCodeField
+from irpf.fields import CharCodeField, DateField
 
 
 class Institution(models.Model):
@@ -21,7 +21,7 @@ class Negotiation(models.Model):
 	"""Data do Negócio / Tipo de Movimentação / Mercado / Prazo/Vencimento / Instituição /
 	Código de Negociação / Quantidade / Preço / Valor"""
 
-	date = models.DateField(verbose_name="Data do Negócio")
+	date = DateField(verbose_name="Data do Negócio")
 	kind = models.CharField(verbose_name="Tipo de Movimentação",
 	                        max_length=16)
 

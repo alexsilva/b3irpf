@@ -1,4 +1,17 @@
+import datetime
+
 from django.db import models
+
+
+class DateField(models.DateField):
+	def to_python(self, value):
+		if isinstance(value, str):
+			try:
+				value = datetime.datetime.strptime(value, "%d/%m/%Y")
+			except ValueError:
+				pass
+		value = super().to_python(value)
+		return value
 
 
 class CharCodeField(models.CharField):
