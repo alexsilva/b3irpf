@@ -20,10 +20,17 @@ class ListActionModelPlugin(BaseAdminPlugin):
 			'url': url
 		}
 
+	def get_report_action(self):
+		return {
+			'title': "Relário do IRPF",
+			'url': ''
+		}
+
 	def block_top_toolbar(self, context, nodes):
 		context = get_context_dict(context)
 		list_actions_group = {
-			"import_list": self.get_import_action()
+			"import_list": self.get_import_action(),
+			"report_irpf": self.get_report_action()
 		}
 		context['list_actions_group'] = list_actions_group
 		return render_to_string("irpf/adminx.block.listtoolbar_action.html",
