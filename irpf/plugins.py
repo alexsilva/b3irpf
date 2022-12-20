@@ -3,6 +3,7 @@ from django.core.management import get_commands
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 
+from irpf.models import Negotiation
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
@@ -10,8 +11,7 @@ from xadmin.views import BaseAdminPlugin
 class ListActionModelPlugin(BaseAdminPlugin):
 
 	def init_request(self, *args, **kwargs):
-		self.command_name = f"import_{self.opts.model_name.lower()}"
-		return self.command_name in get_commands()
+		return issubclass(self.model, (Negotiation,))
 
 	@cached_property
 	def model_app_label(self):
@@ -33,10 +33,14 @@ class ListActionModelPlugin(BaseAdminPlugin):
 
 	def block_top_toolbar(self, context, nodes):
 		context = get_context_dict(context)
-		list_actions_group = {
-			"import_list": self.get_import_action(),
-			"report_irpf": self.get_report_action()
-		}
+		list_actions_group = {}
+
+		command_name = f"import_{self.opts.model_name.lower()}"
+		if command_name in get_commands():
+			list_actions_group['import_list'] = self.get_import_action()
+
+		list_actions_group["report_irpf"] = self.get_report_action()
+
 		context['list_actions_group'] = list_actions_group
 		return render_to_string("irpf/adminx.block.listtoolbar_action.html",
 		                        context=context)
