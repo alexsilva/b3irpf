@@ -1,5 +1,5 @@
 
 $(function () {
-   $(".import-list").click(function (evt) {
+   $(".import_list").click(function (evt) {
    })
 });
