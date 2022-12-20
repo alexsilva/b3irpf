@@ -1,0 +1,16 @@
+<div class="btn-group ml-1 list-action">
+  <div class="dropdown">
+    <a class="dropdown-toggle btn btn-sm btn-secondary" href="#"
+       id="dropdown-action-groups" data-toggle="dropdown" aria-expanded="false">
+      <i class="fa fa-group"></i> Ações em grupos
+    </a>
+    <div class="dropdown-menu" aria-labelledby="dropdown-action-groups">
+      {% for name, action in list_actions_group.items %}
+        <a class="dropdown-item" href="{{ action.url }}">
+          <i class="fa fa-file-import"></i>
+          {{ action.title }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
