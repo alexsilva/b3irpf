@@ -1,5 +1,7 @@
 from django.db import models
 
+from irpf.fields import CharCodeField
+
 
 class Institution(models.Model):
 	code = models.CharField(verbose_name="Código de negociação",
@@ -26,8 +28,8 @@ class Negotiation(models.Model):
 	institution = models.CharField(verbose_name="Instituição",
 	                               max_length=512)
 
-	code = models.CharField(verbose_name="Código de negociação",
-	                        max_length=8)
+	code = CharCodeField(verbose_name="Código de negociação",
+	                     max_length=8)
 
 	quantity = models.PositiveBigIntegerField(verbose_name="Quantidade")
 
