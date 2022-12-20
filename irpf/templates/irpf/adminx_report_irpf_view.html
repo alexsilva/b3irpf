@@ -1,9 +1,33 @@
 {% extends base_template %}
 {% load crispy_forms_tags %}
+{% load humanize %}
 
 {% block content %}
-  <form class="exform" method="post">{% csrf_token %}
-    {{ form|crispy }}
-    <button type="submit" class="btn btn-primary">Enviar</button>
-  </form>
+  <div class="container-fluid">
+    <form class="exform" method="get">
+      {{ form|crispy }}
+      <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+    {% if report %}
+      {% for item in report.results %}
+        <pre>
+          {% if item.enterprise %}
+          {{ item.code }} / {{ item.enterprise }}
+          {% else %}
+          {{ item.code }}
+          {% endif %}
+          Quantidade comprada: {{ item.results.compra.quantity }}
+          Preço médio de compra): {{ item.results.compra.avg_price|floatformat:2|intcomma }}
+          Valor total de compra: {{ item.results.compra.total|floatformat:2|intcomma }}
+
+          ###
+
+          Quantiadade vendida: {{ item.results.venda.quantity }}
+          Preço médio de venda: {{ item.results.venda.avg_price|floatformat:2|intcomma }}
+          Valor total de vendida: {{ item.results.venda.total|floatformat:2|intcomma }}
+        </pre>
+        <hr/>
+      {% endfor %}
+    {% endif %}
+  </div>
 {% endblock %}
