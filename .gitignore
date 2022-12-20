@@ -3,3 +3,5 @@ venv
 *.sqlite3
 irpf.secret
 *migrations
+__pycache__
+*.pyc
