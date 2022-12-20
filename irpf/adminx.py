@@ -1,6 +1,6 @@
 from irpf.models import Enterprise, Negotiation
 from irpf.plugins import ListActionModelPlugin
-from irpf.views import AdminImportListModelView
+from irpf.views.import_list import AdminImportListModelView
 from xadmin import sites, site
 from xadmin.views import ListAdminView
 
