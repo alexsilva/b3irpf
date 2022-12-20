@@ -51,3 +51,4 @@ class Negotiation(models.Model):
 
 	class Meta:
 		verbose_name = "Negotiation"
+		ordering = ("date",)
