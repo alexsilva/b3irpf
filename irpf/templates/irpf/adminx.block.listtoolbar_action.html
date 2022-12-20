@@ -6,7 +6,7 @@
     </a>
     <div class="dropdown-menu" aria-labelledby="dropdown-action-groups">
       {% for name, action in list_actions_group.items %}
-        <a class="dropdown-item" href="{{ action.url }}">
+        <a class="dropdown-item {{ name }}" href="{{ action.url }}">
           <i class="fa fa-file-import"></i>
           {{ action.title }}
         </a>
