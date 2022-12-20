@@ -1,10 +1,10 @@
 from xadmin import sites
 
-from irpf.models import Institution, Negotiation
+from irpf.models import Enterprise, Negotiation
 
 
-@sites.register(Institution)
-class InstitutionAdmin:
+@sites.register(Enterprise)
+class EnterpriseAdmin:
 	...
 
 

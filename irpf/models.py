@@ -3,7 +3,7 @@ from django.db import models
 from irpf.fields import CharCodeField, DateField
 
 
-class Institution(models.Model):
+class Enterprise(models.Model):
 	code = models.CharField(verbose_name="Código de negociação",
 	                        max_length=8)
 	name = models.CharField(verbose_name="Nome", max_length=512)
@@ -13,8 +13,8 @@ class Institution(models.Model):
 		return f"{self.name} ({self.cnpj})"
 
 	class Meta:
-		verbose_name = "Instituição"
-		verbose_name_plural = "Instituições"
+		verbose_name = "Empresa"
+		verbose_name_plural = "Empresas"
 
 
 class Negotiation(models.Model):
