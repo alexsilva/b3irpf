@@ -1,0 +1,9 @@
+{% extends base_template %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <form class="exform" method="post">{% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">Enviar</button>
+  </form>
+{% endblock %}
