@@ -42,7 +42,18 @@ class CharCodeNameField(models.CharField):
 
 class FloatZeroField(models.FloatField):
 
+	def _get_safe_value(self, value):
+		if isinstance(value, str):
+			try:
+				value = float(value)
+			except ValueError:
+				value = 0.0
+		return value
+
+	def get_prep_value(self, value):
+		value = self._get_safe_value(value)
+		return super().get_prep_value(value)
+
 	def to_python(self, value):
-		if isinstance(value, str) and not value.isdigit():
-			value = 0.0
+		value = self._get_safe_value(value)
 		return super().to_python(value)
