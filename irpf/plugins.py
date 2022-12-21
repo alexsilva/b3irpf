@@ -3,7 +3,7 @@ from django.core.management import get_commands
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 
-from irpf.models import Negotiation
+from irpf.models import Negotiation, Earnings
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
@@ -11,7 +11,7 @@ from xadmin.views import BaseAdminPlugin
 class ListActionModelPlugin(BaseAdminPlugin):
 
 	def init_request(self, *args, **kwargs):
-		return issubclass(self.model, (Negotiation,))
+		return issubclass(self.model, (Negotiation, Earnings))
 
 	@cached_property
 	def model_app_label(self):
