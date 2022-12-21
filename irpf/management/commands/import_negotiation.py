@@ -46,7 +46,6 @@ class Command(BaseCommand):
 				cells.append(str(cell.value))
 			print(" / ".join(cells))
 			self.storage_model.objects.get_or_create(**data)
-			print(data)
 
 	def handle(self, *args, **options):
 		wb = None
