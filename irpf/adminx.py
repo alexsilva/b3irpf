@@ -41,6 +41,7 @@ class EarningsAdmin:
 		"code",
 		"name",
 		"institution",
+		"quantity",
 		"total",
 		"date"
 	)
