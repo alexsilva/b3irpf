@@ -25,7 +25,7 @@ class CharCodeField(models.CharField):
 
 class CharCodeNameField(models.CharField):
 	def __init__(self, *args, **kwargs):
-		self._is_code = kwargs.pop("is_code", True)
+		self._is_code = kwargs.pop("is_code", False)
 		super().__init__(*args, **kwargs)
 
 	def to_python(self, value):
@@ -35,6 +35,8 @@ class CharCodeNameField(models.CharField):
 			code, name = value.split('-', 1)
 			if self._is_code:
 				value = code.rstrip("Ff ")
+			else:
+				value = name.strip()
 		return value
 
 

@@ -77,5 +77,5 @@ class Earnings(models.Model):
 		return f'{self.code}/{self.name} ({self.institution}) / R${self.total}'
 
 	class Meta:
-		verbose_name = "Earnings"
+		verbose_name = "Earning"
 		ordering = ("date",)
