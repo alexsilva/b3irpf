@@ -40,7 +40,6 @@
           Preço médio de compra: {{ item.results.compra.avg_price_av|floatformat:2|intcomma }}
           Valor total de compra: {{ item.results.compra.total_av|floatformat:2|intcomma }}
           {% if item.earnings %}
-
           ###
           {% if item.earnings.dividendo %}
           {{ item.earnings.dividendo.title }}:
@@ -49,6 +48,11 @@
           {% if item.earnings.juros_sobre_capital_proprio %}
           {{ item.earnings.juros_sobre_capital_proprio.title }}:
           R$ {{ item.earnings.juros_sobre_capital_proprio.value|floatformat:2|intcomma }}
+          {% endif %}
+          {% if item.earnings.bonificacao_em_ativos %}
+          {{ item.earnings.bonificacao_em_ativos.title }}
+          Quantidade: {{ item.earnings.bonificacao_em_ativos.quantity|floatformat:2|intcomma }}
+          Valor: R$ {{ item.earnings.bonificacao_em_ativos.value|floatformat:2|intcomma }}
           {% endif %}
           {% if item.earnings.redimento %}
           {{ item.earnings.redimento.title }}:

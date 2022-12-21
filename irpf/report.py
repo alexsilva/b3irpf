@@ -26,9 +26,11 @@ class NegotiationReport:
 					data = earnings[slugify(instance.kind).replace('-', "_")]
 					items = data.setdefault('items', [])
 					data.setdefault('title', instance.kind)
+					data.setdefault('quantity', 0.0)
 					data.setdefault('value', 0.0)
 
 					items.append(instance)
+					data['quantity'] += instance.quantity
 					data['value'] += instance.total
 			except self.earnings_models.DoesNotExist:
 				pass
