@@ -21,20 +21,22 @@ class NegotiationReport:
 			kind = item.kind.lower()
 
 			quantity = data[kind].setdefault('quantity', 0)
+			quantity_av = data[kind].setdefault('quantity_av', 0)
 			total = data[kind].setdefault('total', 0.0)
 
 			if kind == buy:
 				quantity += item.quantity
-				total += item.quantity * item.price
+				quantity_av += item.quantity
+				total += (item.quantity * item.price)
 				avg_price = total / float(quantity)
 
 				data[kind]['quantity'] = quantity
 				data[kind]['avg_price'] = avg_price
 				data[kind]['total'] = total
 
-				data[kind]['quantity_av'] = quantity
+				data[kind]['quantity_av'] = quantity_av
 				data[kind]['avg_price_av'] = avg_price
-				data[buy]['total_av'] = total
+				data[buy]['total_av'] = quantity_av * avg_price
 			elif kind == sale:
 				quantity += item.quantity
 				total += item.quantity * item.price
@@ -47,17 +49,20 @@ class NegotiationReport:
 
 				# valores de compra
 				buy_quantity = data[buy]['quantity']
+				buy_quantity_av = data[buy]['quantity_av']
 				buy_avg_price = data[buy]['avg_price']
 
-				data[kind]['capital'] = buy_avg_price - avg_price
+				data[kind]['capital'] = quantity * (avg_price - buy_avg_price)
 
 				# removendo as unidades vendidas
 				buy_quantity -= item.quantity
-				buy_total = buy_quantity * buy_avg_price
+				buy_quantity_av -= item.quantity
+
+				buy_total = buy_quantity_av * buy_avg_price
 
 				# novos valores para compra
 				data[buy]['total_av'] = buy_total
-				data[buy]['quantity_av'] = buy_quantity
+				data[buy]['quantity_av'] = buy_quantity_av
 				data[buy]['avg_price_av'] = buy_avg_price
 
 		results = {
