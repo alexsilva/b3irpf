@@ -1,6 +1,6 @@
 from django.db import models
 
-from irpf.fields import CharCodeField, DateField
+from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField
 
 
 class Enterprise(models.Model):
@@ -51,4 +51,31 @@ class Negotiation(models.Model):
 
 	class Meta:
 		verbose_name = "Negotiation"
+		ordering = ("date",)
+
+
+class Earnings(models.Model):
+	date = DateField(verbose_name="Data")
+	flow = models.CharField(verbose_name="Entrada/Saída", max_length=16)
+
+	kind = models.CharField(verbose_name="Tipo de Movimentação", max_length=256)
+	code = CharCodeNameField(verbose_name="Código", max_length=512, is_code=True)
+	name = CharCodeNameField(verbose_name="Empresa", max_length=256)
+	institution = models.CharField(verbose_name="Instituição",
+	                               max_length=512)
+	total = FloatZeroField(verbose_name="Valor da operação", default=0.0)
+
+	date.sheet_header = "Data"
+	flow.sheet_header = "Entrada/Saída"
+	kind.sheet_header = "Movimentação"
+	code.sheet_header = "Produto"
+	name.sheet_header = "Produto"
+	institution.sheet_header = "Instituição"
+	total.sheet_header = "Valor da Operação"
+
+	def __str__(self):
+		return f'{self.code}/{self.name} ({self.institution}) / R${self.total}'
+
+	class Meta:
+		verbose_name = "Earnings"
 		ordering = ("date",)
