@@ -13,7 +13,7 @@ class NegotiationReport:
 	def consolidate(self, code, items):
 		data = collections.defaultdict(dict)
 		try:
-			enterprise = self.enterprise_model.objects.get(code=code)
+			enterprise = self.enterprise_model.objects.get(code__iexact=code)
 		except self.enterprise_model.DoesNotExist:
 			enterprise = None
 		buy, sale = "compra", "venda"
