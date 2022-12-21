@@ -1,14 +1,38 @@
 import collections
 
-from irpf.models import Enterprise
+from django.utils.text import slugify
+
+from irpf.models import Enterprise, Earnings
 
 
 class NegotiationReport:
 	enterprise_model = Enterprise
+	earnings_models = Earnings
 
 	def __init__(self, model, **options):
 		self.model = model
 		self.options = options
+
+	def get_earnings(self, code, items):
+		earnings = collections.defaultdict(dict)
+		if items:
+			try:
+				qs = self.earnings_models.objects.filter(
+					flow="Credito",
+					institution=items[0].institution,
+					code__iexact=code)
+
+				for instance in qs:
+					data = earnings[slugify(instance.kind).replace('-', "_")]
+					items = data.setdefault('items', [])
+					data.setdefault('title', instance.kind)
+					data.setdefault('value', 0.0)
+
+					items.append(instance)
+					data['value'] += instance.total
+			except self.earnings_models.DoesNotExist:
+				pass
+		return earnings
 
 	def consolidate(self, code, items):
 		data = collections.defaultdict(dict)
@@ -68,6 +92,7 @@ class NegotiationReport:
 		results = {
 			'code': code,
 			'enterprise': enterprise,
+			'earnings': self.get_earnings(code, items),
 			'results': data
 		}
 		return results

@@ -39,6 +39,22 @@
           Quantidade líquida:    {{ item.results.compra.quantity_av }}
           Preço médio de compra: {{ item.results.compra.avg_price_av|floatformat:2|intcomma }}
           Valor total de compra: {{ item.results.compra.total_av|floatformat:2|intcomma }}
+          {% if item.earnings %}
+
+          ###
+          {% if item.earnings.dividendo %}
+          {{ item.earnings.dividendo.title }}:
+          R$ {{ item.earnings.dividendo.value|floatformat:2|intcomma }}
+          {% endif %}
+          {% if item.earnings.juros_sobre_capital_proprio %}
+          {{ item.earnings.juros_sobre_capital_proprio.title }}:
+          R$ {{ item.earnings.juros_sobre_capital_proprio.value|floatformat:2|intcomma }}
+          {% endif %}
+          {% if item.earnings.redimento %}
+          {{ item.earnings.redimento.title }}:
+          R$ {{ item.earnings.redimento.value|floatformat:2|intcomma }}
+          {% endif %}
+          {% endif %}
         </pre>
         <hr/>
       {% endfor %}
