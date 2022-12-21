@@ -3,10 +3,19 @@
 {% load humanize %}
 
 {% block content %}
-  <div class="container-fluid">
     <form class="exform" method="get">
-      {{ form|crispy }}
-      <button type="submit" class="btn btn-primary">Enviar</button>
+      <div class="form-container row clearfix">
+        <div class="column form-column full col col-sm-12 form-horizontal">
+          <div class="card fieldset mt-1 mb-2  unsort no_title">
+            <div class="card-body">
+              {{ form|crispy }}
+            </div>
+          </div>
+          <div class="float-right">
+            <button type="submit" class="btn btn-primary">Enviar</button>
+          </div>
+        </div>
+      </div>
     </form>
     {% if report %}
       {% for item in report.results %}
@@ -34,5 +43,4 @@
         <hr/>
       {% endfor %}
     {% endif %}
-  </div>
 {% endblock %}
