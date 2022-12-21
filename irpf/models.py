@@ -63,7 +63,7 @@ class Earnings(models.Model):
 	name = CharCodeNameField(verbose_name="Empresa", max_length=256)
 	institution = models.CharField(verbose_name="Instituição",
 	                               max_length=512)
-	quantity = models.PositiveBigIntegerField(verbose_name="Quantidade", default=0)
+	quantity = models.FloatField(verbose_name="Quantidade", default=0.0)
 	total = FloatZeroField(verbose_name="Valor da operação", default=0.0)
 
 	date.sheet_header = "Data"
