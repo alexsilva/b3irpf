@@ -1,4 +1,4 @@
-from irpf.models import Enterprise, Negotiation
+from irpf.models import Enterprise, Negotiation, Earnings
 from irpf.plugins import ListActionModelPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
@@ -26,6 +26,19 @@ class NegotiationAdmin:
 		"kind",
 		"institution",
 		"quantity",
+		"total",
+		"date"
+	)
+
+
+@sites.register(Earnings)
+class EarningsAdmin:
+	list_filter = ("kind",)
+	list_display = (
+		"kind",
+		"code",
+		"name",
+		"institution",
 		"total",
 		"date"
 	)
