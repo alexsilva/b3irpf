@@ -34,7 +34,9 @@ class NegotiationAdmin:
 @sites.register(Earnings)
 class EarningsAdmin:
 	list_filter = ("kind",)
+	search_fields = ("code",)
 	list_display = (
+		"flow",
 		"kind",
 		"code",
 		"name",
