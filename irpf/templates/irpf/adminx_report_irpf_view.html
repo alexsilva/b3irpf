@@ -16,15 +16,20 @@
           {% else %}
           {{ item.code }}
           {% endif %}
-          Quantidade comprada:   {{ item.results.compra.quantity }}
+          Quantidade de compra:  {{ item.results.compra.quantity }}
           Preço médio de compra: {{ item.results.compra.avg_price|floatformat:2|intcomma }}
           Valor total de compra: {{ item.results.compra.total|floatformat:2|intcomma }}
 
           ###
+          Quantidade de venda:  {{ item.results.venda.quantity }}
+          Preço médio de venda: {{ item.results.venda.avg_price|floatformat:2|intcomma }}
+          Valor total de venda: {{ item.results.venda.total|floatformat:2|intcomma }}
+          Ganho de capital:     {{ item.results.venda.capital|floatformat:2|intcomma }}
 
-          Quantiadade vendida:    {{ item.results.venda.quantity }}
-          Preço médio de venda:   {{ item.results.venda.avg_price|floatformat:2|intcomma }}
-          Valor total de vendida: {{ item.results.venda.total|floatformat:2|intcomma }}
+          ###
+          Quantidade líquida:    {{ item.results.compra.quantity_av }}
+          Preço médio de compra: {{ item.results.compra.avg_price_av|floatformat:2|intcomma }}
+          Valor total de compra: {{ item.results.compra.total_av|floatformat:2|intcomma }}
         </pre>
         <hr/>
       {% endfor %}

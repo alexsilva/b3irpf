@@ -16,19 +16,50 @@ class NegotiationReport:
 			enterprise = self.enterprise_model.objects.get(code=code)
 		except self.enterprise_model.DoesNotExist:
 			enterprise = None
+		buy, sale = "compra", "venda"
 		for item in items:
 			kind = item.kind.lower()
-			if kind == "compra":
-				quantity = data[kind].setdefault('quantity', 0)
-				total = data[kind].setdefault('total', 0.0)
 
+			quantity = data[kind].setdefault('quantity', 0)
+			total = data[kind].setdefault('total', 0.0)
+
+			if kind == buy:
 				quantity += item.quantity
 				total += item.quantity * item.price
 				avg_price = total / float(quantity)
 
 				data[kind]['quantity'] = quantity
-				data[kind]['total'] = total
 				data[kind]['avg_price'] = avg_price
+				data[kind]['total'] = total
+
+				data[kind]['quantity_av'] = quantity
+				data[kind]['avg_price_av'] = avg_price
+				data[buy]['total_av'] = total
+			elif kind == sale:
+				quantity += item.quantity
+				total += item.quantity * item.price
+				avg_price = total / float(quantity)
+
+				# valores de venda
+				data[kind]['total'] = total
+				data[kind]['quantity'] = quantity
+				data[kind]['avg_price'] = avg_price
+
+				# valores de compra
+				buy_quantity = data[buy]['quantity']
+				buy_avg_price = data[buy]['avg_price']
+
+				data[kind]['capital'] = buy_avg_price - avg_price
+
+				# removendo as unidades vendidas
+				buy_quantity -= item.quantity
+				buy_total = buy_quantity * buy_avg_price
+
+				# novos valores para compra
+				data[buy]['total_av'] = buy_total
+				data[buy]['quantity_av'] = buy_quantity
+				data[buy]['avg_price_av'] = buy_avg_price
+
 		results = {
 			'code': code,
 			'enterprise': enterprise,
