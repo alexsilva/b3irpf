@@ -65,7 +65,7 @@ class NegotiationReport:
 				data[buy]['total_av'] = quantity_av * avg_price
 			elif kind == sale:
 				quantity += item.quantity
-				total += item.quantity * item.price
+				total += (item.quantity * item.price)
 				avg_price = total / float(quantity)
 
 				# valores de venda
@@ -84,10 +84,10 @@ class NegotiationReport:
 				buy_quantity -= item.quantity
 				buy_quantity_av -= item.quantity
 
-				buy_total = buy_quantity_av * buy_avg_price
+				buy_total_av = buy_quantity_av * buy_avg_price
 
 				# novos valores para compra
-				data[buy]['total_av'] = buy_total
+				data[buy]['total_av'] = buy_total_av
 				data[buy]['quantity_av'] = buy_quantity_av
 				data[buy]['avg_price_av'] = buy_avg_price
 
