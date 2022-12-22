@@ -42,14 +42,19 @@ class NegotiationReport:
 		self.options = options
 		self.earnings_report = EaningsReport("Credito")
 
-	def consolidate(self, code, items):
-		institution = items[0].institution
-		earnings = self.earnings_report.report(code, institution)
-		data = collections.defaultdict(dict)
+	def get_enterprise(self, code):
+		"""A empresa"""
 		try:
 			enterprise = self.enterprise_model.objects.get(code__iexact=code)
 		except self.enterprise_model.DoesNotExist:
 			enterprise = None
+		return enterprise
+
+	def consolidate(self, code, items):
+		institution = items[0].institution
+		earnings = self.earnings_report.report(code, institution)
+		enterprise = self.get_enterprise(code)
+		data = collections.defaultdict(dict)
 		buy, sale = "compra", "venda"
 		for item in items:
 			kind = item.kind.lower()
