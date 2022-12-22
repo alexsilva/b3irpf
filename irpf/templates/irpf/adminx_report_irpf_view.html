@@ -21,7 +21,8 @@
       {% for item in report.results %}
         <pre>
           {% if item.enterprise %}
-          {{ item.results.compra.quantity_av }} COTAS DE {{ item.code }} / {{ item.enterprise }} / CORRETORA: {{ item.institution }}
+          {{ item.results.compra.quantity_av }} cotas de {{ item.code }} / {{ item.enterprise }} /
+          a um custom médio de R$ {{ item.results.compra.avg_price_av|floatformat:2 }}, na corretora {{ item.institution }}
           {% else %}
           {{ item.code }}
           {% endif %}
