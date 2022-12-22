@@ -5,19 +5,17 @@ from django.utils.text import slugify
 from irpf.models import Enterprise, Earnings
 
 
-class NegotiationReport:
-	enterprise_model = Enterprise
+class EaningsReport:
 	earnings_models = Earnings
 
-	def __init__(self, model, **options):
-		self.model = model
-		self.options = options
+	def __init__(self, flow):
+		self.flow = flow
 
-	def get_earnings(self, code, institution):
+	def report(self, code, institution):
 		earnings = collections.defaultdict(dict)
 		try:
 			qs = self.earnings_models.objects.filter(
-				flow="Credito",
+				flow__iexact=self.flow,
 				institution=institution,
 				code__iexact=code)
 
@@ -35,8 +33,18 @@ class NegotiationReport:
 			pass
 		return earnings
 
+
+class NegotiationReport:
+	enterprise_model = Enterprise
+
+	def __init__(self, model, **options):
+		self.model = model
+		self.options = options
+		self.earnings_report = EaningsReport("Credito")
+
 	def consolidate(self, code, items):
 		institution = items[0].institution
+		earnings = self.earnings_report.report(code, institution)
 		data = collections.defaultdict(dict)
 		try:
 			enterprise = self.enterprise_model.objects.get(code__iexact=code)
@@ -95,7 +103,7 @@ class NegotiationReport:
 			'code': code,
 			'institution': institution,
 			'enterprise': enterprise,
-			'earnings': self.get_earnings(code, institution),
+			'earnings': earnings,
 			'results': data
 		}
 		return results
