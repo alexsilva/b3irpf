@@ -4,10 +4,36 @@ from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroFi
 
 
 class Enterprise(models.Model):
+	CATEGORY_ACAO = 1
+	CATEGORY_FII = 2
+	CATEGORY_BDR = 3
+	CATEGORY_CHOICES = (
+		(CATEGORY_ACAO, "AÇÃO"),
+		(CATEGORY_FII, "FII"),
+		(CATEGORY_BDR, "BDR")
+	)
+
 	code = models.CharField(verbose_name="Código de negociação",
 	                        max_length=8)
 	name = models.CharField(verbose_name="Nome", max_length=512)
 	cnpj = models.CharField(verbose_name="CNPJ", max_length=32)
+
+	category = models.IntegerField(verbose_name="Categoria",
+	                               default=None, null=True, blank=True,
+	                               help_text="É tipo de papel que essa empresa representa.",
+	                               choices=CATEGORY_CHOICES)
+
+	@property
+	def is_acao(self):
+		return self.category == self.CATEGORY_ACAO
+
+	@property
+	def is_fii(self):
+		return self.category == self.CATEGORY_FII
+
+	@property
+	def is_bdr(self):
+		return self.category == self.CATEGORY_BDR
 
 	def __str__(self):
 		return f"{self.name} ({self.cnpj})"
