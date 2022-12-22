@@ -19,5 +19,5 @@ from xadmin.sites import site
 
 
 urlpatterns = [
-    url('admin/', include((site.get_urls(), site.app_name), site.name)),
+    url('', include((site.get_urls(), site.app_name), site.name)),
 ]
