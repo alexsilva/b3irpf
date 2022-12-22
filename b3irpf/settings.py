@@ -29,6 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+XADMIN_TITLE = "B3 - IRPF"
+XADMIN_FOOTER_TITLE = 'irpf'
 
 # Application definition
 
