@@ -13,30 +13,30 @@ class NegotiationReport:
 		self.model = model
 		self.options = options
 
-	def get_earnings(self, code, items):
+	def get_earnings(self, code, institution):
 		earnings = collections.defaultdict(dict)
-		if items:
-			try:
-				qs = self.earnings_models.objects.filter(
-					flow="Credito",
-					institution=items[0].institution,
-					code__iexact=code)
+		try:
+			qs = self.earnings_models.objects.filter(
+				flow="Credito",
+				institution=institution,
+				code__iexact=code)
 
-				for instance in qs:
-					data = earnings[slugify(instance.kind).replace('-', "_")]
-					items = data.setdefault('items', [])
-					data.setdefault('title', instance.kind)
-					data.setdefault('quantity', 0.0)
-					data.setdefault('value', 0.0)
+			for instance in qs:
+				data = earnings[slugify(instance.kind).replace('-', "_")]
+				items = data.setdefault('items', [])
+				data.setdefault('title', instance.kind)
+				data.setdefault('quantity', 0.0)
+				data.setdefault('value', 0.0)
 
-					items.append(instance)
-					data['quantity'] += instance.quantity
-					data['value'] += instance.total
-			except self.earnings_models.DoesNotExist:
-				pass
+				items.append(instance)
+				data['quantity'] += instance.quantity
+				data['value'] += instance.total
+		except self.earnings_models.DoesNotExist:
+			pass
 		return earnings
 
 	def consolidate(self, code, items):
+		institution = items[0].institution
 		data = collections.defaultdict(dict)
 		try:
 			enterprise = self.enterprise_model.objects.get(code__iexact=code)
@@ -93,8 +93,9 @@ class NegotiationReport:
 
 		results = {
 			'code': code,
+			'institution': institution,
 			'enterprise': enterprise,
-			'earnings': self.get_earnings(code, items),
+			'earnings': self.get_earnings(code, institution),
 			'results': data
 		}
 		return results

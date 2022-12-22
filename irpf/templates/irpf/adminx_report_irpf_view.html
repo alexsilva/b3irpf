@@ -21,7 +21,7 @@
       {% for item in report.results %}
         <pre>
           {% if item.enterprise %}
-          {{ item.code }} / {{ item.enterprise }}
+          {{ item.results.compra.quantity_av }} COTAS DE {{ item.code }} / {{ item.enterprise }} / CORRETORA: {{ item.institution }}
           {% else %}
           {{ item.code }}
           {% endif %}
