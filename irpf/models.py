@@ -76,7 +76,8 @@ class Negotiation(models.Model):
 		return f'{self.code}/{self.quantity} ({self.institution})'
 
 	class Meta:
-		verbose_name = "Negotiation"
+		verbose_name = "Negociação"
+		verbose_name_plural = "Negociações"
 		ordering = ("date",)
 
 
@@ -105,5 +106,6 @@ class Earnings(models.Model):
 		return f'{self.code}/{self.name} ({self.institution}) / R${self.total}'
 
 	class Meta:
-		verbose_name = "Earning"
+		verbose_name = "Provento"
+		verbose_name_plural = "Proventos"
 		ordering = ("date",)
