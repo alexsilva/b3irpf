@@ -54,9 +54,9 @@
           Quantidade: {{ item.earnings.bonificacao_em_ativos.quantity|floatformat:2|intcomma }}
           Valor: R$ {{ item.earnings.bonificacao_em_ativos.value|floatformat:2|intcomma }}
           {% endif %}
-          {% if item.earnings.redimento %}
-          {{ item.earnings.redimento.title }}:
-          R$ {{ item.earnings.redimento.value|floatformat:2|intcomma }}
+          {% if item.earnings.rendimento %}
+          {{ item.earnings.rendimento.title }} (cumulativo):
+          R$ {{ item.earnings.rendimento.value|floatformat:2|intcomma }}
           {% endif %}
           {% endif %}
         </pre>
