@@ -14,7 +14,14 @@ site.register_view("^ifpf/report-irpf/(?P<model_app_label>.+)/$", AdminReportIrp
 
 @sites.register(Enterprise)
 class EnterpriseAdmin:
-	...
+	list_filter = ("category",)
+	search_fields = ("code", "name", "cnpj")
+	list_display = (
+		'code',
+		'category',
+		'name',
+		'cnpj'
+	)
 
 
 @sites.register(Negotiation)
