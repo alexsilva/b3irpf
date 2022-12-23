@@ -19,49 +19,7 @@
     </form>
     {% if report %}
       {% for item in report.results %}
-        <pre>
-          {% if item.enterprise %}
-          {{ item.results.compra.quantity_av }} cotas de {{ item.code }} / {{ item.enterprise }} /
-          a um custom médio de R$ {{ item.results.compra.avg_price_av|floatformat:2 }}, na corretora {{ item.institution }}
-          {% else %}
-          {{ item.code }}
-          {% endif %}
-          Quantidade de compra:  {{ item.results.compra.quantity }}
-          Preço médio de compra: {{ item.results.compra.avg_price|floatformat:2 }}
-          Valor total de compra: {{ item.results.compra.total|floatformat:2 }}
-
-          ###
-          Quantidade de venda:  {{ item.results.venda.quantity }}
-          Preço médio de venda: {{ item.results.venda.avg_price|floatformat:2 }}
-          Valor total de venda: {{ item.results.venda.total|floatformat:2 }}
-          Ganho de capital:     {{ item.results.venda.capital|floatformat:2 }}
-
-          ###
-          Quantidade líquida:    {{ item.results.compra.quantity_av }}
-          Preço médio de compra: {{ item.results.compra.avg_price_av|floatformat:2 }}
-          Valor total de compra: {{ item.results.compra.total_av|floatformat:2 }}
-          {% if item.earnings %}
-          ###
-          {% if item.earnings.dividendo %}
-          {{ item.earnings.dividendo.title }}:
-          R$ {{ item.earnings.dividendo.value|floatformat:2 }}
-          {% endif %}
-          {% if item.earnings.juros_sobre_capital_proprio %}
-          {{ item.earnings.juros_sobre_capital_proprio.title }}:
-          R$ {{ item.earnings.juros_sobre_capital_proprio.value|floatformat:2 }}
-          {% endif %}
-          {% if item.earnings.bonificacao_em_ativos %}
-          {{ item.earnings.bonificacao_em_ativos.title }}
-          Quantidade: {{ item.earnings.bonificacao_em_ativos.quantity|floatformat:2 }}
-          Valor: R$ {{ item.earnings.bonificacao_em_ativos.value|floatformat:2 }}
-          {% endif %}
-          {% if item.earnings.rendimento %}
-          {{ item.earnings.rendimento.title }} (cumulativo):
-          R$ {{ item.earnings.rendimento.value|floatformat:2 }}
-          {% endif %}
-          {% endif %}
-        </pre>
-        <hr/>
+        {% include "irpf/adminx_report_irpf_item.html" %}
       {% endfor %}
     {% endif %}
 {% endblock %}

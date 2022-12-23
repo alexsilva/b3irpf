@@ -48,6 +48,13 @@ class AdminReportIrpfModelView(CommAdminView, FormView):
 		"""report from all models"""
 		return None
 
+	def get_media(self):
+		media = super().get_media()
+		media += django_forms.Media(js=(
+			"irpf/js/irpf.report.js",
+		))
+		return media
+
 	def report_model(self, model, **options):
 		"""report to specified model"""
 		report = NegotiationReport(model, **options)
