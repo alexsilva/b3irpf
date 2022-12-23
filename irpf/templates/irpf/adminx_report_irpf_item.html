@@ -2,7 +2,7 @@
   <div class="card-header">
     <button class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
             aria-expanded="true" aria-controls="collapsebody-{{ forloop.counter }}">
-      <span class="text-primary">{{ item.code }}</span> - {% if item.enterprise %}{{ item.enterprise }}{% endif %}
+      {{ item.code }}{% if item.enterprise %} - {{ item.enterprise }}{% endif %}
     </button>
     <button class="btn btn-link" data-toggle="popover"
             data-content="
@@ -58,9 +58,10 @@
         </p>
       {% endif %}
       {% if item.earnings.bonificacao_em_ativos %}
-        <p class="card-text">{{ item.earnings.bonificacao_em_ativos.title }}
-          <span>Quantidade: {{ item.earnings.bonificacao_em_ativos.quantity|floatformat:2 }}</span>
-          <span>Valor: R$ {{ item.earnings.bonificacao_em_ativos.value|floatformat:2 }}</span>
+        <p class="card-text">{{ item.earnings.bonificacao_em_ativos.title }}</p>
+        <p class="card-text">
+          Quantidade: {{ item.earnings.bonificacao_em_ativos.quantity|floatformat:2 }},
+          valor: R$ {{ item.earnings.bonificacao_em_ativos.value|floatformat:2 }}
         </p>
       {% endif %}
       {% if item.earnings.rendimento %}
