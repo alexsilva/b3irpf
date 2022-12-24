@@ -134,6 +134,7 @@ class Position(models.Model):
 	quantity = models.FloatField(verbose_name="Quantidade", default=0)
 	price_avg = models.FloatField(verbose_name="Preço médio", default=0.0)
 	total = FloatZeroField(verbose_name="Valor da operação", default=0.0)
+	date = DateField(verbose_name="Data")
 
 	def __str__(self):
 		return str(self.enterprise)
