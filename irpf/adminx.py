@@ -1,4 +1,4 @@
-from irpf.models import Enterprise, Negotiation, Earnings
+from irpf.models import Enterprise, Negotiation, Earnings, Position
 from irpf.plugins import ListActionModelPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
@@ -22,6 +22,11 @@ class EnterpriseAdmin:
 		'name',
 		'cnpj'
 	)
+
+
+@sites.register(Position)
+class PositionAdmin:
+	...
 
 
 @sites.register(Negotiation)

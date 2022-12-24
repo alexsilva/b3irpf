@@ -109,3 +109,20 @@ class Earnings(models.Model):
 		verbose_name = "Provento"
 		verbose_name_plural = "Proventos"
 		ordering = ("date",)
+
+
+class Position(models.Model):
+	enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
+	                               verbose_name="Empresa")
+	institution = models.CharField(verbose_name="Instituição",
+	                               max_length=512)
+	quantity = models.FloatField(verbose_name="Quantidade", default=0)
+	price_avg = models.FloatField(verbose_name="Preço médio", default=0.0)
+	total = FloatZeroField(verbose_name="Valor da operação", default=0.0)
+
+	def __str__(self):
+		return str(self.enterprise)
+
+	class Meta:
+		verbose_name = "Posição"
+		verbose_name_plural = "Posições"
