@@ -1,5 +1,5 @@
 from django import template
-from django.template.defaultfilters import stringformat
+from django.utils.formats import number_format
 
 register = template.Library()
 
@@ -7,4 +7,4 @@ register = template.Library()
 @register.filter
 def moneyformat(value):
 	"""money format"""
-	return stringformat(value, ".2f")
+	return number_format(value, decimal_pos=2)
