@@ -127,8 +127,10 @@ class Earnings(models.Model):
 class Position(models.Model):
 	enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
 	                               verbose_name="Empresa")
-	institution = models.CharField(verbose_name="Instituição",
-	                               max_length=512)
+	institution = models.ForeignKey(Instituition,
+	                                on_delete=models.SET_NULL,
+	                                verbose_name="Instituição",
+	                                blank=True, null=True)
 	quantity = models.FloatField(verbose_name="Quantidade", default=0)
 	price_avg = models.FloatField(verbose_name="Preço médio", default=0.0)
 	total = FloatZeroField(verbose_name="Valor da operação", default=0.0)
