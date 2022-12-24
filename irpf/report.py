@@ -113,12 +113,17 @@ class NegotiationReport:
 		}
 		return results
 
-	def report(self):
+	def report(self, institution, start, end=None):
 		groups = collections.defaultdict(list)
-		start = self.options['start']
-		end = self.options['end']
-		for instace in self.model.objects.filter(date__gte=start,
-		                                         date__lte=end):
+		options = {
+			'institution': institution,
+			'date__gte': start
+		}
+		if end is not None:
+			options['date__lte'] = end
+		queryset = self.model.objects.filter(**options)
+		queryset = queryset.order_by('date')
+		for instace in queryset:
 			groups[instace.code].append(instace)
 		results = []
 		for code in groups:

@@ -9,6 +9,7 @@ from django.views.generic import FormView
 from irpf.report import NegotiationReport
 from xadmin.views.base import CommAdminView
 from xadmin.widgets import AdminDateWidget
+from irpf.models import Instituition
 
 _now = timezone.now()
 
@@ -32,6 +33,8 @@ class ReportIRPFForm(django_forms.Form):
 		required=True,
 		widget=AdminDateWidget
 	)
+	institution = django_forms.ModelChoiceField(Instituition.objects.get_queryset(),
+	                                            label=Instituition._meta.verbose_name)
 
 
 class AdminReportIrpfModelView(CommAdminView, FormView):
@@ -84,9 +87,14 @@ class AdminReportIrpfModelView(CommAdminView, FormView):
 		context.update(super().get_context_data(**kwargs))
 		context['media'] += context['form'].media
 		if self.report:
+			form = kwargs['form']
+			form_data = form.cleaned_data
+			institution = form_data['institution'].name
+			start = form_data['start']
+			end = form_data['end']
 			context['report'] = {
 				'obj': self.report,
-				'results': self.report.report()
+				'results': self.report.report(institution, start, end)
 			}
 		return context
 
