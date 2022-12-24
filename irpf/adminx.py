@@ -1,4 +1,4 @@
-from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition
+from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision
 from irpf.plugins import ListActionModelPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
@@ -64,4 +64,17 @@ class EarningsAdmin:
 		"quantity",
 		"total",
 		"date"
+	)
+
+
+@sites.register(Provision)
+class ProvisionAdmin:
+	list_display = (
+		'code',
+		'name',
+		'date_ex',
+		'date_payment',
+		'kind',
+		'quantity',
+		'total'
 	)

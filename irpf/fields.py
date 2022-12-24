@@ -5,7 +5,7 @@ from django.db import models
 
 class DateField(models.DateField):
 	def to_python(self, value):
-		if isinstance(value, str):
+		if value and isinstance(value, str):
 			try:
 				value = datetime.datetime.strptime(value, "%d/%m/%Y")
 			except ValueError:
@@ -38,6 +38,38 @@ class CharCodeNameField(models.CharField):
 			else:
 				value = name.strip()
 		return value
+
+
+class DateNoneField(DateField):
+
+	@staticmethod
+	def _get_date_or_none(value):
+		if value and value.strip() == "-":
+			value = None
+		return value
+
+	def to_python(self, value):
+		value = self._get_date_or_none(value)
+		return super().to_python(value)
+
+	def get_prep_value(self, value):
+		value = self._get_date_or_none(value)
+		return super().get_prep_value(value)
+
+
+class FloatBRField(models.FloatField):
+	def _get_safe_value(self, value):
+		if isinstance(value, str):
+			value = float(value.replace(',', '.'))
+		return value
+
+	def get_prep_value(self, value):
+		value = self._get_safe_value(value)
+		return super().get_prep_value(value)
+
+	def to_python(self, value):
+		value = self._get_safe_value(value)
+		return super().to_python(value)
 
 
 class FloatZeroField(models.FloatField):

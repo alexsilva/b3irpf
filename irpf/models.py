@@ -1,6 +1,6 @@
 from django.db import models
-
-from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField
+from django.utils.formats import number_format
+from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField
 
 
 class Enterprise(models.Model):
@@ -122,6 +122,37 @@ class Earnings(models.Model):
 		verbose_name = "Provento"
 		verbose_name_plural = "Proventos"
 		ordering = ("date",)
+
+
+class Provision(models.Model):
+	code = CharCodeNameField(verbose_name="Código", max_length=512, is_code=True)
+	name = CharCodeNameField(verbose_name="Empresa", max_length=256)
+	kind = models.CharField(verbose_name="Tipo de Movimentação", max_length=256)
+	institution = models.CharField(verbose_name="Instituição",
+	                               max_length=512)
+	quantity = FloatBRField(verbose_name="Quantidade", default=0.0)
+	total = FloatZeroField(verbose_name="Valor da operação", default=0.0)
+
+	date_ex = DateNoneField(verbose_name="Data Ex", blank=True, null=True)
+	date_payment = DateNoneField(verbose_name="Previsão de pagamento",
+	                             blank=True, null=True)
+
+	code.sheet_header = "Produto"
+	name.sheet_header = "Produto"
+	kind.sheet_header = "Tipo de Evento"
+	institution.sheet_header = "Instituição"
+	quantity.sheet_header = "Quantidade"
+	total.sheet_header = "Valor líquido"
+	date_payment.sheet_header = "Previsão de pagamento"
+
+	def __str__(self):
+		total = number_format(self.total)
+		return f"{self.code} - {self.name} R$ {total}"
+
+	class Meta:
+		verbose_name = "Provisão"
+		verbose_name_plural = "Provisões"
+		ordering = ('date_payment',)
 
 
 class Position(models.Model):
