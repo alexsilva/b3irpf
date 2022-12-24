@@ -1,4 +1,4 @@
-from irpf.models import Enterprise, Negotiation, Earnings, Position
+from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition
 from irpf.plugins import ListActionModelPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
@@ -10,6 +10,14 @@ site.register_view("^irpf/import-listmodel/(?P<model_app_label>.+)/$", AdminImpo
                    "import_listmodel")
 site.register_view("^ifpf/report-irpf/(?P<model_app_label>.+)/$", AdminReportIrpfModelView,
                    "reportirpf")
+
+
+@sites.register(Instituition)
+class InstituitionAdmin:
+	list_display = (
+		"name",
+		"cnpj"
+	)
 
 
 @sites.register(Enterprise)

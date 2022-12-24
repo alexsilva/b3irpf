@@ -43,6 +43,19 @@ class Enterprise(models.Model):
 		verbose_name_plural = "Empresas"
 
 
+class Instituition(models.Model):
+	"""Corretora de valores"""
+	name = models.CharField(verbose_name="Instituição", max_length=512)
+	cnpj = models.CharField(verbose_name="CNPJ", max_length=32)
+
+	def __str__(self):
+		return f"{self.name} ({self.cnpj})"
+
+	class Meta:
+		verbose_name = "Corretora"
+		verbose_name_plural = verbose_name + "s"
+
+
 class Negotiation(models.Model):
 	"""Data do Negócio / Tipo de Movimentação / Mercado / Prazo/Vencimento / Instituição /
 	Código de Negociação / Quantidade / Preço / Valor"""
