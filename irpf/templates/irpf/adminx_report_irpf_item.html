@@ -61,7 +61,7 @@
       {% if item.earnings.bonificacao_em_ativos %}
         <p class="card-text">{{ item.earnings.bonificacao_em_ativos.title }}</p>
         <p class="card-text">
-          Quantidade: {{ item.earnings.bonificacao_em_ativos.quantity|floatformat }},
+          Quantidade: {{ item.earnings.bonificacao_em_ativos.quantity|moneyformat }},
           valor: R$ {{ item.earnings.bonificacao_em_ativos.value|moneyformat }}
         </p>
       {% endif %}
