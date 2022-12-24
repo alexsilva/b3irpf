@@ -7,6 +7,7 @@ python pip install git+https://github.com/alexsilva/b3irpf.git@master
 python pip install -r requirements.txt
 ### Configuração
 python manage.py makemigrations
+
 python manage.py migrate
 ### Criação do usuário padrão
 python manage.py createsupseruser
