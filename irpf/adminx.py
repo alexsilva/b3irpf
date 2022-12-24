@@ -69,6 +69,7 @@ class EarningsAdmin:
 
 @sites.register(Provision)
 class ProvisionAdmin:
+	search_fields = ("code", "kind")
 	list_display = (
 		'code',
 		'name',
