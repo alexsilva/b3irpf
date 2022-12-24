@@ -1,3 +1,4 @@
+{% load irpf_tags %}
 <div class="card mt-1 mb-2 unsort irpfreport">
   <div class="card-header">
     <button class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
@@ -14,7 +15,7 @@
           {% endif %}
           {{ item.code }} / {{ item.enterprise }} /
           na corretora {{ item.institution }} /
-          a um custom médio de R$ {{ item.results.compra.avg_price_av|floatformat:2 }}
+          a um custom médio de R$ {{ item.results.compra.avg_price_av|moneyformat }}
         {% else %}
           {{ item.code }}
         {% endif %}">
@@ -26,22 +27,22 @@
     <div class="card-body">
       <h6 class="card-subtitle mb-2 mt-2 text-muted">Posição do período</h6>
       <p class="card-text">Quantidade de compra: {{ item.results.compra.quantity }}</p>
-      <p class="card-text">Preço médio de compra: R$ {{ item.results.compra.avg_price|floatformat:2 }}</p>
-      <p class="card-text">Valor total de compra: R$ {{ item.results.compra.total|floatformat:2 }}</p>
+      <p class="card-text">Preço médio de compra: R$ {{ item.results.compra.avg_price|moneyformat }}</p>
+      <p class="card-text">Valor total de compra: R$ {{ item.results.compra.total|moneyformat }}</p>
 
     {% if item.results.venda %}
       <hr/>
       <h6 class="card-subtitle mb-2 text-muted">Vendas do período</h6>
       <p class="card-text">Quantidade de venda: {{ item.results.venda.quantity }}</p>
-      <p class="card-text">Preço médio de venda: R$ {{ item.results.venda.avg_price|floatformat:2 }}</p>
-      <p class="card-text">Valor total de venda: R$ {{ item.results.venda.total|floatformat:2 }}</p>
-      <p class="card-text">Ganho de capital: R$ {{ item.results.venda.capital|floatformat:2 }}</p>
+      <p class="card-text">Preço médio de venda: R$ {{ item.results.venda.avg_price|moneyformat }}</p>
+      <p class="card-text">Valor total de venda: R$ {{ item.results.venda.total|moneyformat }}</p>
+      <p class="card-text">Ganho de capital: R$ {{ item.results.venda.capital|moneyformat }}</p>
       <hr/>
 
       <h6 class="card-subtitle mb-2 text-muted">Posição atual</h6>
       <p class="card-text">Quantidade líquida: {{ item.results.compra.quantity_av }}</p>
-      <p class="card-text">Preço médio de compra: R$ {{ item.results.compra.avg_price_av|floatformat:2 }}</p>
-      <p class="card-text">Valor total de compra: R$ {{ item.results.compra.total_av|floatformat:2 }}</p>
+      <p class="card-text">Preço médio de compra: R$ {{ item.results.compra.avg_price_av|moneyformat }}</p>
+      <p class="card-text">Valor total de compra: R$ {{ item.results.compra.total_av|moneyformat }}</p>
     {% endif %}
 
     {% if item.earnings %}
@@ -49,24 +50,24 @@
       <h6 class="card-subtitle mb-2 text-muted">Proventos e bonificações</h6>
       {% if item.earnings.dividendo %}
         <p class="card-text">{{ item.earnings.dividendo.title }}:
-          <span>R$ {{ item.earnings.dividendo.value|floatformat:2 }}</span>
+          <span>R$ {{ item.earnings.dividendo.value|moneyformat }}</span>
         </p>
       {% endif %}
       {% if item.earnings.juros_sobre_capital_proprio %}
         <p class="card-text">{{ item.earnings.juros_sobre_capital_proprio.title }}:
-          <span>R$ {{ item.earnings.juros_sobre_capital_proprio.value|floatformat:2 }}</span>
+          <span>R$ {{ item.earnings.juros_sobre_capital_proprio.value|moneyformat }}</span>
         </p>
       {% endif %}
       {% if item.earnings.bonificacao_em_ativos %}
         <p class="card-text">{{ item.earnings.bonificacao_em_ativos.title }}</p>
         <p class="card-text">
-          Quantidade: {{ item.earnings.bonificacao_em_ativos.quantity|floatformat:2 }},
-          valor: R$ {{ item.earnings.bonificacao_em_ativos.value|floatformat:2 }}
+          Quantidade: {{ item.earnings.bonificacao_em_ativos.quantity|floatformat }},
+          valor: R$ {{ item.earnings.bonificacao_em_ativos.value|moneyformat }}
         </p>
       {% endif %}
       {% if item.earnings.rendimento %}
         <p class="card-text">{{ item.earnings.rendimento.title }} (cumulativo):
-          <span>R$ {{ item.earnings.rendimento.value|floatformat:2 }}</span>
+          <span>R$ {{ item.earnings.rendimento.value|moneyformat }}</span>
         </p>
       {% endif %}
     {% endif %}
