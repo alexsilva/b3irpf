@@ -11,14 +11,18 @@ class EaningsReport:
 	def __init__(self, flow):
 		self.flow = flow
 
-	def report(self, institution, code):
+	def report(self, code, institution, start, end=None):
 		earnings = collections.defaultdict(dict)
+		options = dict(
+			flow__iexact=self.flow,
+			institution=institution,
+			date__gte=start,
+			code__iexact=code
+		)
+		if end is not None:
+			options['date__lte'] = end
 		try:
-			qs = self.earnings_models.objects.filter(
-				flow__iexact=self.flow,
-				institution=institution,
-				code__iexact=code)
-
+			qs = self.earnings_models.objects.filter(**options)
 			for instance in qs:
 				data = earnings[slugify(instance.kind).replace('-', "_")]
 				items = data.setdefault('items', [])
@@ -50,8 +54,8 @@ class NegotiationReport:
 			enterprise = None
 		return enterprise
 
-	def consolidate(self, institution, code, items):
-		earnings = self.earnings_report.report(institution, code)
+	def consolidate(self, institution, start, end, code, items):
+		earnings = self.earnings_report.report(code, institution, start, end)
 		enterprise = self.get_enterprise(code)
 		data = collections.defaultdict(dict)
 		buy, sale = "compra", "venda"
@@ -127,7 +131,7 @@ class NegotiationReport:
 		results = []
 		for code in groups:
 			results.append(
-				self.consolidate(institution, code, groups[code])
+				self.consolidate(institution, start, end, code, groups[code])
 			)
 
 		def results_sort_category(item):
