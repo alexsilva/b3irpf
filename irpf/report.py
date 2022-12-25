@@ -11,7 +11,7 @@ class EaningsReport:
 	def __init__(self, flow):
 		self.flow = flow
 
-	def report(self, code, institution):
+	def report(self, institution, code):
 		earnings = collections.defaultdict(dict)
 		try:
 			qs = self.earnings_models.objects.filter(
@@ -50,9 +50,8 @@ class NegotiationReport:
 			enterprise = None
 		return enterprise
 
-	def consolidate(self, code, items):
-		institution = items[0].institution
-		earnings = self.earnings_report.report(code, institution)
+	def consolidate(self, institution, code, items):
+		earnings = self.earnings_report.report(institution, code)
 		enterprise = self.get_enterprise(code)
 		data = collections.defaultdict(dict)
 		buy, sale = "compra", "venda"
@@ -128,6 +127,6 @@ class NegotiationReport:
 		results = []
 		for code in groups:
 			results.append(
-				self.consolidate(code, groups[code])
+				self.consolidate(institution, code, groups[code])
 			)
 		return results
