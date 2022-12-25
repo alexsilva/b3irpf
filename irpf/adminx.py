@@ -39,7 +39,7 @@ class PositionAdmin:
 
 @sites.register(Negotiation)
 class NegotiationAdmin:
-	list_filter = ("kind",)
+	list_filter = ("kind", "date")
 	search_fields = ("code",)
 	list_display = (
 		"code",
@@ -53,7 +53,7 @@ class NegotiationAdmin:
 
 @sites.register(Earnings)
 class EarningsAdmin:
-	list_filter = ("kind",)
+	list_filter = ("kind", "date")
 	search_fields = ("code",)
 	list_display = (
 		"flow",
