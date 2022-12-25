@@ -129,4 +129,13 @@ class NegotiationReport:
 			results.append(
 				self.consolidate(institution, code, groups[code])
 			)
+
+		def results_sort_category(item):
+			return item['enterprise'].category if item['enterprise'] else item['code']
+
+		def results_sort_code(item):
+			return item['code']
+
+		results = sorted(results, key=results_sort_code)
+		results = sorted(results, key=results_sort_category)
 		return results
