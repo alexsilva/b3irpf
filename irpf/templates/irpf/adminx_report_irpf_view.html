@@ -1,6 +1,5 @@
 {% extends base_template %}
 {% load crispy_forms_tags %}
-{% load humanize %}
 
 {% block content %}
     <form class="exform" method="get">
@@ -9,7 +8,7 @@
           <div class="card fieldset mt-1 mb-2  unsort no_title">
             <div class="card-body">
               {{ form|crispy }}
-              <div class="form-group float-right">
+              <div class="form-group float-right p-1">
                 <button type="submit" class="btn btn-primary">Enviar</button>
               </div>
             </div>
