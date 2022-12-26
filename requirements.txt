@@ -1,1 +1,2 @@
 git+https://github.com/alexsilva/django-xadmin@python3-dj32
+django-guardian==2.4.0
