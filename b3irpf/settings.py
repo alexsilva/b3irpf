@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'xadmin',
-    'irpf'
+    'irpf',
+    'guardian'
 ]
 
 MIDDLEWARE = [
