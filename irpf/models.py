@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.formats import number_format
 from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField
@@ -56,7 +57,17 @@ class Instituition(models.Model):
 		verbose_name_plural = verbose_name + "s"
 
 
-class Negotiation(models.Model):
+class BaseIRPFModel(models.Model):
+	user = models.ForeignKey(settings.AUTH_USER_MODEL,
+	                         verbose_name="Usuário",
+	                         on_delete=models.CASCADE,
+	                         null=True, blank=False)
+
+	class Meta:
+		abstract = True
+
+
+class Negotiation(BaseIRPFModel):
 	"""Data do Negócio / Tipo de Movimentação / Mercado / Prazo/Vencimento / Instituição /
 	Código de Negociação / Quantidade / Preço / Valor"""
 
@@ -94,7 +105,7 @@ class Negotiation(models.Model):
 		ordering = ("date",)
 
 
-class Earnings(models.Model):
+class Earnings(BaseIRPFModel):
 	date = DateField(verbose_name="Data")
 	flow = models.CharField(verbose_name="Entrada/Saída", max_length=16)
 
@@ -124,7 +135,7 @@ class Earnings(models.Model):
 		ordering = ("date",)
 
 
-class Provision(models.Model):
+class Provision(BaseIRPFModel):
 	code = CharCodeNameField(verbose_name="Código", max_length=512, is_code=True)
 	name = CharCodeNameField(verbose_name="Empresa", max_length=256)
 	kind = models.CharField(verbose_name="Tipo de Movimentação", max_length=256)
@@ -155,7 +166,7 @@ class Provision(models.Model):
 		ordering = ('date_payment',)
 
 
-class Position(models.Model):
+class Position(BaseIRPFModel):
 	enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
 	                               verbose_name="Empresa")
 	institution = models.ForeignKey(Instituition,
