@@ -32,11 +32,18 @@ class CharCodeNameField(models.CharField):
 		value = super().to_python(value)
 		if isinstance(value, str):
 			# removes the fractional portion of the code.
-			code, name = value.split('-', 1)
-			if self._is_code:
-				value = code.rstrip("Ff ")
+			try:
+				code, name = value.split('-', 1)
+			except ValueError:
+				if self._is_code:
+					value = value.rstrip("Ff ")
+				else:
+					value = value.strip()
 			else:
-				value = name.strip()
+				if self._is_code:
+					value = code.rstrip("Ff ")
+				else:
+					value = name.strip()
 		return value
 
 
