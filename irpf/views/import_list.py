@@ -33,7 +33,8 @@ class AdminImportListModelView(CommAdminView, FormView):
 		command_app = get_commands()[command_name]
 		try:
 			command = load_command_class(command_app, command_name)
-			command.handle(filepath=filestream.file)
+			command.handle(filepath=filestream.file,
+			               user=self.user)
 			self.message_user(f"Dados importados com sucesso!",
 			                  level='success')
 		except Exception as exc:
