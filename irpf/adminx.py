@@ -1,3 +1,5 @@
+from django.contrib.auth import get_permission_codename
+
 from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin
 from irpf.views.import_list import AdminImportListModelView
@@ -29,6 +31,13 @@ class BaseIRPFAdmin:
 	guardian_protected = True
 	# AssignUserAdminPlugin
 	assign_current_user = True
+
+	def has_auth_permission(self, name: str, obj=None):
+		if isinstance(self, ModelFormAdminView) and obj is None:
+			obj = self.org_obj
+		# checks the permission for the object
+		permission_codename = get_permission_codename(name, self.opts)
+		return self.user.has_perm('%s.%s' % (self.opts.app_label, permission_codename), obj)
 
 
 @sites.register(Enterprise)
