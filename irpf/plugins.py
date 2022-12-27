@@ -2,10 +2,32 @@ import django.forms as django_forms
 from django.core.management import get_commands
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
+from guardian.shortcuts import get_objects_for_user
 
 from irpf.models import Negotiation, Earnings, Provision
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
+
+
+class GuardianAdminPlugin(BaseAdminPlugin):
+	"""Protege a view permitindo acesso somente a objetos para os quais o usuário tem permissão"""
+	guardian_protected = False
+
+	def init_request(self, *args, **kwargs):
+		return self.guardian_protected
+
+	def queryset(self, __):
+		model_perms = self.admin_view.get_model_perms()
+		model_perms = [f"{name}_{self.opts.model_name}"
+		               for name in model_perms if model_perms[name]]
+		queryset = get_objects_for_user(
+			self.user,
+			model_perms,
+			klass=self.model,
+			any_perm=True,
+			with_superuser=False,
+			accept_global_perms=False)
+		return queryset
 
 
 class ListActionModelPlugin(BaseAdminPlugin):

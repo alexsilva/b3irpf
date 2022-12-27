@@ -1,17 +1,17 @@
-from guardian.shortcuts import get_objects_for_user
-
 from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision
-from irpf.plugins import ListActionModelPlugin
+from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from xadmin import sites, site
-from xadmin.views import ListAdminView, filter_hook
+from xadmin.views import ListAdminView
 
 site.register_plugin(ListActionModelPlugin, ListAdminView)
 site.register_view("^irpf/import-listmodel/(?P<model_app_label>.+)/$", AdminImportListModelView,
                    "import_listmodel")
 site.register_view("^ifpf/report-irpf/(?P<model_app_label>.+)/$", AdminReportIrpfModelView,
                    "reportirpf")
+
+site.register_plugin(GuardianAdminPlugin, ListAdminView)
 
 
 @sites.register(Instituition)
@@ -24,20 +24,8 @@ class InstituitionAdmin:
 
 class BaseIRPFAdmin:
 	readonly_fields = ("user",)
-
-	@filter_hook
-	def queryset(self):
-		model_perms = self.get_model_perms()
-		model_perms = [f"{name}_{self.opts.model_name}"
-		               for name in model_perms if model_perms[name]]
-		queryset = get_objects_for_user(
-			self.user,
-			model_perms,
-			klass=self.model,
-			any_perm=True,
-			with_superuser=False,
-			accept_global_perms=False)
-		return queryset
+	# GuardianAdminPlugin
+	guardian_protected = True
 
 
 @sites.register(Enterprise)
