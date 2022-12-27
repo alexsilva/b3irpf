@@ -1,9 +1,9 @@
 from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision
-from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin
+from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from xadmin import sites, site
-from xadmin.views import ListAdminView
+from xadmin.views import ListAdminView, ModelFormAdminView
 
 site.register_plugin(ListActionModelPlugin, ListAdminView)
 site.register_view("^irpf/import-listmodel/(?P<model_app_label>.+)/$", AdminImportListModelView,
@@ -12,6 +12,7 @@ site.register_view("^ifpf/report-irpf/(?P<model_app_label>.+)/$", AdminReportIrp
                    "reportirpf")
 
 site.register_plugin(GuardianAdminPlugin, ListAdminView)
+site.register_plugin(AssignUserAdminPlugin, ModelFormAdminView)
 
 
 @sites.register(Instituition)
@@ -26,6 +27,8 @@ class BaseIRPFAdmin:
 	readonly_fields = ("user",)
 	# GuardianAdminPlugin
 	guardian_protected = True
+	# AssignUserAdminPlugin
+	assign_current_user = True
 
 
 @sites.register(Enterprise)

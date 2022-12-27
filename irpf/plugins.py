@@ -30,6 +30,18 @@ class GuardianAdminPlugin(BaseAdminPlugin):
 		return queryset
 
 
+class AssignUserAdminPlugin(BaseAdminPlugin):
+	"""Salva o usuário da sessão junto a instância do modelo recém criada"""
+	assign_current_user = False
+
+	def init_request(self, *args, **kwargs):
+		return self.assign_current_user
+
+	def save_forms(self):
+		if self.admin_view.new_obj and self.admin_view.new_obj.user is None:
+			self.admin_view.new_obj.user = self.user
+
+
 class ListActionModelPlugin(BaseAdminPlugin):
 
 	def init_request(self, *args, **kwargs):
