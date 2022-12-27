@@ -70,7 +70,7 @@ class AdminReportIrpfModelView(CommAdminView, FormView):
 			model = apps.get_model(*self.model_app_label.split('.', 1))
 			if not self.admin_site.get_registry(model, None):
 				raise Http404
-			self.report = self.report_model(model, **form.cleaned_data)
+			self.report = self.report_model(model, user=self.user)
 		return self.render_to_response(self.get_context_data(form=form))
 
 	def get_form_kwargs(self):

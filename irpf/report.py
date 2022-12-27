@@ -8,13 +8,19 @@ from irpf.models import Enterprise, Earnings
 class EaningsReport:
 	earnings_models = Earnings
 
-	def __init__(self, flow):
+	def __init__(self, flow, user, **options):
 		self.flow = flow
+		self.user = user
+		self.options = options
+
+	def get_queryset(self, **options):
+		return self.earnings_models.objects.filter(**options)
 
 	def report(self, code, institution, start, end=None):
 		earnings = collections.defaultdict(dict)
 		options = dict(
 			flow__iexact=self.flow,
+			user=self.user,
 			institution=institution,
 			date__gte=start,
 			code__iexact=code
@@ -22,7 +28,7 @@ class EaningsReport:
 		if end is not None:
 			options['date__lte'] = end
 		try:
-			qs = self.earnings_models.objects.filter(**options)
+			qs = self.get_queryset(**options)
 			for instance in qs:
 				data = earnings[slugify(instance.kind).replace('-', "_")]
 				items = data.setdefault('items', [])
@@ -41,10 +47,11 @@ class EaningsReport:
 class NegotiationReport:
 	enterprise_model = Enterprise
 
-	def __init__(self, model, **options):
+	def __init__(self, model, user, **options):
 		self.model = model
+		self.user = user
 		self.options = options
-		self.earnings_report = EaningsReport("Credito")
+		self.earnings_report = EaningsReport("Credito", user=self.user)
 
 	def get_enterprise(self, code):
 		"""A empresa"""
@@ -53,6 +60,9 @@ class NegotiationReport:
 		except self.enterprise_model.DoesNotExist:
 			enterprise = None
 		return enterprise
+
+	def get_queryset(self, **options):
+		return self.model.objects.filter(**options)
 
 	def consolidate(self, institution, start, end, code, items):
 		earnings = self.earnings_report.report(code, institution, start, end)
@@ -120,11 +130,12 @@ class NegotiationReport:
 		groups = collections.defaultdict(list)
 		options = {
 			'institution': institution,
+			'user': self.user,
 			'date__gte': start
 		}
 		if end is not None:
 			options['date__lte'] = end
-		queryset = self.model.objects.filter(**options)
+		queryset = self.get_queryset(**options)
 		queryset = queryset.order_by('date')
 		for instace in queryset:
 			groups[instace.code].append(instace)
