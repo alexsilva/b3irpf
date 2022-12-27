@@ -1,6 +1,6 @@
 import argparse
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, get_permission_codename
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from guardian.shortcuts import assign_perm
@@ -51,7 +51,8 @@ class Command(BaseCommand):
 		if user is None:
 			user = instance.user
 		for name in self.model_permissions:
-			assign_perm(f"{name}_{opts.model_name}", user, instance)
+			permission_codename = get_permission_codename(name, opts)
+			assign_perm(permission_codename, user, instance)
 
 	def save_instance(self, **data):
 		instance, created = self.storage_model.objects.get_or_create(**data)

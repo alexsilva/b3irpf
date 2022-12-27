@@ -1,4 +1,5 @@
 import django.forms as django_forms
+from django.contrib.auth import get_permission_codename
 from django.core.management import get_commands
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
@@ -18,7 +19,7 @@ class GuardianAdminPlugin(BaseAdminPlugin):
 
 	def queryset(self, __):
 		model_perms = self.admin_view.get_model_perms()
-		model_perms = [f"{name}_{self.opts.model_name}"
+		model_perms = [get_permission_codename(name, self.opts)
 		               for name in model_perms if model_perms[name]]
 		queryset = get_objects_for_user(
 			self.user,
