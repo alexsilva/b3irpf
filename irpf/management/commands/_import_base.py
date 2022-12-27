@@ -3,6 +3,7 @@ import argparse
 from django.contrib.auth import get_user_model, get_permission_codename
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
+from django.db.transaction import atomic
 from guardian.shortcuts import assign_perm
 from openpyxl import load_workbook
 
@@ -54,6 +55,7 @@ class Command(BaseCommand):
 			permission_codename = get_permission_codename(name, opts)
 			assign_perm(permission_codename, user, instance)
 
+	@atomic
 	def save_instance(self, **data):
 		instance, created = self.storage_model.objects.get_or_create(**data)
 		if created:
