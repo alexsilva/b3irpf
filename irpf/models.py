@@ -105,6 +105,15 @@ class Negotiation(BaseIRPFModel):
 		ordering = ("date",)
 
 
+class Bonus(BaseIRPFModel):
+	date = DateField(verbose_name="Data")
+
+	class Meta:
+		verbose_name = "Bonificação"
+		verbose_name_plural = "Bonificações"
+		ordering = ("date",)
+
+
 class Earnings(BaseIRPFModel):
 	date = DateField(verbose_name="Data")
 	flow = models.CharField(verbose_name="Entrada/Saída", max_length=16)
