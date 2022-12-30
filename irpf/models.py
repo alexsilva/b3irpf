@@ -193,8 +193,8 @@ class Position(BaseIRPFModel):
 	                                on_delete=models.SET_NULL,
 	                                verbose_name="Instituição",
 	                                blank=True, null=True)
-	quantity = models.FloatField(verbose_name="Quantidade", default=0)
-	price_avg = models.FloatField(verbose_name="Preço médio", default=0.0)
+	quantity = models.IntegerField(verbose_name="Quantidade", default=0)
+	avg_price = models.FloatField(verbose_name="Preço médio", default=0.0)
 	total = FloatZeroField(verbose_name="Valor total", default=0.0)
 	date = DateField(verbose_name="Data")
 

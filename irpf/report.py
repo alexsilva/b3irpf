@@ -143,11 +143,11 @@ class NegotiationReport:
 			data[position.enterprise.code] = info
 
 			info[self.buy]['quantity'] = position.quantity
-			info[self.buy]['avg_price'] = position.price_avg
+			info[self.buy]['avg_price'] = position.avg_price
 			info[self.buy]['total'] = position.total
 
 			info['pos_quantity'] = position.quantity
-			info['pos_avg_price'] = position.price_avg
+			info['pos_avg_price'] = position.avg_price
 			info['pos_total'] = position.total
 		return data
 
