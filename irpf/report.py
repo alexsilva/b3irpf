@@ -155,6 +155,8 @@ class NegotiationReport:
 		options = {'institution': institution, 'user': self.user}
 		all_data = self.get_position(dtstart, institution)
 		for dt in range_dates(dtstart, dtend):  # calcula um dia por vez
+			# Adição de bônus antes de inserir compras/vendas na data.
+			self.add_bonus(dt, all_data)
 			queryset = self.get_queryset(date=dt, **options)
 			for instance in queryset:
 				# instance: compra / venda
@@ -164,8 +166,6 @@ class NegotiationReport:
 					data = collections.defaultdict(dict)
 					all_data[instance.code] = data
 				self.consolidate(instance, data)
-			# bonus
-			self.add_bonus(dt, all_data)
 		results = []
 		for code in all_data:
 			enterprise = self.get_enterprise(code)
