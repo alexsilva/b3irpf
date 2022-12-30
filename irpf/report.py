@@ -2,7 +2,7 @@ import collections
 
 from django.utils.text import slugify
 
-from irpf.models import Enterprise, Earnings
+from irpf.models import Enterprise, Earnings, Bonus
 from irpf.utils import range_dates
 
 
@@ -47,6 +47,9 @@ class EaningsReport:
 
 class NegotiationReport:
 	enterprise_model = Enterprise
+	bonus_model = Bonus
+
+	buy, sale = "compra", "venda"
 
 	def __init__(self, model, user, **options):
 		self.model = model
@@ -65,15 +68,35 @@ class NegotiationReport:
 	def get_queryset(self, **options):
 		return self.model.objects.filter(**options)
 
+	def add_bonus(self, date, data):
+		queryset = self.bonus_model.objects.filter(date=date, user=self.user)
+		for bonus in queryset:
+			info = data[bonus.enterprise.code]
+			quantity = info[self.buy]['quantity_av']
+			total = info[self.buy]['total_av']
+
+			# valor quantidade e valores recebidos de bonificação
+			bonus_quantity = int(quantity * (bonus.proportion / 100.0))
+			bonus_value = bonus_quantity * bonus.base_value
+
+			quantity += bonus_quantity
+			total += bonus_value
+
+			# novo preço médio já com a bonifição
+			avg_price = total / float(quantity)
+
+			info[self.buy]['total_av'] = total
+			info[self.buy]['avg_price_av'] = avg_price
+			info[self.buy]['quantity_av'] = quantity
+
 	def consolidate(self, instance, data):
-		buy, sale = "compra", "venda"
 		kind = instance.kind.lower()
 
 		quantity = data[kind].setdefault('quantity', 0)
 		quantity_av = data[kind].setdefault('quantity_av', 0)
 		total = data[kind].setdefault('total', 0.0)
 
-		if kind == buy:
+		if kind == self.buy:
 			quantity += instance.quantity
 			quantity_av += instance.quantity
 			total += (instance.quantity * instance.price)
@@ -85,8 +108,8 @@ class NegotiationReport:
 
 			data[kind]['quantity_av'] = quantity_av
 			data[kind]['avg_price_av'] = avg_price
-			data[buy]['total_av'] = quantity_av * avg_price
-		elif kind == sale:
+			data[self.buy]['total_av'] = quantity_av * avg_price
+		elif kind == self.sale:
 			quantity += instance.quantity
 			total += (instance.quantity * instance.price)
 			avg_price = total / float(quantity)
@@ -97,9 +120,9 @@ class NegotiationReport:
 			data[kind]['avg_price'] = avg_price
 
 			# valores de compra
-			buy_quantity = data[buy]['quantity']
-			buy_quantity_av = data[buy]['quantity_av']
-			buy_avg_price = data[buy]['avg_price']
+			buy_quantity = data[self.buy]['quantity']
+			buy_quantity_av = data[self.buy]['quantity_av']
+			buy_avg_price = data[self.buy]['avg_price']
 
 			data[kind]['capital'] = quantity * (avg_price - buy_avg_price)
 
@@ -110,9 +133,9 @@ class NegotiationReport:
 			buy_total_av = buy_quantity_av * buy_avg_price
 
 			# novos valores para compra
-			data[buy]['total_av'] = buy_total_av
-			data[buy]['quantity_av'] = buy_quantity_av
-			data[buy]['avg_price_av'] = buy_avg_price
+			data[self.buy]['total_av'] = buy_total_av
+			data[self.buy]['quantity_av'] = buy_quantity_av
+			data[self.buy]['avg_price_av'] = buy_avg_price
 		return data
 
 	def report(self, institution, dtstart, dtend):
@@ -132,6 +155,8 @@ class NegotiationReport:
 					data = collections.defaultdict(dict)
 					all_data[instance.code] = data
 				self.consolidate(instance, data)
+			# bonus
+			self.add_bonus(dt, all_data)
 		results = []
 		for code in all_data:
 			enterprise = self.get_enterprise(code)
