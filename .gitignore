@@ -8,6 +8,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*migrations
 irpf/management/commands/project.py
 
 # C extensions
