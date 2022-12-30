@@ -25,7 +25,7 @@
   </div>
   <div id="collapsebody-{{ forloop.counter }}" class="collapse show">
     <div class="card-body">
-      <h6 class="card-subtitle mb-2 mt-2 text-muted">Posição do período</h6>
+      <h6 class="card-subtitle mb-2 mt-2 text-primary">Posição atual </h6>
       <p class="card-text">Quantidade de compra: {{ item.results.compra.quantity }}</p>
       <p class="card-text">Preço médio de compra: R$ {{ item.results.compra.avg_price|moneyformat }}</p>
       <p class="card-text">Valor total de compra: R$ {{ item.results.compra.total|moneyformat }}</p>
@@ -38,16 +38,17 @@
       <p class="card-text">Valor total de venda: R$ {{ item.results.venda.total|moneyformat }}</p>
       <p class="card-text">Ganho de capital: R$ {{ item.results.venda.capital|moneyformat }}</p>
       <hr/>
+    {% endif %}
 
-      <h6 class="card-subtitle mb-2 text-muted">Posição atual</h6>
+      <hr/>
+      <h6 class="card-subtitle mb-2 text-success">Posição do período</h6>
       <p class="card-text">Quantidade líquida: {{ item.results.compra.quantity_av }}</p>
       <p class="card-text">Preço médio de compra: R$ {{ item.results.compra.avg_price_av|moneyformat }}</p>
       <p class="card-text">Valor total de compra: R$ {{ item.results.compra.total_av|moneyformat }}</p>
-    {% endif %}
 
     {% if item.earnings %}
       <hr/>
-      <h6 class="card-subtitle mb-2 text-muted">Proventos e bonificações</h6>
+      <h6 class="card-subtitle mb-2 text-info">Proventos e bonificações</h6>
       {% if item.earnings.dividendo %}
         <p class="card-text">{{ item.earnings.dividendo.title }}:
           <span>R$ {{ item.earnings.dividendo.value|moneyformat }}</span>
