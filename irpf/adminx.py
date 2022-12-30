@@ -1,6 +1,6 @@
 from django.contrib.auth import get_permission_codename
 
-from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision
+from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision, Bonus
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
@@ -55,6 +55,13 @@ class EnterpriseAdmin:
 @sites.register(Position)
 class PositionAdmin(BaseIRPFAdmin):
 	...
+
+
+@sites.register(Bonus)
+class BonusAdmin(BaseIRPFAdmin):
+	list_display = (
+		'enterprise',
+	)
 
 
 @sites.register(Negotiation)

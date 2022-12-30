@@ -106,7 +106,18 @@ class Negotiation(BaseIRPFModel):
 
 
 class Bonus(BaseIRPFModel):
-	date = DateField(verbose_name="Data")
+	enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
+	                               verbose_name="Empresa")
+	data_com = DateField(verbose_name="Data com")
+	date_ex = DateField(verbose_name="Data ex")
+	date = DateField(verbose_name="Data de incorporação")
+	base_value = models.FloatField(verbose_name="Valor de base", default=0.0)
+	proportion = models.FloatField(verbose_name="Proporção", default=0.0,
+	                               help_text="valor expresso em porcentagem.")
+
+	def __str__(self):
+		value = number_format(self.base_value)
+		return f"{self.enterprise} / R$ {value} {self.proportion}%"
 
 	class Meta:
 		verbose_name = "Bonificação"
