@@ -8,14 +8,14 @@
     <button class="btn btn-link" data-toggle="popover"
             data-content="
         {% if item.enterprise %}
-          {{ item.results.compra.quantity_av }}
-          {% if item.enterprise.is_fii %}cota{{ item.results.compra.quantity_av|pluralize:"s" }}
+          {{ item.results.compra.quantity }}
+          {% if item.enterprise.is_fii %}cota{{ item.results.compra.quantity|pluralize:"s" }}
           {% elif item.enterprise.is_acao %}ações
-          {% elif item.enterprise.is_bdr %}bdr{{ item.results.compra.quantity_av|pluralize:"s" }}
+          {% elif item.enterprise.is_bdr %}bdr{{ item.results.compra.quantity|pluralize:"s" }}
           {% endif %}
           {{ item.code }} / {{ item.enterprise.name }} ({{ item.enterprise.cnpj }}) /
           na corretora {{ item.institution }} /
-          a um custom médio de R$ {{ item.results.compra.avg_price_av|moneyformat }}
+          a um custom médio de R$ {{ item.results.compra.avg_price|moneyformat }}
         {% else %}
           {{ item.code }}
         {% endif %}">
@@ -25,10 +25,10 @@
   </div>
   <div id="collapsebody-{{ forloop.counter }}" class="collapse show">
     <div class="card-body">
-      <h6 class="card-subtitle mb-2 mt-2 text-primary">Posição atual </h6>
-      <p class="card-text">Quantidade de compra: {{ item.results.compra.quantity }}</p>
-      <p class="card-text">Preço médio de compra: R$ {{ item.results.compra.avg_price|moneyformat }}</p>
-      <p class="card-text">Valor total de compra: R$ {{ item.results.compra.total|moneyformat }}</p>
+      <h6 class="card-subtitle mb-2 mt-2 text-primary">Posição atual</h6>
+      <p class="card-text">Quantidade: {{ item.results.pos_quantity|default:0 }}</p>
+      <p class="card-text">Preço médio: R$ {{ item.results.pos_avg_price|default:0|moneyformat }}</p>
+      <p class="card-text">Valor total: R$ {{ item.results.pos_total|default:0|moneyformat }}</p>
 
     {% if item.results.venda %}
       <hr/>
@@ -37,14 +37,13 @@
       <p class="card-text">Preço médio de venda: R$ {{ item.results.venda.avg_price|moneyformat }}</p>
       <p class="card-text">Valor total de venda: R$ {{ item.results.venda.total|moneyformat }}</p>
       <p class="card-text">Ganho de capital: R$ {{ item.results.venda.capital|moneyformat }}</p>
-      <hr/>
     {% endif %}
 
       <hr/>
       <h6 class="card-subtitle mb-2 text-success">Posição do período</h6>
-      <p class="card-text">Quantidade líquida: {{ item.results.compra.quantity_av }}</p>
-      <p class="card-text">Preço médio de compra: R$ {{ item.results.compra.avg_price_av|moneyformat }}</p>
-      <p class="card-text">Valor total de compra: R$ {{ item.results.compra.total_av|moneyformat }}</p>
+      <p class="card-text">Quantidade líquida: {{ item.results.compra.quantity }}</p>
+      <p class="card-text">Preço médio de compra: R$ {{ item.results.compra.avg_price|moneyformat }}</p>
+      <p class="card-text">Valor total de compra: R$ {{ item.results.compra.total|moneyformat }}</p>
 
     {% if item.earnings %}
       <hr/>
