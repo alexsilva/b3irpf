@@ -14,6 +14,7 @@ site.register_view("^ifpf/report-irpf/(?P<model_app_label>.+)/$", AdminReportIrp
                    "reportirpf")
 
 site.register_plugin(GuardianAdminPlugin, ListAdminView)
+site.register_plugin(GuardianAdminPlugin, ModelFormAdminView)
 site.register_plugin(AssignUserAdminPlugin, ModelFormAdminView)
 
 

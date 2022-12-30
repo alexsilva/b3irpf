@@ -3,7 +3,7 @@ from django.contrib.auth import get_permission_codename
 from django.core.management import get_commands
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
-from guardian.shortcuts import get_objects_for_user
+from guardian.shortcuts import get_objects_for_user, assign_perm
 
 from irpf.models import Negotiation, Earnings, Provision
 from xadmin.plugins.utils import get_context_dict
@@ -29,6 +29,16 @@ class GuardianAdminPlugin(BaseAdminPlugin):
 			with_superuser=False,
 			accept_global_perms=False)
 		return queryset
+
+	def save_models(self):
+		new_obj = getattr(self.admin_view, "new_obj", None)
+		if new_obj and new_obj.pk:
+			model_perms = self.admin_view.get_model_perms()
+			for perm_name in model_perms:
+				# atribuição das permissões de objeto
+				if model_perms[perm_name]:
+					permission_codename = get_permission_codename(perm_name, self.opts)
+					assign_perm(permission_codename, self.user, new_obj)
 
 
 class AssignUserAdminPlugin(BaseAdminPlugin):
