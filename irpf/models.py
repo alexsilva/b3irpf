@@ -37,7 +37,7 @@ class Enterprise(models.Model):
 		return self.category == self.CATEGORY_BDR
 
 	def __str__(self):
-		return f"{self.name} ({self.cnpj})"
+		return f"{self.code} - {self.name} ({self.cnpj})"
 
 	class Meta:
 		verbose_name = "Empresa"

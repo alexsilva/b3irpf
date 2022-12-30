@@ -62,6 +62,8 @@ class PositionAdmin(BaseIRPFAdmin):
 class BonusAdmin(BaseIRPFAdmin):
 	list_display = (
 		'enterprise',
+		'base_value',
+		'proportion'
 	)
 
 
