@@ -105,6 +105,7 @@ class NegotiationReport:
 			data[kind]['avg_price'] = avg_price
 			data[kind]['total'] = total
 		elif kind == self.sale:
+			data[kind].setdefault("capital", 0.0)
 			quantity += instance.quantity
 			total += (instance.quantity * instance.price)
 			avg_price = total / float(quantity)
@@ -118,7 +119,8 @@ class NegotiationReport:
 			buy_quantity = data[self.buy]['quantity']
 			buy_avg_price = data[self.buy]['avg_price']
 
-			data[kind]['capital'] = quantity * (avg_price - buy_avg_price)
+			# ganho de capital de todas a vendas
+			data[kind]['capital'] += (instance.quantity * (instance.price - buy_avg_price))
 
 			# removendo as unidades vendidas
 			buy_quantity -= instance.quantity
