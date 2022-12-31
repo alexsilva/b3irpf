@@ -1,0 +1,14 @@
+
+{% for sheet in sheets %}
+  <table class="xlsx_viewer table display" data-items="{{ sheet.items }}">
+    <thead>
+    {{ sheet.title }}
+    <tr>
+      {% for header in sheet.headers %}
+        <th>{{ header }}</th>
+      {% endfor %}
+    </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+{% endfor %}

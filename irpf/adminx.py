@@ -4,15 +4,18 @@ from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituitio
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
+from irpf.views.xlsx_viewer import AdminXlsxViewer
 from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView
 
 site.register_plugin(ListActionModelPlugin, ListAdminView)
 site.register_view("^irpf/import-listmodel/(?P<model_app_label>.+)/$", AdminImportListModelView,
                    "import_listmodel")
-site.register_view("^ifpf/report-irpf/(?P<model_app_label>.+)/$", AdminReportIrpfModelView,
+site.register_view("^irpf/report-irpf/(?P<model_app_label>.+)/$", AdminReportIrpfModelView,
                    "reportirpf")
 
+site.register_view("^irpf/xlsx/viewer", AdminXlsxViewer,
+                   "xlsx_viewer")
 site.register_plugin(GuardianAdminPlugin, ListAdminView)
 site.register_plugin(GuardianAdminPlugin, ModelFormAdminView)
 site.register_plugin(AssignUserAdminPlugin, ModelFormAdminView)
