@@ -13,9 +13,10 @@ class XlsxViewerForm(django_forms.Form):
 
 class AdminXlsxViewer(AdminFormView):
 	"""Visualizador de dados de um arquivo Excel (xlsx)"""
-
 	template_name = "irpf/adminx_report_irpf_viewer.html"
 	form_class = XlsxViewerForm
+
+	title = "Visualizador de arquivos Excel"
 
 	def process_sheet(self, ws):
 		if settings.DEBUG:
