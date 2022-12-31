@@ -15,11 +15,13 @@
             </div>
           </div>
         </div>
+        {% if sheets %}
         <div class="card fieldset mt-1 mb-2  unsort no_title">
           <div class="card-body">
             {% include "irpf/adminx_report_irpf_viewer_table.html" %}
           </div>
         </div>
+        {% endif %}
       </div>
     </div>
   </form>
