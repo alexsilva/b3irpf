@@ -1,6 +1,7 @@
 import json
 
 import django.forms as django_forms
+from django.conf import settings
 from openpyxl.reader.excel import load_workbook
 import collections
 from irpf.views.base import AdminFormView
@@ -17,7 +18,8 @@ class AdminXlsxViewer(AdminFormView):
 	form_class = XlsxViewerForm
 
 	def process_sheet(self, ws):
-		print("SHEET ", ws.title)
+		if settings.DEBUG:
+			print("SHEET ", ws.title)
 		data = collections.OrderedDict()
 
 		rows = ws.iter_rows()
@@ -30,7 +32,8 @@ class AdminXlsxViewer(AdminFormView):
 		data['headers'] = headers
 		items = []
 
-		print(" / ".join(headers))
+		if settings.DEBUG:
+			print(" / ".join(headers))
 
 		for row in rows:
 			cells = []
@@ -38,7 +41,8 @@ class AdminXlsxViewer(AdminFormView):
 				cells.append(str(cell.value))
 
 			items.append(cells)
-			print(" / ".join(cells))
+			if settings.DEBUG:
+				print(" / ".join(cells))
 
 		data['items'] = json.dumps(items)
 		return data
@@ -59,14 +63,15 @@ class AdminXlsxViewer(AdminFormView):
 
 	def get_media(self):
 		media = super().get_media()
+		minified = '.min' if settings.DEBUG else ''
 		media += django_forms.Media(js=(
-			'irpf/datatables-1.13.1/js/jquery.dataTables.js',
-			'irpf/datatables-1.13.1/js/dataTables.bootstrap4.js',
+			f"irpf/datatables-1.13.1/js/jquery.dataTables.js",
+			f"irpf/datatables-1.13.1/js/dataTables.bootstrap4{minified}.js",
 			'irpf/js/irpf.xlsx.viewer.js'
 		), css={
 			'screen': (
-				'irpf/datatables-1.13.1/css/jquery.dataTables.css',
-				'irpf/datatables-1.13.1/css/dataTables.bootstrap4.css'
+				f"irpf/datatables-1.13.1/css/jquery.dataTables{minified}.css",
+				f"irpf/datatables-1.13.1/css/dataTables.bootstrap4{minified}.css"
 			)
 		})
 		return media
