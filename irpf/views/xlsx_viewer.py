@@ -60,10 +60,14 @@ class AdminXlsxViewer(AdminFormView):
 	def get_media(self):
 		media = super().get_media()
 		media += django_forms.Media(js=(
-			'https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js',
+			'irpf/datatables-1.13.1/js/jquery.dataTables.js',
+			'irpf/datatables-1.13.1/js/dataTables.bootstrap4.js',
 			'irpf/js/irpf.xlsx.viewer.js'
 		), css={
-			'screen': ('https://cdn.datatables.net/1.13.1/css/jquery.dataTables.css',)
+			'screen': (
+				'irpf/datatables-1.13.1/css/jquery.dataTables.css',
+				'irpf/datatables-1.13.1/css/dataTables.bootstrap4.css'
+			)
 		})
 		return media
 
