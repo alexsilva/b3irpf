@@ -1,24 +1,9 @@
-{% extends base_template %}
-{% load crispy_forms_tags %}
+{% extends 'irpf/adminx_base_form_view.html' %}
 
-{% block content %}
-    <form class="exform" method="get">
-      <div class="form-container row clearfix">
-        <div class="column form-column full col col-sm-12 form-horizontal">
-          <div class="card fieldset mt-1 mb-2  unsort no_title">
-            <div class="card-body">
-              {{ form|crispy }}
-              <div class="form-group float-right p-1">
-                <button type="submit" class="btn btn-primary">Enviar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </form>
-    {% if report %}
-      {% for item in report.results %}
-        {% include "irpf/adminx_report_irpf_item.html" %}
-      {% endfor %}
-    {% endif %}
+{% block form_container %}
+  {% if report %}
+    {% for item in report.results %}
+      {% include "irpf/adminx_report_irpf_item.html" %}
+    {% endfor %}
+  {% endif %}
 {% endblock %}

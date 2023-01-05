@@ -4,12 +4,11 @@ import django.forms as django_forms
 from django.apps import apps
 from django.http import Http404
 from django.utils import timezone
-from django.views.generic import FormView
 
-from irpf.report import NegotiationReport
-from xadmin.views.base import CommAdminView
-from xadmin.widgets import AdminDateWidget
 from irpf.models import Instituition
+from irpf.report import NegotiationReport
+from irpf.views.base import AdminFormView
+from xadmin.widgets import AdminDateWidget
 
 _now = timezone.now()
 
@@ -37,10 +36,12 @@ class ReportIRPFForm(django_forms.Form):
 	                                            label=Instituition._meta.verbose_name)
 
 
-class AdminReportIrpfModelView(CommAdminView, FormView):
+class AdminReportIrpfModelView(AdminFormView):
 	"""View that produces the report with data consolidation (average cost, sum of earnings, etc)."""
 	template_name = "irpf/adminx_report_irpf_view.html"
 	form_class = ReportIRPFForm
+
+	title = "Relatório IRPF"
 
 	def init_request(self, *args, **kwargs):
 		super().init_request(*args, **kwargs)
@@ -83,9 +84,7 @@ class AdminReportIrpfModelView(CommAdminView, FormView):
 		return kwargs
 
 	def get_context_data(self, **kwargs):
-		context = self.get_context()
-		context.update(super().get_context_data(**kwargs))
-		context['media'] += context['form'].media
+		context = super().get_context_data(**kwargs)
 		if self.report:
 			form = kwargs['form']
 			form_data = form.cleaned_data
