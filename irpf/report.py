@@ -22,7 +22,7 @@ class EaningsReport:
 		options = dict(
 			flow__iexact=self.flow,
 			user=self.user,
-			institution=institution,
+			institution=institution.name,
 			date__gte=start,
 			code__iexact=code
 		)
@@ -137,7 +137,7 @@ class NegotiationReport:
 		data = {}
 		queryset = self.position_model.objects.filter(
 			date__lte=dtstart,
-			institution__name=institution,
+			institution=institution,
 			user=self.user
 		)
 		for position in queryset:
@@ -154,7 +154,7 @@ class NegotiationReport:
 		return data
 
 	def report(self, institution, dtstart, dtend):
-		options = {'institution': institution, 'user': self.user}
+		options = {'institution': institution.name, 'user': self.user}
 		all_data = self.get_position(dtstart, institution)
 		for dt in range_dates(dtstart, dtend):  # calcula um dia por vez
 			# Adição de bônus antes de inserir compras/vendas na data.

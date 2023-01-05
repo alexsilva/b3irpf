@@ -88,7 +88,7 @@ class AdminReportIrpfModelView(AdminFormView):
 		if self.report:
 			form = kwargs['form']
 			form_data = form.cleaned_data
-			institution = form_data['institution'].name
+			institution = form_data['institution']
 			start = form_data['start']
 			end = form_data['end']
 			context['report'] = {
