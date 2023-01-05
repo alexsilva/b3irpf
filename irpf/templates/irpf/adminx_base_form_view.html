@@ -1,0 +1,28 @@
+{% extends base_template %}
+{% load crispy_forms_tags %}
+{% load xadmin_tags %}
+{% block nav_title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <form class="exform" method="{% if form_method_post %}post{% else %}get{% endif %}"
+        {% if form_method_post %}enctype="multipart/form-data"{% endif %}>
+    {% if form_method_post %}{% csrf_token %}{% endif %}
+    {% view_block 'exform' %}
+    {% block exform %}{% endblock %}
+    <div class="form-container row clearfix">
+      <div class="column form-column full col col-sm-12 form-horizontal">
+        <div class="card fieldset mt-1 mb-2  unsort no_title">
+          <div class="card-body">
+            {{ form|crispy }}
+            <div class="form-group float-right p-1">
+              {% view_block 'form_buttons' %}
+              <button type="submit" class="btn btn-primary">Enviar</button>
+            </div>
+          </div>
+        </div>
+        {% view_block 'form_container' %}
+        {% block form_container %}{% endblock %}
+      </div>
+    </div>
+  </form>
+{% endblock %}
