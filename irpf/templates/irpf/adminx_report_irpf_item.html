@@ -15,7 +15,7 @@
           {% endif %}
           {{ item.code }} / {{ item.enterprise.name }} ({{ item.enterprise.cnpj }}) /
           na corretora {{ item.institution }} /
-          a um custom médio de R$ {{ item.results.compra.avg_price|moneyformat }}
+          a um custo médio de R$ {{ item.results.compra.avg_price|moneyformat }}
         {% else %}
           {{ item.code }}
         {% endif %}">
