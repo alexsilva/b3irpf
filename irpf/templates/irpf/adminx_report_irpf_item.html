@@ -1,11 +1,11 @@
 {% load irpf_tags %}
 <div class="card mt-1 mb-2 unsort irpfreport">
   <div class="card-header">
-    <button class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
+    <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
             aria-expanded="true" aria-controls="collapsebody-{{ forloop.counter }}">
       {{ item.code }}{% if item.enterprise %} - {{ item.enterprise.name }} ({{ item.enterprise.cnpj }}){% endif %}
     </button>
-    <button class="btn btn-link" data-toggle="popover"
+    <button type="button" class="btn btn-link" data-toggle="popover"
             data-content="
         {% if item.enterprise %}
           {{ item.results.compra.quantity }}
