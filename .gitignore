@@ -1,6 +1,7 @@
 # Custom
 *.secret
 *.sqlite3
+*.env
 .idea
 
 # Byte-compiled / optimized / DLL files
