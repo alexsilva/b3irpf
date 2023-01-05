@@ -62,7 +62,9 @@ class Command(BaseCommand):
 			self._assign_perm(instance)
 
 	def process_sheet(self, ws, options):
-		print("SHEET ", ws.title)
+		verbosity, level = options.get('verbosity', 0), 2
+		if verbosity > level:
+			print("SHEET ", ws.title)
 
 		rows = ws.iter_rows()
 
@@ -70,7 +72,8 @@ class Command(BaseCommand):
 		for cell in next(rows):
 			headers.append(cell.value)
 
-		print(" / ".join(headers))
+		if verbosity > level:
+			print(" / ".join(headers))
 
 		fields = self.get_fields_map()
 		user = options['user']
@@ -85,7 +88,8 @@ class Command(BaseCommand):
 				for field in header_fields:
 					data[field.name] = cell.value
 				cells.append(str(cell.value))
-			print(" / ".join(cells))
+			if verbosity > level:
+				print(" / ".join(cells))
 			self.save_instance(**data)
 
 	def handle(self, *args, **options):
