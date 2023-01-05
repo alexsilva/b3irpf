@@ -21,6 +21,10 @@ site.register_plugin(GuardianAdminPlugin, ModelFormAdminView)
 site.register_plugin(AssignUserAdminPlugin, ModelFormAdminView)
 
 
+def _get_field_opts(name, model):
+	return model._meta.get_field(name)
+
+
 @sites.register(Instituition)
 class InstituitionAdmin:
 	list_display = (
@@ -58,7 +62,34 @@ class EnterpriseAdmin:
 
 @sites.register(Position)
 class PositionAdmin(BaseIRPFAdmin):
-	...
+	list_filter = ("enterprise__code",)
+	search_fields = (
+		'enterprise__code',
+		'enterprise__name',
+		'institution__name'
+	)
+	list_display = (
+		'enterprise_code',
+		'enterprise_name',
+		'institution',
+		'quantity',
+		'avg_price',
+		'date'
+	)
+
+	def enterprise_code(self, instance):
+		return instance.enterprise.code
+
+	enterprise_code.is_column = True
+	enterprise_code.admin_order_field = "enterprise__code"
+	enterprise_code.short_description = _get_field_opts("code", Enterprise).verbose_name
+
+	def enterprise_name(self, instance):
+		return instance.enterprise.name
+
+	enterprise_name.is_column = True
+	enterprise_name.admin_order_field = "enterprise__name"
+	enterprise_name.short_description = _get_field_opts("name", Enterprise).verbose_name
 
 
 @sites.register(Bonus)
