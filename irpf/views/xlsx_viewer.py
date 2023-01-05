@@ -15,6 +15,7 @@ class AdminXlsxViewer(AdminFormView):
 	"""Visualizador de dados de um arquivo Excel (xlsx)"""
 	template_name = "irpf/adminx_report_irpf_viewer.html"
 	form_class = XlsxViewerForm
+	form_method_post = True
 
 	title = "Visualizador de arquivos Excel"
 
