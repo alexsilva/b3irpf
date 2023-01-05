@@ -1,19 +1,4 @@
-{% extends base_template %}
-{% load crispy_forms_tags %}
-
-{% block content %}
-  <form class="exform" method="post" enctype="multipart/form-data" >{% csrf_token %}
-    <div class="form-container row clearfix">
-        <div class="column form-column full col col-sm-12 form-horizontal">
-          <div class="card fieldset mt-1 mb-2  unsort no_title">
-            <div class="card-body">
-              {{ form|crispy }}
-              <div class="form-group float-right p-1">
-                <button type="submit" class="btn btn-primary">Enviar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  </form>
+{% extends 'irpf/adminx_base_form_view.html' %}
+{% block nav_title %}
+  {{ block.super }}{% if verbose_name %} - {{ verbose_name }}{% endif %}
 {% endblock %}

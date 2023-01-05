@@ -2,19 +2,20 @@ import django.forms as django_forms
 from django.apps import apps
 from django.core.management import get_commands, load_command_class
 from django.http import Http404
-from django.views.generic import FormView
 
-from xadmin.views.base import CommAdminView
+from irpf.views.base import AdminFormView
 
 
 class ImportListForm(django_forms.Form):
 	filestream = django_forms.FileField(label="Arquivo de dados")
 
 
-class AdminImportListModelView(CommAdminView, FormView):
+class AdminImportListModelView(AdminFormView):
 	"""View that imports data through the import command"""
 	template_name = "irpf/adminx_import_listmodel_view.html"
 	form_class = ImportListForm
+	title = "Importação de dados"
+	form_method_post = True
 
 	def init_request(self, *args, **kwargs):
 		super().init_request(*args, **kwargs)
@@ -26,6 +27,11 @@ class AdminImportListModelView(CommAdminView, FormView):
 
 	def get_success_url(self):
 		return self.get_model_url(self.import_model, "changelist")
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['verbose_name'] = getattr(self.import_model_opts, "verbose_name_plural", None)
+		return context
 
 	def form_valid(self, form):
 		filestream = form.cleaned_data["filestream"]
@@ -41,13 +47,3 @@ class AdminImportListModelView(CommAdminView, FormView):
 			self.message_user(f"Falha na importação de dados: {exc}",
 			                  level='error')
 		return super().form_valid(form)
-
-	def get_form_kwargs(self):
-		kwargs = super().get_form_kwargs()
-		return kwargs
-
-	def get_context_data(self, **kwargs):
-		context = self.get_context()
-		context.update(super().get_context_data(**kwargs))
-		context['media'] += context['form'].media
-		return context
