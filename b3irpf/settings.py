@@ -34,7 +34,7 @@ SECRET_KEY = str(SecretKey(BASE_DIR / "irpf.secret"))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
 XADMIN_TITLE = "B3 - IRPF"
 XADMIN_FOOTER_TITLE = 'irpf'
@@ -95,12 +95,8 @@ WSGI_APPLICATION = 'b3irpf.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'irpf.sqlite3',
-    }
+    'default': env.db(default=f"sqlite:////{BASE_DIR / 'irpf.sqlite3'}")
 }
 
 
