@@ -13,7 +13,7 @@
           {% elif item.enterprise.is_acao %}ações
           {% elif item.enterprise.is_bdr %}bdr{{ item.results.compra.quantity|pluralize:"s" }}
           {% endif %}
-          {{ item.code }} / {{ item.enterprise.name }} ({{ item.enterprise.cnpj }}) /
+          {{ item.code }} / {{ item.enterprise.name }} - {{ item.enterprise.cnpj }} /
           na corretora {{ item.institution }} /
           a um custo médio de R$ {{ item.results.compra.avg_price|moneyformat }}
         {% else %}
