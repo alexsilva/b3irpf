@@ -79,15 +79,11 @@ class Command(BaseCommand):
 			data = {'user': user}
 			for index, cell in enumerate(row):
 				try:
-					field_list = fields[headers[index]]
+					header_fields = fields[headers[index]]
 				except KeyError:
 					continue
-				for field in field_list:
-					try:
-						field_name = field.name
-					except KeyError:
-						continue
-					data[field_name] = cell.value
+				for field in header_fields:
+					data[field.name] = cell.value
 				cells.append(str(cell.value))
 			print(" / ".join(cells))
 			self.save_instance(**data)
