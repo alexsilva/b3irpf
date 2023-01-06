@@ -202,5 +202,6 @@ class Position(BaseIRPFModel):
 		return str(self.enterprise)
 
 	class Meta:
+		ordering = ('enterprise__code',)
 		verbose_name = "Posição"
 		verbose_name_plural = "Posições"
