@@ -47,7 +47,7 @@ class AdminReportIrpfModelView(AdminFormView):
 	def init_request(self, *args, **kwargs):
 		super().init_request(*args, **kwargs)
 		self.model_app_label = self.kwargs['model_app_label']
-		self.report = None
+		self.report, self.results = None, None
 
 	def report_all(self, **options):
 		"""report from all models"""
@@ -73,7 +73,15 @@ class AdminReportIrpfModelView(AdminFormView):
 			model = apps.get_model(*self.model_app_label.split('.', 1))
 			if not self.admin_site.get_registry(model, None):
 				raise Http404
+
 			self.report = self.report_model(model, user=self.user)
+
+			form_data = form.cleaned_data
+			institution = form_data['institution']
+			start = form_data['start']
+			end = form_data['end']
+
+			self.results = self.report.report(institution, start, end)
 		return self.render_to_response(self.get_context_data(form=form))
 
 	def get_form_kwargs(self):
@@ -87,15 +95,10 @@ class AdminReportIrpfModelView(AdminFormView):
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		if self.report:
-			form = kwargs['form']
-			form_data = form.cleaned_data
-			institution = form_data['institution']
-			start = form_data['start']
-			end = form_data['end']
+		if self.report and self.results:
 			context['report'] = {
 				'obj': self.report,
-				'results': self.report.report(institution, start, end)
+				'results': self.results
 			}
 		return context
 
