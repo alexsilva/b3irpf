@@ -1,5 +1,6 @@
 import django.forms as django_forms
 from django.contrib.auth import get_permission_codename
+from django.contrib.auth.models import Permission
 from django.core.management import get_commands
 from django.db.transaction import atomic
 from django.template.loader import render_to_string
@@ -143,8 +144,11 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 			for name in self.position_permission:
 				if not self.has_model_perm(self.position_model, name, self.user):
 					continue
-				codename = self.get_model_perm(self.position_model, name)
-				assign_perm(codename, self.user, instance)
+				try:
+					codename = self.get_model_perm(self.position_model, name)
+					assign_perm(codename, self.user, instance)
+				except Permission.DoesNotExist:
+					continue
 
 	@cached_property
 	def is_save_position(self):
