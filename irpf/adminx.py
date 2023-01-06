@@ -1,7 +1,7 @@
 from django.contrib.auth import get_permission_codename
 
 from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision, Bonus
-from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin
+from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from irpf.views.xlsx_viewer import AdminXlsxViewer
@@ -19,6 +19,7 @@ site.register_view("^irpf/xlsx/viewer", AdminXlsxViewer,
 site.register_plugin(GuardianAdminPlugin, ListAdminView)
 site.register_plugin(GuardianAdminPlugin, ModelFormAdminView)
 site.register_plugin(AssignUserAdminPlugin, ModelFormAdminView)
+site.register_plugin(SaveReportPositionPlugin, AdminReportIrpfModelView)
 
 
 def _get_field_opts(name, model):

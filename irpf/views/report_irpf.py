@@ -8,6 +8,7 @@ from django.utils import timezone
 from irpf.models import Instituition
 from irpf.report import NegotiationReport
 from irpf.views.base import AdminFormView
+from xadmin.views import filter_hook
 from xadmin.widgets import AdminDateWidget
 
 _now = timezone.now()
@@ -64,6 +65,7 @@ class AdminReportIrpfModelView(AdminFormView):
 		report = NegotiationReport(model, **options)
 		return report
 
+	@filter_hook
 	def form_valid(self, form):
 		if self.model_app_label == "all":
 			self.report = self.report_all()
