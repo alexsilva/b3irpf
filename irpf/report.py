@@ -132,11 +132,11 @@ class NegotiationReport:
 			data[self.buy]['avg_price'] = buy_avg_price
 		return data
 
-	def get_position(self, dtstart, institution):
+	def get_position(self, date, institution):
 		"""Retorna dados de posição para caculo do período"""
 		data = {}
 		queryset = self.position_model.objects.filter(
-			date__lte=dtstart,
+			date__lt=date,
 			institution=institution,
 			user=self.user
 		)
@@ -155,7 +155,7 @@ class NegotiationReport:
 
 	def report(self, institution, dtstart, dtend):
 		options = {'institution': institution.name, 'user': self.user}
-		all_data = self.get_position(dtstart, institution)
+		all_data = self.get_position(dtend, institution)
 		for dt in range_dates(dtstart, dtend):  # calcula um dia por vez
 			# Adição de bônus antes de inserir compras/vendas na data.
 			self.add_bonus(dt, all_data)
