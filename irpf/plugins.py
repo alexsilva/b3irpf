@@ -131,7 +131,8 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 			instance, created = self.position_model.objects.get_or_create(
 				defaults=defaults,
 				enterprise=enterprise,
-				institution=institution
+				institution=institution,
+				user=self.user
 			)
 			if not created:
 				for field_name in defaults:
