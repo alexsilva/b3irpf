@@ -9,9 +9,9 @@ from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView
 
 site.register_plugin(ListActionModelPlugin, ListAdminView)
-site.register_view("^irpf/import-listmodel/(?P<model_app_label>.+)/$", AdminImportListModelView,
+site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView,
                    "import_listmodel")
-site.register_view("^irpf/report-irpf/(?P<model_app_label>.+)/$", AdminReportIrpfModelView,
+site.register_view("^irpf/report/(?P<model_app_label>.+)/$", AdminReportIrpfModelView,
                    "reportirpf")
 
 site.register_view("^irpf/xlsx/viewer", AdminXlsxViewer,
