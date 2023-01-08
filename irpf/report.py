@@ -148,10 +148,7 @@ class NegotiationReport:
 			info[self.buy]['avg_price'] = position.avg_price
 			info[self.buy]['total'] = position.total
 
-			info['pos_date'] = position.date
-			info['pos_quantity'] = position.quantity
-			info['pos_avg_price'] = position.avg_price
-			info['pos_total'] = position.total
+			info['position'] = position
 		return data
 
 	def report(self, institution, dtstart, dtend):

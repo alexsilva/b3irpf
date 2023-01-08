@@ -25,10 +25,10 @@
   </div>
   <div id="collapsebody-{{ forloop.counter }}" class="collapse show">
     <div class="card-body">
-      <h6 class="card-subtitle mb-2 mt-2 text-primary">Posição atual{% if item.results.pos_date %} ({{ item.results.pos_date }}){% endif %}</h6>
-      <p class="card-text">Quantidade: {{ item.results.pos_quantity|default:0 }}</p>
-      <p class="card-text">Preço médio: R$ {{ item.results.pos_avg_price|default:0|moneyformat }}</p>
-      <p class="card-text">Valor total: R$ {{ item.results.pos_total|default:0|moneyformat }}</p>
+      <h6 class="card-subtitle mb-2 mt-2 text-primary">Posição atual{% if item.results.position.date %} ({{ item.results.position.date }}){% endif %}</h6>
+      <p class="card-text">Quantidade: {{ item.results.position.quantity|default:0 }}</p>
+      <p class="card-text">Preço médio: R$ {{ item.results.position.avg_price|default:0|moneyformat }}</p>
+      <p class="card-text">Valor total: R$ {{ item.results.position.total|default:0|moneyformat }}</p>
 
     {% if item.results.venda %}
       <hr/>
