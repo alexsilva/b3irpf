@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 from django.utils.formats import number_format
+from django.utils.functional import cached_property
+
 from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField
 
 
@@ -23,6 +25,10 @@ class Enterprise(models.Model):
 	                               default=None, null=True, blank=True,
 	                               help_text="É tipo de papel que essa empresa representa.",
 	                               choices=CATEGORY_CHOICES)
+
+	@cached_property
+	def category_choices(self):
+		return dict(self.CATEGORY_CHOICES)
 
 	@property
 	def is_acao(self):
@@ -202,6 +208,7 @@ class Position(BaseIRPFModel):
 		return str(self.enterprise)
 
 	class Meta:
-		ordering = ('enterprise__code',)
+		unique_together = ("enterprise", "institution", "user")
+		ordering = ('enterprise', 'enterprise__code',)
 		verbose_name = "Posição"
 		verbose_name_plural = "Posições"

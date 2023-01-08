@@ -50,7 +50,7 @@ class NegotiationReport:
 	position_model = Position
 	bonus_model = Bonus
 
-	buy, sale = "compra", "venda"
+	buy, sell = "compra", "venda"
 
 	def __init__(self, model, user, **options):
 		self.model = model
@@ -73,6 +73,10 @@ class NegotiationReport:
 		queryset = self.bonus_model.objects.filter(date=date, user=self.user)
 		for bonus in queryset:
 			info = data[bonus.enterprise.code]
+			position = info.get('position')
+			# ignora os registros que já foram contabilizados na posição
+			if position and bonus.date < position.date:
+				continue
 			quantity = info[self.buy]['quantity']
 			total = info[self.buy]['total']
 
@@ -104,7 +108,7 @@ class NegotiationReport:
 			data[kind]['quantity'] = quantity
 			data[kind]['avg_price'] = avg_price
 			data[kind]['total'] = total
-		elif kind == self.sale:
+		elif kind == self.sell:
 			data[kind].setdefault("capital", 0.0)
 			quantity += instance.quantity
 			total += (instance.quantity * instance.price)
@@ -132,11 +136,10 @@ class NegotiationReport:
 			data[self.buy]['avg_price'] = buy_avg_price
 		return data
 
-	def get_position(self, date, institution):
+	def get_position(self, institution):
 		"""Retorna dados de posição para caculo do período"""
 		data = {}
 		queryset = self.position_model.objects.filter(
-			date__lt=date,
 			institution=institution,
 			user=self.user
 		)
@@ -147,12 +150,13 @@ class NegotiationReport:
 			info[self.buy]['quantity'] = position.quantity
 			info[self.buy]['avg_price'] = position.avg_price
 			info[self.buy]['total'] = position.total
+			info[self.buy]['date'] = position.date
 
 			info['position'] = position
 		return data
 
 	def report(self, institution, dtstart, dtend):
-		all_data = self.get_position(dtend, institution)
+		all_data = self.get_position(institution)
 		for dt in range_dates(dtstart, dtend):  # calcula um dia por vez
 			# Adição de bônus antes de inserir compras/vendas na data.
 			self.add_bonus(dt, all_data)
@@ -166,6 +170,11 @@ class NegotiationReport:
 				except KeyError:
 					data = collections.defaultdict(dict)
 					all_data[instance.code] = data
+
+				position = data.get('position')
+				# ignora os registros que já foram contabilizados na posição
+				if position and instance.date < position.date:
+					continue
 				self.consolidate(instance, data)
 		results = []
 		for code in all_data:
@@ -180,7 +189,9 @@ class NegotiationReport:
 			})
 
 		def results_sort_category(item):
-			return item['enterprise'].category if item['enterprise'] else item['code']
+			_enterprise = item['enterprise']
+			return (_enterprise.category_choices[_enterprise.category]
+			        if _enterprise and _enterprise.category else item['code'])
 
 		def results_sort_code(item):
 			return item['code']
