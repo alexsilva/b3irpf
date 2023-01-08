@@ -152,12 +152,13 @@ class NegotiationReport:
 		return data
 
 	def report(self, institution, dtstart, dtend):
-		options = {'institution': institution.name, 'user': self.user}
 		all_data = self.get_position(dtend, institution)
 		for dt in range_dates(dtstart, dtend):  # calcula um dia por vez
 			# Adição de bônus antes de inserir compras/vendas na data.
 			self.add_bonus(dt, all_data)
-			queryset = self.get_queryset(date=dt, **options)
+			queryset = self.get_queryset(date=dt,
+			                             institution=institution.name,
+			                             user=self.user)
 			for instance in queryset:
 				# instance: compra / venda
 				try:
