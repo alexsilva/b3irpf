@@ -35,7 +35,7 @@ class InstituitionAdmin:
 
 
 class BaseIRPFAdmin:
-	readonly_fields = ("user",)
+	readonly_fields = ()
 	# GuardianAdminPlugin
 	guardian_protected = True
 	# AssignUserAdminPlugin
@@ -47,6 +47,12 @@ class BaseIRPFAdmin:
 		# checks the permission for the object
 		permission_codename = get_permission_codename(name, self.opts)
 		return self.user.has_perm('%s.%s' % (self.opts.app_label, permission_codename), obj)
+
+	def get_readonly_fields(self):
+		readonly_fields = list(super().get_readonly_fields())
+		if getattr(self, "org_obj", None):
+			readonly_fields.append('user')
+		return readonly_fields
 
 
 @sites.register(Enterprise)
@@ -114,6 +120,12 @@ class NegotiationAdmin(BaseIRPFAdmin):
 		"total",
 		"date"
 	)
+
+	def get_readonly_fields(self):
+		readonly_fields = list(super().get_readonly_fields())
+		if getattr(self, "org_obj", None):
+			readonly_fields.append('position')
+		return readonly_fields
 
 
 @sites.register(Earnings)

@@ -67,6 +67,7 @@ class BaseIRPFModel(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL,
 	                         verbose_name="Usuário",
 	                         on_delete=models.CASCADE,
+	                         editable=False,
 	                         null=True, blank=False)
 
 	class Meta:
