@@ -170,6 +170,7 @@ class NegotiationReport:
 				except KeyError:
 					data = collections.defaultdict(dict)
 					all_data[instance.code] = data
+					data.setdefault('obj', instance)
 
 				position = data.get('position')
 				# ignora os registros que já foram contabilizados na posição

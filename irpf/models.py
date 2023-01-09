@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from django.utils.formats import number_format
+from django.utils.formats import number_format, date_format
 from django.utils.functional import cached_property
 
 from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField
@@ -93,6 +93,12 @@ class Negotiation(BaseIRPFModel):
 
 	total = models.FloatField(verbose_name="Valor (total)", default=0.0)
 
+	position = models.ForeignKey(to="Position",
+	                             on_delete=models.SET_NULL,
+	                             verbose_name="Posição",
+	                             null=True, blank=True,
+	                             editable=False,
+	                             help_text="Esta relação serve apenas para fins de histórico de posição")
 	# relates the name of the headers with the fields.
 	date.sheet_header = "Data do Negócio"
 	kind.sheet_header = "Tipo de Movimentação"
@@ -205,7 +211,8 @@ class Position(BaseIRPFModel):
 	date = DateField(verbose_name="Data")
 
 	def __str__(self):
-		return str(self.enterprise)
+		dt = date_format(self.date)
+		return f"Posição {dt} {self.institution}"
 
 	class Meta:
 		unique_together = ("enterprise", "institution", "user")
