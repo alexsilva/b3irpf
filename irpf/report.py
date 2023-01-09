@@ -162,6 +162,7 @@ class NegotiationReport:
 			self.add_bonus(dt, all_data)
 			queryset = self.get_queryset(date=dt,
 			                             institution=institution.name,
+			                             position__isnull=True,
 			                             user=self.user)
 			for instance in queryset:
 				# instance: compra / venda
@@ -170,8 +171,7 @@ class NegotiationReport:
 				except KeyError:
 					data = collections.defaultdict(dict)
 					all_data[instance.code] = data
-					data.setdefault('obj', instance)
-
+				data.setdefault('objs', []).append(instance)
 				position = data.get('position')
 				# ignora os registros que já foram contabilizados na posição
 				if position and instance.date < position.date:

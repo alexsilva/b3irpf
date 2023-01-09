@@ -121,7 +121,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 			institution = item['institution']
 
 			item_result = item['results']
-			item_obj = item_result['obj']
+			item_objs = item_result['objs']
 			compra = item_result['compra']
 
 			defaults = {
@@ -140,10 +140,13 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 				for field_name in defaults:
 					setattr(instance, field_name, defaults[field_name])
 				instance.save()
-			elif item_obj.position != instance:
+			elif item_objs:
 				# relaciona a intância (Negotiation) com a posição
-				item_obj.position = instance
-				item_obj.save()
+				for obj in item_objs:
+					if obj.position == instance:
+						continue
+					obj.position = instance
+					obj.save()
 
 			# permissões de objeto
 			for name in self.position_permission:
