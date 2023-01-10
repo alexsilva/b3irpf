@@ -217,6 +217,6 @@ class Position(BaseIRPFModel):
 
 	class Meta:
 		unique_together = ("enterprise", "institution", "user")
-		ordering = ('enterprise', 'enterprise__code',)
+		ordering = ('enterprise__code', 'enterprise__category',)
 		verbose_name = "Posição"
 		verbose_name_plural = "Posições"
