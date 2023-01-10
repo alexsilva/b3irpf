@@ -96,15 +96,6 @@ class PositionAdmin(BaseIRPFAdmin):
 	enterprise_name.short_description = _get_field_opts("name", Enterprise).verbose_name
 
 
-@sites.register(Bonus)
-class BonusAdmin(BaseIRPFAdmin):
-	list_display = (
-		'enterprise',
-		'base_value',
-		'proportion'
-	)
-
-
 @sites.register(Negotiation)
 class NegotiationAdmin(BaseIRPFAdmin):
 	list_filter = ("kind", "date")
@@ -123,6 +114,15 @@ class NegotiationAdmin(BaseIRPFAdmin):
 		if getattr(self, "org_obj", None):
 			readonly_fields.append('position')
 		return readonly_fields
+
+
+@sites.register(Bonus)
+class BonusAdmin(BaseIRPFAdmin):
+	list_display = (
+		'enterprise',
+		'base_value',
+		'proportion'
+	)
 
 
 @sites.register(Earnings)
