@@ -70,6 +70,17 @@
           <span>R$ {{ item.earnings.rendimento.value|moneyformat }}</span>
         </p>
       {% endif %}
+      {% exclude_obj_keys item.earnings "dividendo" "juros_sobre_capital_proprio" "bonificacao_em_ativos" "rendimento" as item_others %}
+      {% if item_others %}
+        <hr/>
+        <h6 class="card-subtitle mb-2 text-info">Outros ganhos</h6>
+        {% for key, item_val in item_others.items %}
+          <p class="card-text">{% get_obj_val item_val "title" %}:
+            <span>Quantidade {% get_obj_val item_val "quantity" %}</span>,
+            <span>R$ {% get_obj_val item_val "value" %}</span>
+          </p>
+        {% endfor %}
+      {% endif %}
     {% endif %}
     </div>
   </div>
