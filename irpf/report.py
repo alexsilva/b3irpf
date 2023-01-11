@@ -17,19 +17,22 @@ class EaningsReport:
 	def get_queryset(self, **options):
 		return self.earnings_models.objects.filter(**options)
 
-	def report(self, code, institution, start, end=None):
+	def report(self, code, institution, start, end=None, **options):
 		earnings = collections.defaultdict(dict)
-		options = dict(
+		qs_options = dict(
 			flow__iexact=self.flow,
 			user=self.user,
 			institution=institution.name,
 			date__gte=start,
 			code__iexact=code
 		)
+		enterprise = options.get('enterprise')
+		if enterprise:
+			qs_options['code'] = enterprise.code
 		if end is not None:
-			options['date__lte'] = end
+			qs_options['date__lte'] = end
 		try:
-			qs = self.get_queryset(**options)
+			qs = self.get_queryset(**qs_options)
 			for instance in qs:
 				data = earnings[slugify(instance.kind).replace('-', "_")]
 				items = data.setdefault('items', [])
@@ -69,8 +72,13 @@ class NegotiationReport:
 	def get_queryset(self, **options):
 		return self.model.objects.filter(**options)
 
-	def add_bonus(self, date, data):
-		queryset = self.bonus_model.objects.filter(date=date, user=self.user)
+	def add_bonus(self, date, data, **options):
+		qs_options = {}
+		enterprise = options.get('enterprise')
+		if enterprise:
+			qs_options['enterprise'] = enterprise
+		queryset = self.bonus_model.objects.filter(date=date, user=self.user,
+		                                           **qs_options)
 		for bonus in queryset:
 			info = data[bonus.enterprise.code]
 			position = info.get('position')
@@ -136,12 +144,16 @@ class NegotiationReport:
 			data[self.buy]['avg_price'] = buy_avg_price
 		return data
 
-	def get_position(self, institution):
+	def get_position(self, institution, **options):
 		"""Retorna dados de posição para caculo do período"""
-		data = {}
+		data, qs_options = {}, {}
+		enterprise = options.get('enterprise')
+		if enterprise:
+			qs_options['enterprise'] = enterprise
 		queryset = self.position_model.objects.filter(
 			institution=institution,
-			user=self.user
+			user=self.user,
+			**qs_options
 		)
 		for position in queryset:
 			info = collections.defaultdict(dict)
@@ -155,15 +167,20 @@ class NegotiationReport:
 			info['position'] = position
 		return data
 
-	def report(self, institution, dtstart, dtend):
-		all_data = self.get_position(institution)
+	def report(self, institution, dtstart, dtend, **options):
+		all_data = self.get_position(institution, **options)
+		qs_options = {}
+		enterprise = options.get('enterprise')
+		if enterprise:  # Permite filtrar por empresa (ativo)
+			qs_options['code'] = enterprise.code
 		for dt in range_dates(dtstart, dtend):  # calcula um dia por vez
 			# Adição de bônus antes de inserir compras/vendas na data.
-			self.add_bonus(dt, all_data)
+			self.add_bonus(dt, all_data, **options)
 			queryset = self.get_queryset(date=dt,
 			                             institution=institution.name,
 			                             position__isnull=True,
-			                             user=self.user)
+			                             user=self.user,
+			                             **qs_options)
 			for instance in queryset:
 				# instance: compra / venda
 				try:
@@ -180,7 +197,9 @@ class NegotiationReport:
 		results = []
 		for code in all_data:
 			enterprise = self.get_enterprise(code)
-			earnings = self.earnings_report.report(code, institution, dtstart, dtend)
+			earnings = self.earnings_report.report(code, institution,
+			                                       dtstart, dtend,
+			                                       **options)
 			results.append({
 				'code': code,
 				'institution': institution,

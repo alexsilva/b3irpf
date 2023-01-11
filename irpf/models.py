@@ -46,6 +46,7 @@ class Enterprise(models.Model):
 		return f"{self.code} - {self.name} - {self.cnpj}"
 
 	class Meta:
+		ordering = ("name", "code")
 		verbose_name = "Empresa"
 		verbose_name_plural = "Empresas"
 

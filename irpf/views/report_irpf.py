@@ -5,7 +5,7 @@ from django.apps import apps
 from django.http import Http404
 from django.utils import timezone
 
-from irpf.models import Instituition
+from irpf.models import Instituition, Enterprise
 from irpf.report import NegotiationReport
 from irpf.views.base import AdminFormView
 from xadmin.views import filter_hook
@@ -33,6 +33,10 @@ class ReportIRPFForm(django_forms.Form):
 		required=True,
 		widget=AdminDateWidget
 	)
+
+	enterprise = django_forms.ModelChoiceField(Enterprise.objects.all(),
+	                                           label=Enterprise._meta.verbose_name,
+	                                           required=False)
 	institution = django_forms.ModelChoiceField(Instituition.objects.get_queryset(),
 	                                            label=Instituition._meta.verbose_name)
 
@@ -78,10 +82,12 @@ class AdminReportIrpfModelView(AdminFormView):
 
 			form_data = form.cleaned_data
 			institution = form_data['institution']
+			enterprise = form_data['enterprise']
 			start = form_data['start']
 			end = form_data['end']
 
-			self.results = self.report.report(institution, start, end)
+			self.results = self.report.report(institution, start, end,
+			                                  enterprise=enterprise)
 		return self.render_to_response(self.get_context_data(form=form))
 
 	def get_form_kwargs(self):
