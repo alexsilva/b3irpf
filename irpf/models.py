@@ -10,7 +10,10 @@ class Bookkeeping(models.Model):
 	name = models.CharField(verbose_name="Nome", max_length=512)
 	cnpj = models.CharField(verbose_name="CNPJ", max_length=32,
 	                        blank=True, null=True)
-	link = models.URLField(verbose_name="Local")
+	link = models.URLField(verbose_name="Portal do investidor")
+
+	def __str__(self):
+		return f"{self.name} / {self.cnpj or self.link}"
 
 	class Meta:
 		verbose_name = "Agente escriturador"

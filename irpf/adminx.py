@@ -1,6 +1,6 @@
 from django.contrib.auth import get_permission_codename
 
-from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision, Bonus
+from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision, Bonus, Bookkeeping
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
@@ -21,6 +21,15 @@ site.register_plugin(SaveReportPositionPlugin, AdminReportIrpfModelView)
 
 def _get_field_opts(name, model):
 	return model._meta.get_field(name)
+
+
+@sites.register(Bookkeeping)
+class BookkeepingAdmin:
+	list_display = (
+		"name",
+		"cnpj",
+		"link"
+	)
 
 
 @sites.register(Instituition)
