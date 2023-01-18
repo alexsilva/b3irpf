@@ -6,6 +6,17 @@ from django.utils.functional import cached_property
 from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField
 
 
+class Bookkeeping(models.Model):
+	name = models.CharField(verbose_name="Nome", max_length=512)
+	cnpj = models.CharField(verbose_name="CNPJ", max_length=32,
+	                        blank=True, null=True)
+	link = models.URLField(verbose_name="Local")
+
+	class Meta:
+		verbose_name = "Agente escriturador"
+		verbose_name_plural = "Agentes escrituradores"
+
+
 class Enterprise(models.Model):
 	CATEGORY_ACAO = 1
 	CATEGORY_FII = 2
@@ -25,6 +36,11 @@ class Enterprise(models.Model):
 	                               default=None, null=True, blank=True,
 	                               help_text="É tipo de papel que essa empresa representa.",
 	                               choices=CATEGORY_CHOICES)
+
+	bookkeeping = models.ForeignKey(Bookkeeping,
+	                                verbose_name=Bookkeeping._meta.verbose_name,
+	                                on_delete=models.SET_NULL,
+	                                null=True, blank=False)
 
 	@cached_property
 	def category_choices(self):
