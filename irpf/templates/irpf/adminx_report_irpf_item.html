@@ -82,6 +82,11 @@
         {% endfor %}
       {% endif %}
     {% endif %}
+      {% if item.enterprise and item.enterprise.bookkeeping %}
+        <hr/>
+        <h6 class="card-subtitle mb-2 text-info">Escriturador:
+        <a href="{{ item.enterprise.bookkeeping.link }}" target="_blank">{{ item.enterprise.bookkeeping.name }}</a></h6>
+      {% endif %}
     </div>
   </div>
 </div>
