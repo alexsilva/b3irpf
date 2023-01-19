@@ -69,8 +69,16 @@ class EnterpriseAdmin:
 		'code',
 		'category',
 		'name',
-		'cnpj'
+		'cnpj',
+		'bookkeeping_name'
 	)
+
+	def bookkeeping_name(self, instance):
+		return instance.bookkeeping.name if instance.bookkeeping else None
+
+	bookkeeping_name.is_column = True
+	bookkeeping_name.admin_order_field = "bookkeeping__name"
+	bookkeeping_name.short_description = "Escriturador"
 
 
 @sites.register(Position)
