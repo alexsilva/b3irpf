@@ -63,7 +63,7 @@ class BaseIRPFAdmin:
 
 @sites.register(Enterprise)
 class EnterpriseAdmin:
-	list_filter = ("category",)
+	list_filter = ("category", "bookkeeping")
 	search_fields = ("code", "name", "cnpj")
 	list_display = (
 		'code',
