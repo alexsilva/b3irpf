@@ -166,3 +166,37 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		except django_forms.ValidationError:
 			value = field.initial
 		return value
+
+
+class ReportStatsAdminPlugin(BaseAdminPlugin):
+	"""Gera dados estatísticos (compra, venda, etc)"""
+	def init_request(self, *args, **kwargs):
+		return True
+
+	def get_stats(self):
+		stats = {}
+		report = self.admin_view.report
+		results = self.admin_view.results
+		capital = 'capital'
+		stats[capital] = 0.0
+		stats[report.buy] = 0.0
+		stats[report.sell] = 0.0
+		for item in results:
+			item_results = item['results']
+			if report.buy in item_results:
+				stats[report.buy] += item_results[report.buy]['total']
+			if report.sell in item_results:
+				stats[report.sell] += item_results[report.sell]['total']
+				if capital in item_results[report.sell]:
+					stats[capital] += item_results[report.sell][capital]
+		return stats
+
+	def get_context_data(self, context, **kwargs):
+		if self.admin_view.report and self.admin_view.results:
+			context['report']['stats'] = self.get_stats()
+		return context
+
+	def block_report(self, context, nodes):
+		context = get_context_dict(context)
+		return render_to_string('irpf/blocks/blocks.adminx_report_irpf_stats.html',
+		                        context=context)

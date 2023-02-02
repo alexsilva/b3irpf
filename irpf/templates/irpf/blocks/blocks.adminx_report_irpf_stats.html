@@ -1,0 +1,29 @@
+{% load irpf_tags %}
+
+<div class="card mt-1 mb-2 unsort irpfreport">
+  <div class="card-body">
+    <ul class="list-group list-group-flush">
+      {% if report.stats.compra %}
+        <li class="list-group-item">
+          <div class="text-primary">Compras do período:
+            <span class="text-secondary"> R$ {{ report.stats.compra|moneyformat }}</span>
+          </div>
+        </li>
+      {% endif %}
+      {% if report.stats.venda %}
+        <li class="list-group-item">
+          <div class="text-primary">Vendas do período:
+            <span class="text-secondary">R$ {{ report.stats.venda|moneyformat }}</span>
+          </div>
+        </li>
+      {% endif %}
+      {% if report.stats.capital %}
+        <li class="list-group-item">
+          <div class="text-success">Lucros do período:
+            <span class="text-secondary">R$ {{ report.stats.capital|moneyformat }}</span>
+          </div>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+</div>

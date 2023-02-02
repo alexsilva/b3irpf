@@ -1,8 +1,10 @@
 {% extends 'irpf/adminx_base_form_view.html' %}
+{% load xadmin_tags %}
 
 {% block content %}
   {{ block.super }}
   {% if report %}
+    {% view_block 'report' %}
     {% for item in report.results %}
       {% include "irpf/adminx_report_irpf_item.html" %}
     {% endfor %}
