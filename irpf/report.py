@@ -141,7 +141,6 @@ class NegotiationReport:
 			# novos valores para compra
 			data[self.buy]['total'] = buy_total
 			data[self.buy]['quantity'] = buy_quantity
-			data[self.buy]['avg_price'] = buy_avg_price
 		return data
 
 	def get_position(self, institution, **options):
