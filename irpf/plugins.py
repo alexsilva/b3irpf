@@ -186,9 +186,10 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 			if report.buy in item_results:
 				stats[report.buy] += item_results[report.buy]['total']
 			if report.sell in item_results:
-				stats[report.sell] += item_results[report.sell]['total']
-				if capital in item_results[report.sell]:
-					stats[capital] += item_results[report.sell][capital]
+				item_sell = item_results[report.sell]
+				stats[report.sell] += item_sell['total']
+				if capital in item_sell:
+					stats[capital] += item_sell[capital]
 		return stats
 
 	def get_context_data(self, context, **kwargs):
