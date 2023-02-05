@@ -1,4 +1,5 @@
 import collections
+import copy
 
 from django.utils.text import slugify
 
@@ -72,7 +73,8 @@ class NegotiationReport:
 	def get_queryset(self, **options):
 		return self.model.objects.filter(**options)
 
-	def add_bonus(self, date, data, **options):
+	def add_bonus(self, date, history, all_data, **options):
+		"""Adiciona ações bonificadas na data com base no histórico"""
 		qs_options = {}
 		enterprise = options.get('enterprise')
 		if enterprise:
@@ -80,17 +82,23 @@ class NegotiationReport:
 		queryset = self.bonus_model.objects.filter(date=date, user=self.user,
 		                                           **qs_options)
 		for bonus in queryset:
-			info = data[bonus.enterprise.code]
+			info = all_data[bonus.enterprise.code]
 			position = info.get('position')
 			# ignora os registros que já foram contabilizados na posição
 			if position and bonus.date < position.date:
 				continue
-			quantity = info[self.buy]['quantity']
-			total = info[self.buy]['total']
+
+			# total de ativos na data ex
+			history_date_ex = history[bonus.date_ex]
+			history_info = history_date_ex[bonus.enterprise.code]
+			history_quantity = history_info[self.buy]['quantity']
 
 			# valor quantidade e valores recebidos de bonificação
-			bonus_quantity = int(quantity * (bonus.proportion / 100.0))
+			bonus_quantity = int(history_quantity * (bonus.proportion / 100.0))
 			bonus_value = bonus_quantity * bonus.base_value
+
+			quantity = info[self.buy]['quantity']
+			total = info[self.buy]['total']
 
 			quantity += bonus_quantity
 			total += bonus_value
@@ -168,13 +176,12 @@ class NegotiationReport:
 
 	def report(self, institution, dtstart, dtend, **options):
 		all_data = self.get_position(institution, **options)
+		history = {}
 		qs_options = {}
 		enterprise = options.get('enterprise')
 		if enterprise:  # Permite filtrar por empresa (ativo)
 			qs_options['code'] = enterprise.code
 		for dt in range_dates(dtstart, dtend):  # calcula um dia por vez
-			# Adição de bônus antes de inserir compras/vendas na data.
-			self.add_bonus(dt, all_data, **options)
 			queryset = self.get_queryset(date=dt,
 			                             institution=institution.name,
 			                             position__isnull=True,
@@ -193,6 +200,13 @@ class NegotiationReport:
 				if position and instance.date < position.date:
 					continue
 				self.consolidate(instance, data)
+
+			# histórico das posições no dia
+			if all_data:
+				history[dt] = copy.deepcopy(all_data)
+
+			# aplica a bonificiação na data do histórico
+			self.add_bonus(dt, history, all_data, **options)
 		results = []
 		for code in all_data:
 			enterprise = self.get_enterprise(code)
