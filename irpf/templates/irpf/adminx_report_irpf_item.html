@@ -3,21 +3,21 @@
   <div class="card-header">
     <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
             aria-expanded="true" aria-controls="collapsebody-{{ forloop.counter }}">
-      {{ item.code }}{% if item.enterprise %} - {{ item.enterprise.name }} ({{ item.enterprise.cnpj }}){% endif %}
+      {{ asset.code }}{% if asset.enterprise %} - {{ asset.enterprise.name }} ({{ asset.enterprise.cnpj }}){% endif %}
     </button>
     <button type="button" class="btn btn-link" data-toggle="popover"
             data-content="
-        {% if item.enterprise %}
-          {{ item.results.compra.quantity }}
-          {% if item.enterprise.is_fii %}cota{{ item.results.compra.quantity|pluralize:"s" }}
-          {% elif item.enterprise.is_acao %}ações
-          {% elif item.enterprise.is_bdr %}bdr{{ item.results.compra.quantity|pluralize:"s" }}
+        {% if asset.enterprise %}
+          {{ asset.results.buy.quantity }}
+          {% if asset.enterprise.is_fii %}cota{{ asset.results.buy.quantity|pluralize:"s" }}
+          {% elif asset.enterprise.is_acao %}ações
+          {% elif asset.enterprise.is_bdr %}bdr{{ asset.results.buy.quantity|pluralize:"s" }}
           {% endif %}
-          {{ item.code }} / {{ item.enterprise.name }} - {{ item.enterprise.cnpj }} /
-          na corretora {{ item.institution }} /
-          a um custo médio de R$ {{ item.results.compra.avg_price|moneyformat }}
+          {{ asset.code }} / {{ asset.enterprise.name }} - {{ asset.enterprise.cnpj }} /
+          na corretora {{ asset.institution }} /
+          a um custo médio de R$ {{ asset.results.buy.avg_price|moneyformat }}
         {% else %}
-          {{ item.code }}
+          {{ asset.code }}
         {% endif %}">
       <i class="fa fa-info-circle"></i>
     </button>
@@ -25,52 +25,52 @@
   </div>
   <div id="collapsebody-{{ forloop.counter }}" class="collapse show">
     <div class="card-body">
-      <h6 class="card-subtitle mb-2 mt-2 text-primary">Posição atual{% if item.results.position.date %} ({{ item.results.position.date }}){% endif %}</h6>
-      <p class="card-text">Quantidade: {{ item.results.position.quantity|default:0 }}</p>
-      <p class="card-text">Preço médio: R$ {{ item.results.position.avg_price|default:0|moneyformat }}</p>
-      <p class="card-text">Valor total: R$ {{ item.results.position.total|default:0|moneyformat }}</p>
+      <h6 class="card-subtitle mb-2 mt-2 text-primary">Posição atual{% if asset.results.position.date %} ({{ asset.results.position.date }}){% endif %}</h6>
+      <p class="card-text">Quantidade: {{ asset.results.position.quantity|default:0 }}</p>
+      <p class="card-text">Preço médio: R$ {{ asset.results.position.avg_price|default:0|moneyformat }}</p>
+      <p class="card-text">Valor total: R$ {{ asset.results.position.total|default:0|moneyformat }}</p>
 
-    {% if item.results.venda %}
+    {% if asset.results.sell %}
       <hr/>
       <h6 class="card-subtitle mb-2 text-muted">Vendas do período</h6>
-      <p class="card-text">Quantidade de venda: {{ item.results.venda.quantity }}</p>
-      <p class="card-text">Preço médio de venda: R$ {{ item.results.venda.avg_price|moneyformat }}</p>
-      <p class="card-text">Valor total de venda: R$ {{ item.results.venda.total|moneyformat }}</p>
-      <p class="card-text">Ganho de capital: R$ {{ item.results.venda.capital|moneyformat }}</p>
+      <p class="card-text">Quantidade de venda: {{ asset.results.sell.quantity }}</p>
+      <p class="card-text">Preço médio de venda: R$ {{ asset.results.sell.avg_price|moneyformat }}</p>
+      <p class="card-text">Valor total de venda: R$ {{ asset.results.sell.total|moneyformat }}</p>
+      <p class="card-text">Ganho de capital: R$ {{ asset.results.sell.capital|moneyformat }}</p>
     {% endif %}
 
       <hr/>
       <h6 class="card-subtitle mb-2 text-success">Posição do período</h6>
-      <p class="card-text">Quantidade líquida: {{ item.results.compra.quantity }}</p>
-      <p class="card-text">Preço médio de compra: R$ {{ item.results.compra.avg_price|moneyformat }}</p>
-      <p class="card-text">Valor total de compra: R$ {{ item.results.compra.total|moneyformat }}</p>
+      <p class="card-text">Quantidade líquida: {{ asset.results.buy.quantity }}</p>
+      <p class="card-text">Preço médio de compra: R$ {{ asset.results.buy.avg_price|moneyformat }}</p>
+      <p class="card-text">Valor total de compra: R$ {{ asset.results.buy.total|moneyformat }}</p>
 
-    {% if item.earnings %}
+    {% if asset.earnings %}
       <hr/>
       <h6 class="card-subtitle mb-2 text-info">Proventos e bonificações</h6>
-      {% if item.earnings.dividendo %}
-        <p class="card-text">{{ item.earnings.dividendo.title }}:
-          <span>R$ {{ item.earnings.dividendo.value|moneyformat }}</span>
+      {% if asset.earnings.dividendo %}
+        <p class="card-text">{{ asset.earnings.dividendo.title }}:
+          <span>R$ {{ asset.earnings.dividendo.value|moneyformat }}</span>
         </p>
       {% endif %}
-      {% if item.earnings.juros_sobre_capital_proprio %}
-        <p class="card-text">{{ item.earnings.juros_sobre_capital_proprio.title }}:
-          <span>R$ {{ item.earnings.juros_sobre_capital_proprio.value|moneyformat }}</span>
+      {% if asset.earnings.juros_sobre_capital_proprio %}
+        <p class="card-text">{{ asset.earnings.juros_sobre_capital_proprio.title }}:
+          <span>R$ {{ asset.earnings.juros_sobre_capital_proprio.value|moneyformat }}</span>
         </p>
       {% endif %}
-      {% if item.earnings.bonificacao_em_ativos %}
-        <p class="card-text">{{ item.earnings.bonificacao_em_ativos.title }}</p>
+      {% if asset.earnings.bonificacao_em_ativos %}
+        <p class="card-text">{{ asset.earnings.bonificacao_em_ativos.title }}</p>
         <p class="card-text">
-          Quantidade: {{ item.earnings.bonificacao_em_ativos.quantity|moneyformat }},
-          valor: R$ {{ item.earnings.bonificacao_em_ativos.value|moneyformat }}
+          Quantidade: {{ asset.earnings.bonificacao_em_ativos.quantity|moneyformat }},
+          valor: R$ {{ asset.earnings.bonificacao_em_ativos.value|moneyformat }}
         </p>
       {% endif %}
-      {% if item.earnings.rendimento %}
-        <p class="card-text">{{ item.earnings.rendimento.title }} (cumulativo):
-          <span>R$ {{ item.earnings.rendimento.value|moneyformat }}</span>
+      {% if asset.earnings.rendimento %}
+        <p class="card-text">{{ asset.earnings.rendimento.title }} (cumulativo):
+          <span>R$ {{ asset.earnings.rendimento.value|moneyformat }}</span>
         </p>
       {% endif %}
-      {% exclude_obj_keys item.earnings "dividendo" "juros_sobre_capital_proprio" "bonificacao_em_ativos" "rendimento" as item_others %}
+      {% exclude_obj_keys asset.earnings "dividendo" "juros_sobre_capital_proprio" "bonificacao_em_ativos" "rendimento" as item_others %}
       {% if item_others %}
         <hr/>
         <h6 class="card-subtitle mb-2 text-info">Outros ganhos</h6>
@@ -82,10 +82,11 @@
         {% endfor %}
       {% endif %}
     {% endif %}
-      {% if item.enterprise and item.enterprise.bookkeeping %}
+      {% if asset.enterprise and asset.enterprise.bookkeeping %}
         <hr/>
         <h6 class="card-subtitle mb-2 text-info">Escriturador:
-        <a href="{{ item.enterprise.bookkeeping.link }}" target="_blank">{{ item.enterprise.bookkeeping.name }}</a></h6>
+        <a href="{{ asset.enterprise.bookkeeping.link }}" target="_blank">{{ asset.enterprise.bookkeeping.name }}</a>
+        </h6>
       {% endif %}
     </div>
   </div>
