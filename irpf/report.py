@@ -199,7 +199,7 @@ class NegotiationReport:
 
 	def get_position(self, institution, **options):
 		"""Retorna dados de posição para caculo do período"""
-		data, qs_options = {}, {}
+		assets, qs_options = {}, {}
 		enterprise = options.get('enterprise')
 		if enterprise:
 			qs_options['enterprise'] = enterprise
@@ -210,8 +210,8 @@ class NegotiationReport:
 		)
 		for position in queryset:
 			asset = AssetPosition(position=position)
-			data[position.enterprise.code] = asset
-		return data
+			assets[position.enterprise.code] = asset
+		return assets
 
 	def report(self, institution, dtstart, dtend, **options):
 		assets = self.get_position(institution, **options)
