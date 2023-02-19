@@ -1,5 +1,6 @@
 import collections
 import copy
+import datetime
 
 from django.utils.text import slugify
 
@@ -49,6 +50,73 @@ class EaningsReport:
 		return earnings
 
 
+class Buy:
+	"""Compas"""
+
+	def __init__(self, quantity: float = 0,
+	             avg_price: float = 0.0,
+	             total: float = 0.0,
+	             date: datetime.date = None):
+		self.quantity = quantity
+		self.avg_price = avg_price
+		self.total = total
+		self.date = date
+
+
+class Sell:
+	"""Vendas"""
+
+	def __init__(self, quantity: float = 0,
+	             avg_price: float = 0.0,
+	             total: float = 0.0,
+	             capital: float = 0.0,
+	             date: datetime.date = None):
+		self.quantity = quantity
+		self.avg_price = avg_price
+		self.capital = capital
+		self.total = total
+		self.date = date
+
+	def __bool__(self):
+		return bool(self.quantity)
+
+
+class Asset:
+	"""Ativos"""
+	def __init__(self, buy: Buy = None, sell: Sell = None, position=None):
+		self.items = []
+		self.buy = buy
+		self.sell = sell
+		self.position = position
+
+		if buy is None:
+			self.buy = Buy()
+		if sell is None:
+			self.sell = Sell()
+
+	def __deepcopy__(self, memo):
+		memo[id(self)] = cpy = type(self)(
+			buy=copy.deepcopy(self.buy, memo),
+			sell=copy.deepcopy(self.sell, memo),
+			position=self.position
+		)
+		return cpy
+
+	def __iter__(self):
+		return iter(self.items)
+
+
+class AssetPosition:
+	"""Posição de ativos"""
+	def __init__(self, position):
+		super().__init__(Buy(
+			quantity=position.quantity,
+			avg_price=position.avg_price,
+			total=position.total,
+			date=position.date
+		), position=position)
+
+
 class NegotiationReport:
 	enterprise_model = Enterprise
 	position_model = Position
@@ -73,7 +141,7 @@ class NegotiationReport:
 	def get_queryset(self, **options):
 		return self.model.objects.filter(**options)
 
-	def add_bonus(self, date, history, all_data, **options):
+	def add_bonus(self, date, history, assets, **options):
 		"""Adiciona ações bonificadas na data com base no histórico"""
 		qs_options = {}
 		enterprise = options.get('enterprise')
@@ -82,74 +150,47 @@ class NegotiationReport:
 		queryset = self.bonus_model.objects.filter(date=date, user=self.user,
 		                                           **qs_options)
 		for bonus in queryset:
-			info = all_data[bonus.enterprise.code]
-			position = info.get('position')
+			asset = assets[bonus.enterprise.code]
 			# ignora os registros que já foram contabilizados na posição
-			if position and bonus.date < position.date:
+			if asset.position and bonus.date < asset.position.date:
 				continue
 
 			# total de ativos na data ex
 			history_date_ex = history[bonus.date_ex]
-			history_info = history_date_ex[bonus.enterprise.code]
-			history_quantity = history_info[self.buy]['quantity']
+			history_asset = history_date_ex[bonus.enterprise.code]
 
 			# valor quantidade e valores recebidos de bonificação
-			bonus_quantity = int(history_quantity * (bonus.proportion / 100.0))
+			bonus_quantity = int(history_asset.buy.quantity * (bonus.proportion / 100.0))
 			bonus_value = bonus_quantity * bonus.base_value
 
-			quantity = info[self.buy]['quantity']
-			total = info[self.buy]['total']
-
-			quantity += bonus_quantity
-			total += bonus_value
+			# adição dos novos ativos
+			asset.buy.quantity += bonus_quantity
+			asset.buy.total += bonus_value
 
 			# novo preço médio já com a bonifição
-			avg_price = total / float(quantity)
+			asset.buy.avg_price = asset.buy.total / float(asset.buy.quantity)
 
-			info[self.buy]['total'] = total
-			info[self.buy]['avg_price'] = avg_price
-			info[self.buy]['quantity'] = quantity
-
-	def consolidate(self, instance, data):
+	def consolidate(self, instance, asset: Asset):
 		kind = instance.kind.lower()
 
-		quantity = data[kind].setdefault('quantity', 0)
-		total = data[kind].setdefault('total', 0.0)
-
 		if kind == self.buy:
-			quantity += instance.quantity
-			total += (instance.quantity * instance.price)
-			avg_price = total / float(quantity)
-
-			data[kind]['quantity'] = quantity
-			data[kind]['avg_price'] = avg_price
-			data[kind]['total'] = total
+			# valores de compras
+			asset.buy.quantity += instance.quantity
+			asset.buy.total += (instance.quantity * instance.price)
+			asset.buy.avg_price = asset.buy.total / float(asset.buy.quantity)
 		elif kind == self.sell:
-			data[kind].setdefault("capital", 0.0)
-			quantity += instance.quantity
-			total += (instance.quantity * instance.price)
-			avg_price = total / float(quantity)
-
 			# valores de venda
-			data[kind]['total'] = total
-			data[kind]['quantity'] = quantity
-			data[kind]['avg_price'] = avg_price
-
-			# valores de compra
-			buy_quantity = data[self.buy]['quantity']
-			buy_avg_price = data[self.buy]['avg_price']
+			asset.sell.quantity += instance.quantity
+			asset.sell.total += (instance.quantity * instance.price)
+			asset.sell.avg_price = (asset.sell.total / float(asset.sell.quantity))
 
 			# ganho de capital de todas a vendas
-			data[kind]['capital'] += (instance.quantity * (instance.price - buy_avg_price))
-
-			# removendo as unidades vendidas
-			buy_quantity -= instance.quantity
-			buy_total = buy_quantity * buy_avg_price
+			asset.sell.capital += (instance.quantity * (instance.price - asset.buy.avg_price))
 
 			# novos valores para compra
-			data[self.buy]['total'] = buy_total
-			data[self.buy]['quantity'] = buy_quantity
-		return data
+			asset.buy.quantity -= instance.quantity
+			asset.buy.total = asset.buy.quantity * asset.buy.avg_price
+		return asset
 
 	def get_position(self, institution, **options):
 		"""Retorna dados de posição para caculo do período"""
@@ -163,19 +204,12 @@ class NegotiationReport:
 			**qs_options
 		)
 		for position in queryset:
-			info = collections.defaultdict(dict)
-			data[position.enterprise.code] = info
-
-			info[self.buy]['quantity'] = position.quantity
-			info[self.buy]['avg_price'] = position.avg_price
-			info[self.buy]['total'] = position.total
-			info[self.buy]['date'] = position.date
-
-			info['position'] = position
+			asset = AssetPosition(position=position)
+			data[position.enterprise.code] = asset
 		return data
 
 	def report(self, institution, dtstart, dtend, **options):
-		all_data = self.get_position(institution, **options)
+		assets = self.get_position(institution, **options)
 		history = {}
 		qs_options = {}
 		enterprise = options.get('enterprise')
@@ -190,25 +224,23 @@ class NegotiationReport:
 			for instance in queryset:
 				# instance: compra / venda
 				try:
-					data = all_data[instance.code]
+					asset = assets[instance.code]
 				except KeyError:
-					data = collections.defaultdict(dict)
-					all_data[instance.code] = data
-				data.setdefault('objs', []).append(instance)
-				position = data.get('position')
+					assets[instance.code] = asset = Asset()
+				asset.items.append(instance)
 				# ignora os registros que já foram contabilizados na posição
-				if position and instance.date < position.date:
+				if asset.position and instance.date < asset.position.date:
 					continue
-				self.consolidate(instance, data)
+				self.consolidate(instance, asset)
 
 			# histórico das posições no dia
-			if all_data:
-				history[dt] = copy.deepcopy(all_data)
+			if assets:
+				history[dt] = copy.deepcopy(assets)
 
 			# aplica a bonificiação na data do histórico
-			self.add_bonus(dt, history, all_data, **options)
+			self.add_bonus(dt, history, assets, **options)
 		results = []
-		for code in all_data:
+		for code in assets:
 			enterprise = self.get_enterprise(code)
 			earnings = self.earnings_report.report(code, institution,
 			                                       dtstart, dtend,
@@ -218,7 +250,7 @@ class NegotiationReport:
 				'institution': institution,
 				'enterprise': enterprise,
 				'earnings': earnings,
-				'results': all_data[code]
+				'results': assets[code]
 			})
 
 		def results_sort_category(item):
