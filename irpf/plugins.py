@@ -119,15 +119,12 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		for item in results:
 			enterprise = item['enterprise']
 			institution = item['institution']
-
-			item_result = item['results']
-			item_objs = item_result['objs']
-			compra = item_result['compra']
+			asset = item['results']
 
 			defaults = {
-				'quantity': compra['quantity'],
-				'avg_price': compra['avg_price'],
-				'total': compra['total'],
+				'quantity': asset.buy.quantity,
+				'avg_price': asset.buy.avg_price,
+				'total': asset.buy.total,
 				'date': date
 			}
 			instance, created = self.position_model.objects.get_or_create(
@@ -140,9 +137,9 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 				for field_name in defaults:
 					setattr(instance, field_name, defaults[field_name])
 				instance.save()
-			elif item_objs:
+			elif asset.items:
 				# relaciona a intância (Negotiation) com a posição
-				for obj in item_objs:
+				for obj in asset.items:
 					if obj.position == instance:
 						continue
 					obj.position = instance
@@ -175,21 +172,14 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 
 	def get_stats(self):
 		stats = {}
-		report = self.admin_view.report
 		results = self.admin_view.results
-		capital = 'capital'
-		stats[capital] = 0.0
-		stats[report.buy] = 0.0
-		stats[report.sell] = 0.0
+		buy, sell, capital = 'buy', 'sell', 'capital'
+		stats[capital] = stats[buy] = stats[sell] = 0.0
 		for item in results:
-			item_results = item['results']
-			if report.buy in item_results:
-				stats[report.buy] += item_results[report.buy]['total']
-			if report.sell in item_results:
-				item_sell = item_results[report.sell]
-				stats[report.sell] += item_sell['total']
-				if capital in item_sell:
-					stats[capital] += item_sell[capital]
+			asset = item['results']
+			stats[buy] += asset.buy.total
+			stats[sell] += asset.sell.total
+			stats[capital] += asset.sell.capital
 		return stats
 
 	def get_context_data(self, context, **kwargs):

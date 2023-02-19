@@ -106,15 +106,20 @@ class Asset:
 		return iter(self.items)
 
 
-class AssetPosition:
+class AssetPosition(Asset):
 	"""Posição de ativos"""
 	def __init__(self, position):
-		super().__init__(Buy(
+		super().__init__(buy=Buy(
 			quantity=position.quantity,
 			avg_price=position.avg_price,
 			total=position.total,
 			date=position.date
 		), position=position)
+
+	def __deepcopy__(self, memo):
+		cpy = type(self)(self.position)
+		memo[id(self)] = cpy
+		return cpy
 
 
 class NegotiationReport:
