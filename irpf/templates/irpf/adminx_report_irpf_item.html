@@ -25,21 +25,23 @@
   </div>
   <div id="collapsebody-{{ forloop.counter }}" class="collapse show">
     <div class="card-body">
+    {% if asset.results.position %}
       <h6 class="card-subtitle mb-2 mt-2 text-primary">Posição atual{% if asset.results.position.date %} ({{ asset.results.position.date }}){% endif %}</h6>
       <p class="card-text">Quantidade: {{ asset.results.position.quantity|default:0 }}</p>
       <p class="card-text">Preço médio: R$ {{ asset.results.position.avg_price|default:0|moneyformat }}</p>
       <p class="card-text">Valor total: R$ {{ asset.results.position.total|default:0|moneyformat }}</p>
+      <hr/>
+    {% endif %}
 
     {% if asset.results.sell %}
-      <hr/>
       <h6 class="card-subtitle mb-2 text-muted">Vendas do período</h6>
       <p class="card-text">Quantidade de venda: {{ asset.results.sell.quantity }}</p>
       <p class="card-text">Preço médio de venda: R$ {{ asset.results.sell.avg_price|moneyformat }}</p>
       <p class="card-text">Valor total de venda: R$ {{ asset.results.sell.total|moneyformat }}</p>
       <p class="card-text">Ganho de capital: R$ {{ asset.results.sell.capital|moneyformat }}</p>
+      <hr/>
     {% endif %}
 
-      <hr/>
       <h6 class="card-subtitle mb-2 text-success">Posição do período</h6>
       <p class="card-text">Quantidade líquida: {{ asset.results.buy.quantity }}</p>
       <p class="card-text">Preço médio de compra: R$ {{ asset.results.buy.avg_price|moneyformat }}</p>
@@ -82,12 +84,12 @@
         {% endfor %}
       {% endif %}
     {% endif %}
-      {% if asset.enterprise and asset.enterprise.bookkeeping %}
-        <hr/>
-        <h6 class="card-subtitle mb-2 text-info">Escriturador:
-        <a href="{{ asset.enterprise.bookkeeping.link }}" target="_blank">{{ asset.enterprise.bookkeeping.name }}</a>
-        </h6>
-      {% endif %}
+    {% if asset.enterprise and asset.enterprise.bookkeeping %}
+      <hr/>
+      <h6 class="card-subtitle mb-2 text-info">Escriturador:
+      <a href="{{ asset.enterprise.bookkeeping.link }}" target="_blank">{{ asset.enterprise.bookkeeping.name }}</a>
+      </h6>
+    {% endif %}
     </div>
   </div>
 </div>
