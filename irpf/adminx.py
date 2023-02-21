@@ -121,7 +121,7 @@ class PositionAdmin(BaseIRPFAdmin):
 @sites.register(BrokerageNote)
 class BrokerageNoteAdmin(BaseIRPFAdmin):
 	fields = ('note', 'institution')
-	list_display = ('note', 'institution')
+	list_display = ('note', 'institution', 'reference_date')
 	brokerrage_note_parsers = {
 		# NU INVEST CORRETORA DE VALORES S.A.
 		'62169875000179': NunInvestParser
