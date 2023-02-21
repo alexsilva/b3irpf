@@ -199,7 +199,7 @@ class BrokerageNote(BaseIRPFModel):
 	                                on_delete=models.CASCADE,
 	                                verbose_name="Corretora",
 	                                help_text="Informe a correta para a correta análise do arquivo.")
-	date = models.DateField(verbose_name="Data do pregão", null=True)
+	reference_date = models.DateField(verbose_name="Data do pregão", null=True)
 	settlement_fee = models.FloatField(verbose_name="Taxa de liquidação", default=0.0)
 	registration_fee = models.FloatField(verbose_name="Taxa de registro", default=0.0)
 	term_fee = models.FloatField(verbose_name="Taxa de termo/opções", default=0.0)
@@ -212,6 +212,9 @@ class BrokerageNote(BaseIRPFModel):
 	others = models.FloatField(verbose_name="Outros", default=0.0)
 
 	transactions = models.ManyToManyField(Negotiation, verbose_name="Transações")
+
+	def __str__(self):
+		return f"{self.note} / {self.institution.name}"
 
 	class Meta:
 		verbose_name = "Nota de corretagem"

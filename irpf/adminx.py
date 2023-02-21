@@ -1,8 +1,10 @@
 from django.contrib.auth import get_permission_codename
 
-from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision, Bonus, Bookkeeping
+from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
+from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision, Bonus, Bookkeeping, \
+	BrokerageNote
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
-	ReportStatsAdminPlugin
+	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from irpf.views.xlsx_viewer import AdminXlsxViewer
@@ -19,6 +21,7 @@ site.register_plugin(GuardianAdminPlugin, ModelFormAdminView)
 site.register_plugin(AssignUserAdminPlugin, ModelFormAdminView)
 site.register_plugin(SaveReportPositionPlugin, AdminReportIrpfModelView)
 site.register_plugin(ReportStatsAdminPlugin, AdminReportIrpfModelView)
+site.register_plugin(BrokerageNoteAdminPlugin, ModelFormAdminView)
 
 
 def _get_field_opts(name, model):
@@ -113,6 +116,36 @@ class PositionAdmin(BaseIRPFAdmin):
 	enterprise_name.is_column = True
 	enterprise_name.admin_order_field = "enterprise__name"
 	enterprise_name.short_description = _get_field_opts("name", Enterprise).verbose_name
+
+
+@sites.register(BrokerageNote)
+class BrokerageNoteAdmin(BaseIRPFAdmin):
+	fields = ('note', 'institution')
+	list_display = ('note', 'institution')
+	brokerrage_note_parsers = {
+		# NU INVEST CORRETORA DE VALORES S.A.
+		'62169875000179': NunInvestParser
+	}
+	brokerrage_note_field_update = [
+		'reference_date',
+		'settlement_fee',
+		'registration_fee',
+		'term_fee',
+		'ana_fee',
+		'emoluments',
+		'operational_fee',
+		'execution',
+		'custody_fee',
+		'taxes',
+		'others'
+	]
+
+	def get_readonly_fields(self):
+		readonly_fields = list(super().get_readonly_fields())
+		for field_name in self.brokerrage_note_field_update:
+			if field_name not in readonly_fields:
+				readonly_fields.append(field_name)
+		return readonly_fields
 
 
 @sites.register(Negotiation)

@@ -1,3 +1,6 @@
+import io
+import re
+
 import django.forms as django_forms
 from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
@@ -165,8 +168,34 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		return value
 
 
+class BrokerageNoteAdminPlugin(BaseAdminPlugin):
+	brokerrage_note_parsers = None
+	brokerrage_note_field_update = ()
+
+	def init_request(self, *args, **kwargs):
+		return bool(self.brokerrage_note_parsers)
+
+	def _parser_file(self, parser, instance):
+		with instance.note.file as fp:
+			parser = parser(brokerage_note=io.BytesIO(fp.read()))
+			for note in parser.parse_brokerage_note():
+				for field_name in self.brokerrage_note_field_update:
+					setattr(instance, field_name, getattr(note, field_name))
+		instance.save()
+
+	def save_models(self):
+		instance = getattr(self.admin_view, "new_obj", None)
+		if instance and instance.pk:
+			parts = re.findall('([0-9]+)', instance.institution.cnpj)
+			if parts:
+				cnpj = ''.join(parts)
+				parser = self.brokerrage_note_parsers[cnpj]
+				self._parser_file(parser, instance)
+
+
 class ReportStatsAdminPlugin(BaseAdminPlugin):
 	"""Gera dados estatísticos (compra, venda, etc)"""
+
 	def init_request(self, *args, **kwargs):
 		return True
 
