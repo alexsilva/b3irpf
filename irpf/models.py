@@ -191,6 +191,33 @@ class Earnings(BaseIRPFModel):
 		ordering = ("date",)
 
 
+class BrokerageNote(BaseIRPFModel):
+	"""Modelo de notas de corretagem"""
+	note = models.FileField(verbose_name='Nota de corretagem (PDF)',
+	                        upload_to='notes')
+	institution = models.ForeignKey(Instituition,
+	                                on_delete=models.CASCADE,
+	                                verbose_name="Corretora",
+	                                help_text="Informe a correta para a correta análise do arquivo.")
+	date = models.DateField(verbose_name="Data do pregão", null=True)
+	settlement_fee = models.FloatField(verbose_name="Taxa de liquidação", default=0.0)
+	registration_fee = models.FloatField(verbose_name="Taxa de registro", default=0.0)
+	term_fee = models.FloatField(verbose_name="Taxa de termo/opções", default=0.0)
+	ana_fee = models.FloatField(verbose_name="Taxa A.N.A", default=0.0)
+	emoluments = models.FloatField(verbose_name="Emolumentos", default=0.0)
+	operational_fee = models.FloatField(verbose_name="Taxa Operacional", default=0.0)
+	execution = models.FloatField(verbose_name="Execução", default=0.0)
+	custody_fee = models.FloatField(verbose_name="Taxa de custódia", default=0.0)
+	taxes = models.FloatField(verbose_name="Impostos", default=0.0)
+	others = models.FloatField(verbose_name="Outros", default=0.0)
+
+	transactions = models.ManyToManyField(Negotiation, verbose_name="Transações")
+
+	class Meta:
+		verbose_name = "Nota de corretagem"
+		verbose_name_plural = "Notas de corretagem"
+
+
 class Provision(BaseIRPFModel):
 	code = CharCodeNameField(verbose_name="Código", max_length=512, is_code=True)
 	name = CharCodeNameField(verbose_name="Empresa", max_length=256)
