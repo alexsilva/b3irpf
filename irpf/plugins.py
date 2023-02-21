@@ -171,9 +171,14 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 	brokerrage_note_parsers = None
 	brokerrage_note_field_update = ()
+	brokerrage_note_negociation = Negotiation
 
 	def init_request(self, *args, **kwargs):
-		return bool(self.brokerrage_note_parsers)
+		return bool(self.brokerrage_note_negociation and
+		            self.brokerrage_note_parsers)
+
+	def setup(self, *args, **kwargs):
+		self.basic_ticker = re.compile("([A-Z-0-9]{4})")
 
 	def _parser_file(self, parser, instance):
 		with instance.note.file as fp:
@@ -181,7 +186,19 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 			for note in parser.parse_brokerage_note():
 				for field_name in self.brokerrage_note_field_update:
 					setattr(instance, field_name, getattr(note, field_name))
-		instance.save()
+
+				instance.save()
+				self._add_transations(note, instance)
+
+	def _add_transations(self, note, instance):
+		queryset = self.brokerrage_note_negociation.objects.all()
+		for asset in note.transactions:
+			qs = queryset.filter(
+				date=instance.reference_date,
+				institution=instance.institution.name,
+				user=self.user)
+			if ticker := self.basic_ticker.search(asset.security.ticker, re.IGNORECASE):
+				print(qs.filter(code=ticker))
 
 	def save_models(self):
 		instance = getattr(self.admin_view, "new_obj", None)
