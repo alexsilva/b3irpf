@@ -120,6 +120,9 @@ class Negotiation(BaseIRPFModel):
 	                             null=True, blank=True,
 	                             editable=False,
 	                             help_text="Esta relação serve apenas para fins de histórico de posição")
+
+	tx = models.FloatField(verbose_name="Taxas", default=0.0)
+
 	# relates the name of the headers with the fields.
 	date.sheet_header = "Data do Negócio"
 	kind.sheet_header = "Tipo de Movimentação"
