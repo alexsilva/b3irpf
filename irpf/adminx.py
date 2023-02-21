@@ -124,8 +124,10 @@ class NegotiationAdmin(BaseIRPFAdmin):
 		"kind",
 		"institution",
 		"quantity",
+		"price",
 		"total",
-		"date"
+		"tx",
+		"date",
 	)
 
 	def get_readonly_fields(self):
