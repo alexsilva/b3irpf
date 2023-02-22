@@ -178,7 +178,7 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 		            self.brokerrage_note_parsers)
 
 	def setup(self, *args, **kwargs):
-		self.basic_ticker = re.compile("([A-Z-0-9]{4})")
+		...
 
 	def _parser_file(self, parser, instance):
 		with instance.note.file as fp:
@@ -192,19 +192,26 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 
 	def _add_transations(self, note, instance):
 		queryset = self.brokerrage_note_negociation.objects.all()
+		tax = note.settlement_fee + note.emoluments
+		paid = sum([(ts.amount * ts.unit_price) for ts in note.transactions])
 		for asset in note.transactions:
 			qs = queryset.filter(
 				date=instance.reference_date,
 				institution=instance.institution.name,
 				user=self.user)
-			if ticker := self.basic_ticker.search(asset.security.ticker, re.IGNORECASE):
-				print(qs.filter(code=ticker))
+			ticker = asset.security.ticker.rstrip("Ff")
+			qs = qs.filter(code=ticker,
+			               quantity=asset.amount,
+			               price=asset.unit_price)
+			for obj in qs:
+				# rateio de taxas proporcional ao valor pago
+				obj.tx = tax * ((asset.amount * asset.unit_price) / paid)
+				obj.save()
 
 	def save_models(self):
 		instance = getattr(self.admin_view, "new_obj", None)
 		if instance and instance.pk:
-			parts = re.findall('([0-9]+)', instance.institution.cnpj)
-			if parts:
+			if parts := re.findall('([0-9]+)', instance.institution.cnpj):
 				cnpj = ''.join(parts)
 				parser = self.brokerrage_note_parsers[cnpj]
 				self._parser_file(parser, instance)
