@@ -128,11 +128,11 @@ class NegotiationInline:
 class BrokerageNoteAdmin(BaseIRPFAdmin):
 	fields = ('note', 'institution')
 	list_display = ('note', 'institution', 'reference_date')
-	brokerrage_note_parsers = {
+	brokerage_note_parsers = {
 		# NU INVEST CORRETORA DE VALORES S.A.
 		'62169875000179': NunInvestParser
 	}
-	brokerrage_note_field_update = [
+	brokerage_note_field_update = [
 		'reference_date',
 		'settlement_fee',
 		'registration_fee',
@@ -149,7 +149,7 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 
 	def get_readonly_fields(self):
 		readonly_fields = list(super().get_readonly_fields())
-		for field_name in self.brokerrage_note_field_update:
+		for field_name in self.brokerage_note_field_update:
 			if field_name not in readonly_fields:
 				readonly_fields.append(field_name)
 		return readonly_fields

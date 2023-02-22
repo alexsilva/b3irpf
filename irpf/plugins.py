@@ -172,13 +172,13 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 	"""Plugin que faz o registro da nota de corretagem
 	Distribui os valores proporcionais de taxas e registra negociações
 	"""
-	brokerrage_note_parsers = None
-	brokerrage_note_field_update = ()
-	brokerrage_note_negociation = Negotiation
+	brokerage_note_parsers = None
+	brokerage_note_field_update = ()
+	brokerage_note_negociation = Negotiation
 
 	def init_request(self, *args, **kwargs):
-		return bool(self.brokerrage_note_negociation and
-		            self.brokerrage_note_parsers)
+		return bool(self.brokerage_note_negociation and
+		            self.brokerage_note_parsers)
 
 	def setup(self, *args, **kwargs):
 		...
@@ -187,14 +187,14 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 		with instance.note.file as fp:
 			parser = parser(brokerage_note=io.BytesIO(fp.read()))
 			for note in parser.parse_brokerage_note():
-				for field_name in self.brokerrage_note_field_update:
+				for field_name in self.brokerage_note_field_update:
 					setattr(instance, field_name, getattr(note, field_name))
 
 				instance.save()
 				self._add_transations(note, instance)
 
 	def _add_transations(self, note, instance):
-		queryset = self.brokerrage_note_negociation.objects.all()
+		queryset = self.brokerage_note_negociation.objects.all()
 		tax = note.settlement_fee + note.emoluments
 		paid = sum([(ts.amount * ts.unit_price) for ts in note.transactions])
 		for asset in note.transactions:
@@ -217,7 +217,7 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 		if instance and instance.pk:
 			if parts := re.findall('([0-9]+)', instance.institution.cnpj):
 				cnpj = ''.join(parts)
-				parser = self.brokerrage_note_parsers[cnpj]
+				parser = self.brokerage_note_parsers[cnpj]
 				self._parser_file(parser, instance)
 
 
