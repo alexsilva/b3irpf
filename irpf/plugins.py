@@ -17,7 +17,20 @@ from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
 
-class GuardianAdminPlugin(BaseAdminPlugin):
+class GuadianAdminPluginMixin(BaseAdminPlugin):
+
+	def add_permission_for_object(self, obj, opts=None):
+		model_perms = self.admin_view.get_model_perms()
+		if opts is None:
+			opts = self.opts
+		for perm_name in model_perms:
+			# atribuição das permissões de objeto
+			if model_perms[perm_name]:
+				permission_codename = get_permission_codename(perm_name, opts)
+				assign_perm(permission_codename, self.user, obj)
+
+
+class GuardianAdminPlugin(GuadianAdminPluginMixin):
 	"""Protege a view permitindo acesso somente a objetos para os quais o usuário tem permissão"""
 	guardian_protected = False
 
@@ -40,12 +53,7 @@ class GuardianAdminPlugin(BaseAdminPlugin):
 	def save_models(self):
 		new_obj = getattr(self.admin_view, "new_obj", None)
 		if new_obj and new_obj.pk:
-			model_perms = self.admin_view.get_model_perms()
-			for perm_name in model_perms:
-				# atribuição das permissões de objeto
-				if model_perms[perm_name]:
-					permission_codename = get_permission_codename(perm_name, self.opts)
-					assign_perm(permission_codename, self.user, new_obj)
+			self.add_permission_for_object(new_obj)
 
 
 class AssignUserAdminPlugin(BaseAdminPlugin):
@@ -169,7 +177,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		return value
 
 
-class BrokerageNoteAdminPlugin(BaseAdminPlugin):
+class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 	"""Plugin que faz o registro da nota de corretagem
 	Distribui os valores proporcionais de taxas e registra negociações
 	"""
@@ -184,6 +192,18 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 	def setup(self, *args, **kwargs):
 		...
 
+	def block_submit_more_btns(self, context, nodes):
+		return render_to_string("irpf/blocks/blocks.form.save_transactions.html")
+
+	@cached_property
+	def is_save_transactions(self):
+		field = django_forms.BooleanField(initial=False)
+		try:
+			value = field.to_python(self.request.POST.get('_continue') == "save_transactions")
+		except django_forms.ValidationError:
+			value = field.initial
+		return value
+
 	@atomic
 	def _parser_file(self, parser, instance):
 		with instance.note.file as fp:
@@ -194,6 +214,37 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 
 				instance.save()
 				self._add_transations(note, instance)
+
+	def _save_trasaction(self, asset, instance, **options) -> Negotiation:
+		"""Cria uma nova 'transaction' com os dados da nota"""
+		options.update(
+			date=instance.reference_date,
+			quantity=asset.amount,
+			price=asset.unit_price,
+			brokerage_note=instance,
+			institution=instance.institution.name,
+			user=self.user
+		)
+		defaults = options.setdefault('defaults', {})
+		defaults['total'] = asset.amount * asset.unit_price
+		model = self.brokerage_note_negociation
+		opts = model._meta
+		obj, created = model.objects.get_or_create(**options)
+		self.add_permission_for_object(obj, opts=opts)
+		return obj
+
+	def _get_transaction_type(self, asset) -> str:
+		# filtro para a categoria de transação
+		kind = None
+		if asset.transaction_type == TransactionType.BUY:
+			kind = self.brokerage_note_negociation.KIND_BUY
+		elif asset.transaction_type == TransactionType.SELL:
+			kind = self.brokerage_note_negociation.KIND_SELL
+		return kind
+
+	@staticmethod
+	def _get_clean_ticker(asset):
+		return asset.security.ticker.rstrip("Ff")
 
 	def _add_transations(self, note, instance):
 		queryset = self.brokerage_note_negociation.objects.all()
@@ -210,23 +261,28 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 				date=instance.reference_date,
 				institution=instance.institution.name,
 				user=self.user)
-			ticker = asset.security.ticker.rstrip("Ff")
-			# filtro para a categoria de transação
-			if asset.transaction_type == TransactionType.BUY:
-				kind = self.brokerage_note_negociation.KIND_BUY
-			elif asset.transaction_type == TransactionType.SELL:
-				kind = self.brokerage_note_negociation.KIND_SELL
-			else:
+			ticker = self._get_clean_ticker(asset)
+			kind = self._get_transaction_type(asset)
+			if kind is None:
 				continue
-			qs = qs.filter(code=ticker,
+			# rateio de taxas proporcional ao valor pago
+			tx = tax * ((asset.amount * asset.unit_price) / paid)
+			qs = qs.filter(code__iexact=ticker,
 			               kind__iexact=kind,
 			               quantity=asset.amount,
 			               price=asset.unit_price)
-			for negociation in qs:
-				# rateio de taxas proporcional ao valor pago
-				negociation.tx = tax * ((asset.amount * asset.unit_price) / paid)
-				negociation.brokerage_note = instance
-				negociation.save()
+			if self.is_save_transactions and not qs.exists():
+				self._save_trasaction(
+					asset, instance,
+					code=ticker,
+					kind=kind,
+					defaults={'tx': tx}
+				)
+			else:
+				for negociation in qs:
+					negociation.tx = tx
+					negociation.brokerage_note = instance
+					negociation.save()
 
 	def save_models(self):
 		instance = getattr(self.admin_view, "new_obj", None)
