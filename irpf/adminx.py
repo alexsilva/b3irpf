@@ -88,7 +88,7 @@ class EnterpriseAdmin:
 
 @sites.register(Position)
 class PositionAdmin(BaseIRPFAdmin):
-	list_filter = ("enterprise__code",)
+	list_filter = ("enterprise__code", 'institution')
 	search_fields = (
 		'enterprise__code',
 		'enterprise__name',
