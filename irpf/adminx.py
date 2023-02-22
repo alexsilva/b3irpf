@@ -118,6 +118,12 @@ class PositionAdmin(BaseIRPFAdmin):
 	enterprise_name.short_description = _get_field_opts("name", Enterprise).verbose_name
 
 
+class NegotiationInline:
+	model = Negotiation
+	style = "accordion"
+	extra = 0
+
+
 @sites.register(BrokerageNote)
 class BrokerageNoteAdmin(BaseIRPFAdmin):
 	fields = ('note', 'institution')
@@ -139,6 +145,7 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 		'taxes',
 		'others'
 	]
+	inlines = [NegotiationInline]
 
 	def get_readonly_fields(self):
 		readonly_fields = list(super().get_readonly_fields())

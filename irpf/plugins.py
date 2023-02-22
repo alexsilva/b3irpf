@@ -203,10 +203,11 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 			qs = qs.filter(code=ticker,
 			               quantity=asset.amount,
 			               price=asset.unit_price)
-			for obj in qs:
+			for negociation in qs:
 				# rateio de taxas proporcional ao valor pago
-				obj.tx = tax * ((asset.amount * asset.unit_price) / paid)
-				obj.save()
+				negociation.tx = tax * ((asset.amount * asset.unit_price) / paid)
+				negociation.brokerage_note = instance
+				negociation.save()
 
 	def save_models(self):
 		instance = getattr(self.admin_view, "new_obj", None)

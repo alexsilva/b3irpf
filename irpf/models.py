@@ -123,6 +123,12 @@ class Negotiation(BaseIRPFModel):
 
 	tx = models.FloatField(verbose_name="Taxas", default=0.0)
 
+	brokerage_note = models.ForeignKey("BrokerageNote",
+	                                   on_delete=models.SET_NULL,
+	                                   verbose_name="Notas",
+		                               null=True,
+		                               editable=False)
+
 	# relates the name of the headers with the fields.
 	date.sheet_header = "Data do Negócio"
 	kind.sheet_header = "Tipo de Movimentação"
