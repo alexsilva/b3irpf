@@ -9,7 +9,7 @@ from irpf.models import Instituition, Enterprise
 from irpf.report import NegotiationReport
 from irpf.views.base import AdminFormView
 from xadmin.views import filter_hook
-from xadmin.widgets import AdminDateWidget
+from xadmin.widgets import AdminDateWidget, AdminSelectWidget
 
 _now = timezone.now()
 
@@ -36,9 +36,11 @@ class ReportIRPFForm(django_forms.Form):
 
 	enterprise = django_forms.ModelChoiceField(Enterprise.objects.all(),
 	                                           label=Enterprise._meta.verbose_name,
+	                                           widget=AdminSelectWidget,
 	                                           required=False)
 	institution = django_forms.ModelChoiceField(Instituition.objects.get_queryset(),
 	                                            label=Instituition._meta.verbose_name,
+	                                            widget=AdminSelectWidget,
 	                                            required=False)
 
 
