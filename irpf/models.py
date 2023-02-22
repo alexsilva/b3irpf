@@ -97,6 +97,12 @@ class BaseIRPFModel(models.Model):
 class Negotiation(BaseIRPFModel):
 	"""Data do Negócio / Tipo de Movimentação / Mercado / Prazo/Vencimento / Instituição /
 	Código de Negociação / Quantidade / Preço / Valor"""
+	KIND_BUY = "Compra"
+	KIND_SELL = "Venda"
+	KIND_CHOICES = (
+		(KIND_BUY, KIND_BUY),
+		(KIND_SELL, KIND_SELL)
+	)
 
 	date = DateField(verbose_name="Data do Negócio")
 	kind = models.CharField(verbose_name="Tipo de Movimentação",

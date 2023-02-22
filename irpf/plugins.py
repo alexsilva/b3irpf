@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from guardian.shortcuts import get_objects_for_user, assign_perm
 
+from correpy.domain.enums import TransactionType
 from irpf.models import Negotiation, Earnings, Provision, Position
 from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
@@ -204,7 +205,15 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 				institution=instance.institution.name,
 				user=self.user)
 			ticker = asset.security.ticker.rstrip("Ff")
+			# filtro para a categoria de transação
+			if asset.transaction_type == TransactionType.BUY:
+				kind = self.brokerage_note_negociation.KIND_BUY
+			elif asset.transaction_type == TransactionType.SELL:
+				kind = self.brokerage_note_negociation.KIND_SELL
+			else:
+				continue
 			qs = qs.filter(code=ticker,
+			               kind__iexact=kind,
 			               quantity=asset.amount,
 			               price=asset.unit_price)
 			for negociation in qs:
