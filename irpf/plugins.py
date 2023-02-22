@@ -183,6 +183,7 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 	def setup(self, *args, **kwargs):
 		...
 
+	@atomic
 	def _parser_file(self, parser, instance):
 		with instance.note.file as fp:
 			parser = parser(brokerage_note=io.BytesIO(fp.read()))
