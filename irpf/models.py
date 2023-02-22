@@ -4,6 +4,7 @@ from django.utils.formats import number_format, date_format
 from django.utils.functional import cached_property
 
 from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField
+from irpf.storage import FileSystemOverwriteStorage
 
 
 class Bookkeeping(models.Model):
@@ -206,7 +207,8 @@ class Earnings(BaseIRPFModel):
 class BrokerageNote(BaseIRPFModel):
 	"""Modelo de notas de corretagem"""
 	note = models.FileField(verbose_name='Nota de corretagem (PDF)',
-	                        upload_to='notes')
+	                        upload_to='notes',
+	                        storage=FileSystemOverwriteStorage())
 	institution = models.ForeignKey(Instituition,
 	                                on_delete=models.CASCADE,
 	                                verbose_name="Corretora",
