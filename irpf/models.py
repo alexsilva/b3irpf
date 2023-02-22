@@ -280,7 +280,10 @@ class Position(BaseIRPFModel):
 
 	def __str__(self):
 		dt = date_format(self.date)
-		return f"Posição até {dt} - {self.institution.name}"
+		msg = f"Posição até {dt}"
+		if self.institution:
+			msg += f" - {self.institution.name}"
+		return msg
 
 	class Meta:
 		unique_together = ("enterprise", "institution", "user")

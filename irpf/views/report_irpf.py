@@ -38,7 +38,8 @@ class ReportIRPFForm(django_forms.Form):
 	                                           label=Enterprise._meta.verbose_name,
 	                                           required=False)
 	institution = django_forms.ModelChoiceField(Instituition.objects.get_queryset(),
-	                                            label=Instituition._meta.verbose_name)
+	                                            label=Instituition._meta.verbose_name,
+	                                            required=False)
 
 
 class AdminReportIrpfModelView(AdminFormView):
@@ -86,7 +87,8 @@ class AdminReportIrpfModelView(AdminFormView):
 			start = form_data['start']
 			end = form_data['end']
 
-			self.results = self.report.report(institution, start, end,
+			self.results = self.report.report(start, end,
+			                                  institution=institution,
 			                                  enterprise=enterprise)
 		return self.render_to_response(self.get_context_data(form=form))
 

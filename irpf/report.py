@@ -30,14 +30,16 @@ class EaningsReport:
 	def get_queryset(self, **options):
 		return self.earnings_models.objects.filter(**options)
 
-	def report(self, code, institution, start, end=None, **options):
+	def report(self, code, start, end=None, **options):
 		qs_options = dict(
 			flow__iexact=self.flow,
 			user=self.user,
-			institution=institution.name,
 			date__gte=start,
 			code__iexact=code
 		)
+		institution = options.get('institution')
+		if institution:
+			qs_options['institution'] = institution.name
 		enterprise = options.get('enterprise')
 		if enterprise:
 			qs_options['code'] = enterprise.code
@@ -208,14 +210,16 @@ class NegotiationReport:
 			asset.buy.total = asset.buy.quantity * asset.buy.avg_price
 		return asset
 
-	def get_position(self, institution, **options):
+	def get_position(self, **options):
 		"""Retorna dados de posição para caculo do período"""
 		assets, qs_options = {}, {}
+		institution = options.get('institution')
+		if institution:
+			qs_options['institution'] = institution
 		enterprise = options.get('enterprise')
 		if enterprise:
 			qs_options['enterprise'] = enterprise
 		queryset = self.position_model.objects.filter(
-			institution=institution,
 			user=self.user,
 			**qs_options
 		)
@@ -224,19 +228,21 @@ class NegotiationReport:
 			assets[position.enterprise.code] = asset
 		return assets
 
-	def report(self, institution, dtstart, dtend, **options):
-		assets = self.get_position(institution, **options)
+	def report(self, dtstart, dtend, **options):
+		assets = self.get_position(**options)
 		history = {}
-		qs_options = {}
+		qs_options = {
+			'position__isnull': True,
+			'user': self.user
+		}
+		institution = options.get('institution')
+		if institution:
+			qs_options['institution'] = institution.name
 		enterprise = options.get('enterprise')
 		if enterprise:  # Permite filtrar por empresa (ativo)
 			qs_options['code'] = enterprise.code
 		for dt in range_dates(dtstart, dtend):  # calcula um dia por vez
-			queryset = self.get_queryset(date=dt,
-			                             institution=institution.name,
-			                             position__isnull=True,
-			                             user=self.user,
-			                             **qs_options)
+			queryset = self.get_queryset(date=dt, **qs_options)
 			for instance in queryset:
 				# instance: compra / venda
 				try:
@@ -258,8 +264,7 @@ class NegotiationReport:
 		results = []
 		for code in assets:
 			enterprise = self.get_enterprise(code)
-			earnings = self.earnings_report.report(code, institution,
-			                                       dtstart, dtend,
+			earnings = self.earnings_report.report(code, dtstart, dtend,
 			                                       **options)
 			results.append({
 				'code': code,
