@@ -204,7 +204,7 @@ class BrokerageNote(BaseIRPFModel):
 	institution = models.ForeignKey(Instituition,
 	                                on_delete=models.CASCADE,
 	                                verbose_name="Corretora",
-	                                help_text="Informe a correta para a correta análise do arquivo.")
+	                                help_text="A corretora que gerou esssa nota.")
 	reference_date = models.DateField(verbose_name="Data do pregão", null=True)
 	settlement_fee = models.FloatField(verbose_name="Taxa de liquidação", default=0.0)
 	registration_fee = models.FloatField(verbose_name="Taxa de registro", default=0.0)
