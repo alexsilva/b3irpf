@@ -197,7 +197,13 @@ class BrokerageNoteAdminPlugin(BaseAdminPlugin):
 
 	def _add_transations(self, note, instance):
 		queryset = self.brokerage_note_negociation.objects.all()
-		tax = note.settlement_fee + note.emoluments
+		tax = sum([note.settlement_fee,
+		           note.term_fee,
+		           note.ana_fee,
+		           note.registration_fee,
+		           note.taxes,
+		           note.emoluments,
+		           note.others])
 		paid = sum([(ts.amount * ts.unit_price) for ts in note.transactions])
 		for asset in note.transactions:
 			qs = queryset.filter(
