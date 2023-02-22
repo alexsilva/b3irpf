@@ -169,6 +169,9 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 
 
 class BrokerageNoteAdminPlugin(BaseAdminPlugin):
+	"""Plugin que faz o registro da nota de corretagem
+	Distribui os valores proporcionais de taxas e registra negociações
+	"""
 	brokerrage_note_parsers = None
 	brokerrage_note_field_update = ()
 	brokerrage_note_negociation = Negotiation
