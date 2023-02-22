@@ -8,6 +8,17 @@ from irpf.models import Enterprise, Earnings, Bonus, Position
 from irpf.utils import range_dates
 
 
+class Earning:
+	def __init__(self, title: str, quantity: float = 0.0, value: float = 0.0):
+		self.title = title
+		self.quantity = quantity
+		self.value = value
+		self.items = []
+
+	def __str__(self):
+		return self.title
+
+
 class EaningsReport:
 	earnings_models = Earnings
 
@@ -20,7 +31,6 @@ class EaningsReport:
 		return self.earnings_models.objects.filter(**options)
 
 	def report(self, code, institution, start, end=None, **options):
-		earnings = collections.defaultdict(dict)
 		qs_options = dict(
 			flow__iexact=self.flow,
 			user=self.user,
@@ -33,18 +43,19 @@ class EaningsReport:
 			qs_options['code'] = enterprise.code
 		if end is not None:
 			qs_options['date__lte'] = end
+		earnings = {}
 		try:
 			qs = self.get_queryset(**qs_options)
 			for instance in qs:
-				data = earnings[slugify(instance.kind).replace('-', "_")]
-				items = data.setdefault('items', [])
-				data.setdefault('title', instance.kind)
-				data.setdefault('quantity', 0.0)
-				data.setdefault('value', 0.0)
+				kind = slugify(instance.kind).replace('-', "_")
+				try:
+					earning = earnings[kind]
+				except KeyError:
+					earnings[kind] = earning = Earning(instance.kind)
 
-				items.append(instance)
-				data['quantity'] += instance.quantity
-				data['value'] += instance.total
+				earning.items.append(instance)
+				earning.quantity += instance.quantity
+				earning.value += instance.total
 		except self.earnings_models.DoesNotExist:
 			pass
 		return earnings

@@ -21,5 +21,5 @@ def exclude_obj_keys(obj, *keys):
 
 
 @register.simple_tag
-def get_obj_val(obj, key):
-	return obj[key]
+def get_obj_val(obj, name):
+	return getattr(obj, name)
