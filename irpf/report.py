@@ -168,7 +168,10 @@ class NegotiationReport:
 		queryset = self.bonus_model.objects.filter(date=date, user=self.user,
 		                                           **qs_options)
 		for bonus in queryset:
-			asset = assets[bonus.enterprise.code]
+			try:
+				asset = assets[bonus.enterprise.code]
+			except KeyError:
+				continue
 			# ignora os registros que já foram contabilizados na posição
 			if asset.position and bonus.date < asset.position.date:
 				continue
