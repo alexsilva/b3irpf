@@ -226,6 +226,7 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 			quantity=asset.amount,
 			price=asset.unit_price,
 			brokerage_note=instance,
+			irrf=asset.source_withheld_taxes,
 			institution=instance.institution.name,
 			user=self.user
 		)
