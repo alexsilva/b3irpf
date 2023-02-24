@@ -148,7 +148,7 @@ class Negotiation(BaseIRPFModel):
 	total.sheet_header = "Valor"
 
 	def __str__(self):
-		return f'{self.code}/{self.quantity} ({self.institution})'
+		return f'{self.code}:{self.kind[0]}/{self.quantity} ({self.institution})'
 
 	class Meta:
 		verbose_name = "Negociação"
