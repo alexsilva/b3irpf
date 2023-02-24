@@ -1,4 +1,6 @@
+import collections
 import io
+import itertools
 import re
 
 import django.forms as django_forms
@@ -10,6 +12,8 @@ from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from guardian.shortcuts import get_objects_for_user, assign_perm
 
+from correpy.domain.entities.security import Security
+from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import TransactionType
 from irpf.models import Negotiation, Earnings, Provision, Position
 from xadmin.plugins import auth
@@ -246,6 +250,32 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 	def _get_clean_ticker(asset):
 		return asset.security.ticker.rstrip("Ff")
 
+	def _get_transations_group(self, note_transactions) -> collections.OrderedDict:
+		"""Agrupa transações que perceçam ao mesmo ativo"""
+		transactions = collections.OrderedDict()
+
+		def key_group(ts):
+			return self._get_clean_ticker(ts), ts.transaction_type
+
+		for key, group in itertools.groupby(note_transactions, key=key_group):
+			ticker, transaction_type = key
+			for transaction in group:
+				try:
+					asset = transactions[ticker]
+					asset_total = asset.amount * asset.unit_price
+					transaction_total = transaction.amount * transaction.unit_price
+					# atualização do preço médio e quantidade
+					asset.amount += transaction.amount
+					asset.unit_price = (asset_total + transaction_total) / asset.amount
+				except KeyError:
+					transactions[ticker] = Transaction(
+						transaction_type=transaction.transaction_type,
+						amount=transaction.amount,
+						unit_price=transaction.unit_price,
+						security=Security(ticker)
+					)
+		return transactions
+
 	def _add_transations(self, note, instance):
 		queryset = self.brokerage_note_negociation.objects.all()
 		tax = sum([note.settlement_fee,
@@ -255,13 +285,16 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 		           note.taxes,
 		           note.emoluments,
 		           note.others])
-		paid = sum([(ts.amount * ts.unit_price) for ts in note.transactions])
-		for asset in note.transactions:
+
+		transactions = self._get_transations_group(note.transactions)
+		paid = sum([(transactions[ticker].amount * transactions[ticker].unit_price)
+		            for ticker in transactions])
+		for ticker in transactions:
+			asset = transactions[ticker]
 			qs = queryset.filter(
 				date=instance.reference_date,
 				institution=instance.institution.name,
 				user=self.user)
-			ticker = self._get_clean_ticker(asset)
 			kind = self._get_transaction_type(asset)
 			if kind is None:
 				continue
