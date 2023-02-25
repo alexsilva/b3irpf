@@ -19,11 +19,19 @@
       {% endif %}
       {% if report.stats.capital %}
         <li class="list-group-item">
-          <div class="text-success">Lucros do período:
+          <div class="text-{% if report.stats.capital > 0 %}success{% else %}danger{% endif %}">
+            Lucros do período:
             <span class="text-secondary">R$ {{ report.stats.capital|moneyformat }}</span>
           </div>
         </li>
       {% endif %}
+      {% if report.stats.tax %}
+          <li class="list-group-item">
+            <div class="text-danger">Taxas:
+              <span class="text-secondary">R$ {{ report.stats.tax|moneyformat }}</span>
+            </div>
+          </li>
+        {% endif %}
     </ul>
   </div>
 </div>

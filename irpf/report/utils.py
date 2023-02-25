@@ -19,10 +19,12 @@ class Buy:
 	def __init__(self, quantity: float = 0,
 	             avg_price: float = 0.0,
 	             total: float = 0.0,
+	             tax: float = 0.0,
 	             date: datetime.date = None):
 		self.quantity = quantity
 		self.avg_price = avg_price
 		self.total = total
+		self.tax = tax
 		self.date = date
 
 
@@ -33,11 +35,13 @@ class Sell:
 	             avg_price: float = 0.0,
 	             total: float = 0.0,
 	             capital: float = 0.0,
+	             tax: float = 0.0,
 	             date: datetime.date = None):
 		self.quantity = quantity
 		self.avg_price = avg_price
 		self.capital = capital
 		self.total = total
+		self.tax = tax
 		self.date = date
 
 	def __bool__(self):
@@ -78,6 +82,7 @@ class AssetPosition(Asset):
 			quantity=position.quantity,
 			avg_price=position.avg_price,
 			total=position.total,
+			tax=position.tax,
 			date=position.date
 		), position=position)
 

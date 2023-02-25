@@ -112,11 +112,13 @@ class NegotiationReport:
 
 		if kind == self.buy:
 			# valores de compras
+			asset.buy.tax += instance.tx
 			asset.buy.quantity += instance.quantity
 			asset.buy.total += ((instance.quantity * instance.price) + instance.tx)
 			asset.buy.avg_price = asset.buy.total / float(asset.buy.quantity)
 		elif kind == self.sell:
 			# valores de venda
+			asset.sell.tax += instance.tx
 			asset.sell.quantity += instance.quantity
 			asset.sell.total += (instance.quantity * instance.price)
 			asset.sell.avg_price = (asset.sell.total / float(asset.sell.quantity))

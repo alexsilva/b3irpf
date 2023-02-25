@@ -278,6 +278,7 @@ class Position(BaseIRPFModel):
 	quantity = models.IntegerField(verbose_name="Quantidade", default=0)
 	avg_price = models.FloatField(verbose_name="Preço médio", default=0.0)
 	total = FloatZeroField(verbose_name="Valor total", default=0.0)
+	tax = models.FloatField(verbose_name="Taxas", default=0.0)
 	date = DateField(verbose_name="Data")
 
 	def __str__(self):

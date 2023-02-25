@@ -141,6 +141,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 				'quantity': asset.buy.quantity,
 				'avg_price': asset.buy.avg_price,
 				'total': asset.buy.total,
+				'tax': asset.buy.tax,
 				'date': date
 			}
 			instance, created = self.position_model.objects.get_or_create(
@@ -336,13 +337,14 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 	def get_stats(self):
 		stats = {}
 		results = self.admin_view.results
-		buy, sell, capital = 'buy', 'sell', 'capital'
-		stats[capital] = stats[buy] = stats[sell] = 0.0
+		buy, sell, capital, tax = 'buy', 'sell', 'capital', 'tax'
+		stats[capital] = stats[buy] = stats[sell] = stats[tax] = 0.0
 		for item in results:
 			asset = item['results']
 			stats[buy] += asset.buy.total
 			stats[sell] += asset.sell.total
 			stats[capital] += asset.sell.capital
+			stats[tax] += (asset.buy.tax + asset.sell.tax)
 		return stats
 
 	def get_context_data(self, context, **kwargs):
