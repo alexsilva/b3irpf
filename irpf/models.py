@@ -128,7 +128,7 @@ class Negotiation(BaseIRPFModel):
 	                             editable=False,
 	                             help_text="Esta relação serve apenas para fins de histórico de posição")
 
-	tx = models.FloatField(verbose_name="Taxas", default=0.0)
+	tax = models.FloatField(verbose_name="Taxas", default=0.0)
 	irrf = models.FloatField(verbose_name="IRRF", default=0.0,
 	                         help_text="Imposto que pode ter sido retido na fonte")
 
