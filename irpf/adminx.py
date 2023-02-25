@@ -166,7 +166,7 @@ class NegotiationAdmin(BaseIRPFAdmin):
 		"quantity",
 		"price",
 		"total",
-		"tx",
+		"tax",
 		"date",
 	)
 
