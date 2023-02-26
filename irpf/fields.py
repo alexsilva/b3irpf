@@ -7,10 +7,12 @@ from correpy.domain.entities.security import BDR_TICKER_PATTERN
 
 
 class DateField(models.DateField):
+	DATE_FORMAT = "%d/%m/%Y"
+
 	def to_python(self, value):
 		if value and isinstance(value, str):
 			try:
-				value = datetime.datetime.strptime(value, "%d/%m/%Y")
+				value = datetime.datetime.strptime(value, self.DATE_FORMAT)
 			except ValueError:
 				pass
 		value = super().to_python(value)
