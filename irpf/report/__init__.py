@@ -184,15 +184,16 @@ class NegotiationReport:
 			self.add_bonus(dt, history, assets, **options)
 		results = []
 		for code in assets:
+			asset = assets[code]
 			enterprise = self.get_enterprise(code)
-			earnings = self.earnings_report.report(code, dtstart, dtend,
-			                                       **options)
+			earnings = self.earnings_report.report(code, dtstart, dtend, **options)
+			asset.earnings.update(earnings)
 			results.append({
 				'code': code,
 				'institution': institution,
 				'enterprise': enterprise,
 				'earnings': earnings,
-				'results': assets[code]
+				'asset': asset
 			})
 
 		def results_sort_category(item):

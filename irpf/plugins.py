@@ -136,7 +136,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		for item in results:
 			enterprise = item['enterprise']
 			institution = item['institution']
-			asset = item['results']
+			asset = item['asset']
 
 			defaults = {
 				'quantity': asset.buy.quantity,
@@ -341,7 +341,7 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 		buy, sell, capital, tax = 'buy', 'sell', 'capital', 'tax'
 		stats[capital] = stats[buy] = stats[sell] = stats[tax] = 0.0
 		for item in results:
-			asset = item['results']
+			asset = item['asset']
 			stats[buy] += asset.buy.total
 			stats[sell] += asset.sell.total
 			stats[capital] += asset.sell.capital
