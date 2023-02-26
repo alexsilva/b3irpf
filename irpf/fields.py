@@ -1,6 +1,9 @@
 import datetime
+import re
 
 from django.db import models
+
+from correpy.domain.entities.security import BDR_TICKER_PATTERN
 
 
 class DateField(models.DateField):
@@ -15,11 +18,24 @@ class DateField(models.DateField):
 
 
 class CharCodeField(models.CharField):
+	TICKER_PATTERN = (
+		re.compile(BDR_TICKER_PATTERN),
+		re.compile("([A-Z-0-9]{4})(3|4|5|6|11)")
+	)
+
+	@classmethod
+	def _get_simple_ticker(cls, ticker):
+		"""Retorna o ticker (code) sem a parte fracionária"""
+		for pattern in cls.TICKER_PATTERN:
+			if result := pattern.search(ticker):
+				return result[0]
+		raise ValueError(f"unknown format ticker '{ticker}'")
+
 	def to_python(self, value):
 		value = super().to_python(value)
 		if isinstance(value, str):
 			# removes the fractional portion of the code.
-			value = value.rstrip("Ff")
+			value = self._get_simple_ticker(value)
 		return value
 
 

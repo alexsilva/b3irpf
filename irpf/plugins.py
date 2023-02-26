@@ -15,6 +15,7 @@ from guardian.shortcuts import get_objects_for_user, assign_perm
 from correpy.domain.entities.security import Security
 from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import TransactionType
+from irpf.fields import CharCodeField
 from irpf.models import Negotiation, Earnings, Provision, Position
 from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
@@ -248,9 +249,9 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 			kind = self.brokerage_note_negociation.KIND_SELL
 		return kind
 
-	@staticmethod
-	def _get_clean_ticker(asset):
-		return asset.security.ticker.rstrip("Ff")
+	def _get_clean_ticker(self, asset):
+		"""Retornao ticker (code) simplificado"""
+		return CharCodeField().to_python(asset.security.ticker)
 
 	def _get_transations_group(self, note_transactions) -> collections.OrderedDict:
 		"""Agrupa transações que perceçam ao mesmo ativo"""
