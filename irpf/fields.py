@@ -51,15 +51,13 @@ class CharCodeNameField(models.CharField):
 			try:
 				code, name = value.split('-', 1)
 			except ValueError:
+				value = value.strip()
 				if self._is_code:
-					value = value.rstrip("Ff ")
-				else:
-					value = value.strip()
+					value = CharCodeField().to_python(value)
 			else:
+				value = name.strip()
 				if self._is_code:
-					value = code.rstrip("Ff ")
-				else:
-					value = name.strip()
+					value = CharCodeField().to_python(code)
 		return value
 
 
