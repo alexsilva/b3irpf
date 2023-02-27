@@ -142,8 +142,8 @@ class NegotiationReport:
 		if enterprise:
 			qs_options['enterprise'] = enterprise
 		startdate = date - datetime.timedelta(days=365)
-		qs_options[options.get('query_startdate', 'date__gte')] = startdate
-		qs_options[options.get('query_enddate', 'date__lte')] = date
+		qs_options.setdefault(options.get('query_startdate', 'date__gte'), startdate)
+		qs_options.setdefault(options.get('query_enddate', 'date__lte'), date)
 		queryset = self.position_model.objects.filter(
 			user=self.user,
 			**qs_options
@@ -174,6 +174,9 @@ class NegotiationReport:
 			qs_options['code'] = enterprise.code
 
 		for date in range_dates(dtstart, dtend):  # calcula um dia por vez
+			position = self.get_position(date, query_enddate="date", **options)
+			if position:
+				assets.update(position)
 			queryset = self.get_queryset(date=date, **qs_options)
 			for instance in queryset:
 				# calculo de compra, venda, boficiação, etc
