@@ -196,13 +196,13 @@ class NegotiationReport:
 		results = []
 		for code in assets:
 			asset = assets[code]
-			enterprise = self.get_enterprise(code)
+			asset.enterprise = asset.enterprise or self.get_enterprise(code)
 			earnings = self.earnings_report.report(code, dtstart, dtend, **options)
 			asset.earnings.update(earnings)
 			results.append({
 				'code': code,
 				'institution': institution,
-				'enterprise': enterprise,
+				'enterprise': asset.enterprise,
 				'earnings': earnings,
 				'asset': asset
 			})

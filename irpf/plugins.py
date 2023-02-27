@@ -146,7 +146,11 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		return enterprise
 
 	def _save(self, date, asset):
-		enterprise = self.get_enterprise(asset)
+		try:
+			enterprise = self.get_enterprise(asset)
+		except self.enterprise_model.DoesNotExist:
+			# empresa não cadastrada
+			return
 		institution = asset.institution
 
 		defaults = {
