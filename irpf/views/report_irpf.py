@@ -108,7 +108,7 @@ class AdminReportIrpfModelView(AdminFormView):
 		context = super().get_context_data(**kwargs)
 		if self.report and self.results:
 			context['report'] = {
-				'obj': self.report,
+				'report': self.report,
 				'results': self.results
 			}
 		return context

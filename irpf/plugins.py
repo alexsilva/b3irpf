@@ -16,7 +16,7 @@ from correpy.domain.entities.security import Security
 from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import TransactionType
 from irpf.fields import CharCodeField
-from irpf.models import Negotiation, Earnings, Provision, Position
+from irpf.models import Negotiation, Earnings, Provision, Position, Enterprise
 from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
@@ -120,6 +120,7 @@ class ListActionModelPlugin(BaseAdminPlugin):
 class SaveReportPositionPlugin(BaseAdminPlugin):
 	"""Salva os dados de posição do relatório"""
 	position_model = Position
+	enterprise_model = Enterprise
 	position_permission = list(auth.ACTION_NAME)
 
 	def form_valid(self, response, form):
@@ -127,51 +128,65 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 			self.save_position(form.cleaned_data['end'], self.admin_view.results)
 		return response
 
+	def setup(self, *args, **kwargs):
+		self._caches = {}
+
 	def block_form_buttons(self, context, nodes):
 		if self.admin_view.report:
 			return render_to_string("irpf/blocks/blocks.form.buttons.button_save_position.html")
 
+	def get_enterprise(self, asset):
+		"""A empresa"""
+		if asset.ticker in self._caches:
+			return self._caches[asset.ticker]
+		self._caches[asset.ticker] = enterprise = (
+				asset.enterprise or
+				self.enterprise_model.objects.get(code__iexact=asset.ticker)
+		)
+		return enterprise
+
+	def _save(self, date, asset):
+		enterprise = self.get_enterprise(asset)
+		institution = asset.institution
+
+		defaults = {
+			'quantity': asset.buy.quantity,
+			'avg_price': asset.buy.avg_price,
+			'total': asset.buy.total,
+			'tax': asset.buy.tax
+		}
+		instance, created = self.position_model.objects.get_or_create(
+			defaults=defaults,
+			enterprise=enterprise,
+			institution=institution,
+			user=self.user,
+			date=date
+		)
+		if not created:
+			for field_name in defaults:
+				setattr(instance, field_name, defaults[field_name])
+			instance.save()
+		elif asset.items:
+			# relaciona a intância (Negotiation) com a posição
+			for obj in asset.items:
+				if obj.position == instance:
+					continue
+				obj.position = instance
+				obj.save()
+		# permissões de objeto
+		for name in self.position_permission:
+			if not self.has_model_perm(self.position_model, name, self.user):
+				continue
+			try:
+				codename = self.get_model_perm(self.position_model, name)
+				assign_perm(codename, self.user, instance)
+			except Permission.DoesNotExist:
+				continue
+
 	@atomic
 	def save_position(self, date, results):
 		for item in results:
-			enterprise = item['enterprise']
-			institution = item['institution']
-			asset = item['asset']
-
-			defaults = {
-				'quantity': asset.buy.quantity,
-				'avg_price': asset.buy.avg_price,
-				'total': asset.buy.total,
-				'tax': asset.buy.tax,
-				'date': date
-			}
-			instance, created = self.position_model.objects.get_or_create(
-				defaults=defaults,
-				enterprise=enterprise,
-				institution=institution,
-				user=self.user
-			)
-			if not created:
-				for field_name in defaults:
-					setattr(instance, field_name, defaults[field_name])
-				instance.save()
-			elif asset.items:
-				# relaciona a intância (Negotiation) com a posição
-				for obj in asset.items:
-					if obj.position == instance:
-						continue
-					obj.position = instance
-					obj.save()
-
-			# permissões de objeto
-			for name in self.position_permission:
-				if not self.has_model_perm(self.position_model, name, self.user):
-					continue
-				try:
-					codename = self.get_model_perm(self.position_model, name)
-					assign_perm(codename, self.user, instance)
-				except Permission.DoesNotExist:
-					continue
+			self._save(date, item['asset'])
 
 	@cached_property
 	def is_save_position(self):

@@ -51,13 +51,20 @@ class Sell:
 class Asset:
 	"""Ativos"""
 
-	def __init__(self, buy: Buy = None, sell: Sell = None, position=None,
-	             earnings: dict = None):
+	def __init__(self, ticker,
+	             buy: Buy = None, sell: Sell = None,
+	             position=None,
+	             earnings: dict = None,
+	             institution=None,
+	             enterprise=None):
 		self.items = []
+		self.ticker = ticker
 		self.buy = buy
 		self.sell = sell
 		self.position = position
 		self.earnings = earnings
+		self.institution = institution
+		self.enterprise = enterprise
 
 		if buy is None:
 			self.buy = Buy()
@@ -68,9 +75,12 @@ class Asset:
 
 	def __deepcopy__(self, memo):
 		memo[id(self)] = cpy = type(self)(
+			ticker=self.ticker,
 			buy=copy.deepcopy(self.buy, memo),
 			sell=copy.deepcopy(self.sell, memo),
 			earnings=copy.deepcopy(self.earnings, memo),
+			institution=self.institution,
+			enterprise=self.enterprise,
 			position=self.position
 		)
 		return cpy
@@ -78,21 +88,3 @@ class Asset:
 	def __iter__(self):
 		return iter(self.items)
 
-
-class AssetPosition(Asset):
-	"""Posição de ativos"""
-
-	def __init__(self, position, **kwargs):
-		super().__init__(buy=Buy(
-			quantity=position.quantity,
-			avg_price=position.avg_price,
-			total=position.total,
-			tax=position.tax,
-			date=position.date
-		), position=position, **kwargs)
-
-	def __deepcopy__(self, memo):
-		cpy = type(self)(self.position,
-		                 earnings=copy.deepcopy(self.earnings, memo))
-		memo[id(self)] = cpy
-		return cpy

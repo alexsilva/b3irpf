@@ -3,7 +3,7 @@ import copy
 from django.utils.text import slugify
 
 from irpf.models import Enterprise, Earnings, Bonus, Position
-from irpf.report.utils import Earning, Asset, AssetPosition
+from irpf.report.utils import Earning, Asset, Buy
 from irpf.utils import range_dates
 
 
@@ -72,8 +72,8 @@ class NegotiationReport:
 			enterprise = None
 		return enterprise
 
-	def get_queryset(self, **options):
-		return self.model.objects.filter(**options)
+	def get_queryset(self, *args, **kwargs):
+		return self.model.objects.filter(*args, **kwargs)
 
 	def add_bonus(self, date, history, assets, **options):
 		"""Adiciona ações bonificadas na data com base no histórico"""
@@ -131,7 +131,7 @@ class NegotiationReport:
 			asset.buy.total = asset.buy.quantity * asset.buy.avg_price
 		return asset
 
-	def get_position(self, **options):
+	def get_position(self, date, **options):
 		"""Retorna dados de posição para caculo do período"""
 		assets, qs_options = {}, {}
 		institution = options.get('institution')
@@ -140,36 +140,47 @@ class NegotiationReport:
 		enterprise = options.get('enterprise')
 		if enterprise:
 			qs_options['enterprise'] = enterprise
+		qs_options[options.get('query_date', 'date__lte')] = date
 		queryset = self.position_model.objects.filter(
 			user=self.user,
 			**qs_options
 		)
 		for position in queryset:
-			asset = AssetPosition(position=position)
+			asset = Asset(ticker=position.enterprise.code,
+			              institution=position.institution,
+			              enterprise=position.enterprise,
+			              position=position,
+			              buy=Buy(
+							quantity=position.quantity,
+							avg_price=position.avg_price,
+							total=position.total,
+							tax=position.tax,
+							date=position.date
+						))
 			assets[position.enterprise.code] = asset
 		return assets
 
 	def report(self, dtstart, dtend, **options):
-		assets = self.get_position(**options)
-		history = {}
-		qs_options = {
-			'position__isnull': True,
-			'user': self.user
-		}
+		assets, history = self.get_position(dtstart, **options), {}
+		qs_options = {'user': self.user}
 		institution = options.get('institution')
 		if institution:
 			qs_options['institution'] = institution.name
 		enterprise = options.get('enterprise')
 		if enterprise:  # Permite filtrar por empresa (ativo)
 			qs_options['code'] = enterprise.code
-		for dt in range_dates(dtstart, dtend):  # calcula um dia por vez
-			queryset = self.get_queryset(date=dt, **qs_options)
+
+		for date in range_dates(dtstart, dtend):  # calcula um dia por vez
+			queryset = self.get_queryset(date=date, **qs_options)
 			for instance in queryset:
-				# instance: compra / venda
+				# calculo de compra, venda, boficiação, etc
 				try:
 					asset = assets[instance.code]
 				except KeyError:
-					assets[instance.code] = asset = Asset()
+					asset = Asset(ticker=instance.code,
+					              institution=institution,
+					              enterprise=enterprise)
+					assets[instance.code] = asset
 				asset.items.append(instance)
 				# ignora os registros que já foram contabilizados na posição
 				if asset.position and instance.date < asset.position.date:
@@ -178,10 +189,10 @@ class NegotiationReport:
 
 			# histórico das posições no dia
 			if assets:
-				history[dt] = copy.deepcopy(assets)
+				history[date] = copy.deepcopy(assets)
 
 			# aplica a bonificiação na data do histórico
-			self.add_bonus(dt, history, assets, **options)
+			self.add_bonus(date, history, assets, **options)
 		results = []
 		for code in assets:
 			asset = assets[code]
