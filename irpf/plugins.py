@@ -154,16 +154,23 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		institution = asset.institution
 
 		defaults = {
-			'date': date,
 			'quantity': asset.buy.quantity,
 			'avg_price': asset.buy.avg_price,
 			'total': asset.buy.total,
 			'tax': asset.buy.tax
 		}
+		# remove registro acima da data
+		self.position_model.objects.filter(
+			enterprise=enterprise,
+			institution=institution,
+			user=self.user,
+			date__gt=date
+		).delete()
 		instance, created = self.position_model.objects.get_or_create(
 			defaults=defaults,
 			enterprise=enterprise,
 			institution=institution,
+			date=date,
 			user=self.user
 		)
 		if not created:
@@ -173,7 +180,11 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		elif asset.items:
 			# relaciona a intância (Negotiation) com a posição
 			for obj in asset.items:
-				if obj.position == instance:
+				try:
+					if obj.position == instance:
+						continue
+				except self.position_model.DoesNotExist:
+					# pode ter sido removido por estar a frente da data
 					continue
 				obj.position = instance
 				obj.save()

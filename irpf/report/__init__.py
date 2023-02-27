@@ -1,4 +1,5 @@
 import copy
+import datetime
 
 from django.utils.text import slugify
 
@@ -140,11 +141,13 @@ class NegotiationReport:
 		enterprise = options.get('enterprise')
 		if enterprise:
 			qs_options['enterprise'] = enterprise
-		qs_options[options.get('query_date', 'date__lte')] = date
+		startdate = date - datetime.timedelta(days=365)
+		qs_options[options.get('query_startdate', 'date__gte')] = startdate
+		qs_options[options.get('query_enddate', 'date__lte')] = date
 		queryset = self.position_model.objects.filter(
 			user=self.user,
 			**qs_options
-		)
+		).order_by('date')
 		for position in queryset:
 			asset = Asset(ticker=position.enterprise.code,
 			              institution=position.institution,
