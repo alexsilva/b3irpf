@@ -150,6 +150,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		institution = asset.institution
 
 		defaults = {
+			'date': date,
 			'quantity': asset.buy.quantity,
 			'avg_price': asset.buy.avg_price,
 			'total': asset.buy.total,
@@ -159,8 +160,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 			defaults=defaults,
 			enterprise=enterprise,
 			institution=institution,
-			user=self.user,
-			date=date
+			user=self.user
 		)
 		if not created:
 			for field_name in defaults:
