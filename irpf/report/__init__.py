@@ -158,7 +158,8 @@ class NegotiationReport:
 		if queryset is None:
 			queryset = self.get_queryset_position(date, **options)
 		for position in queryset:
-			asset = Asset(ticker=position.enterprise.code,
+			ticker = position.enterprise.code
+			asset = Asset(ticker=ticker,
 			              institution=position.institution,
 			              enterprise=position.enterprise,
 			              position=position,
@@ -169,7 +170,7 @@ class NegotiationReport:
 							tax=position.tax,
 							date=position.date
 						))
-			assets[position.enterprise.code] = asset
+			assets[ticker] = asset
 		return assets
 
 	def report(self, dtstart, dtend, **options):
