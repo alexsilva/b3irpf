@@ -132,22 +132,31 @@ class NegotiationReport:
 			asset.buy.total = asset.buy.quantity * asset.buy.avg_price
 		return asset
 
-	def get_position(self, date, **options):
-		"""Retorna dados de posição para caculo do período"""
-		assets, qs_options = {}, {}
+	def get_queryset_position(self, date, **options):
+		"""Mota e retorna a queryset de posição"""
+		qs_options = {}
 		institution = options.get('institution')
 		if institution:
 			qs_options['institution'] = institution
 		enterprise = options.get('enterprise')
 		if enterprise:
 			qs_options['enterprise'] = enterprise
-		startdate = date - datetime.timedelta(days=365)
+		startdate = options.get('startdate')
+		if startdate is None:
+			startdate = date - datetime.timedelta(days=365)
 		qs_options.setdefault(options.get('query_startdate', 'date__gte'), startdate)
 		qs_options.setdefault(options.get('query_enddate', 'date__lte'), date)
 		queryset = self.position_model.objects.filter(
 			user=self.user,
 			**qs_options
 		).order_by('date')
+		return queryset
+
+	def get_assets_position(self, date=None, queryset=None, **options):
+		"""Retorna dados de posição para caculo do período"""
+		assets = {}
+		if queryset is None:
+			queryset = self.get_queryset_position(date, **options)
 		for position in queryset:
 			asset = Asset(ticker=position.enterprise.code,
 			              institution=position.institution,
@@ -164,7 +173,7 @@ class NegotiationReport:
 		return assets
 
 	def report(self, dtstart, dtend, **options):
-		assets, history = self.get_position(dtstart, **options), {}
+		assets, history = self.get_assets_position(date=dtstart, **options), {}
 		qs_options = {'user': self.user}
 		institution = options.get('institution')
 		if institution:
@@ -173,11 +182,17 @@ class NegotiationReport:
 		if enterprise:  # Permite filtrar por empresa (ativo)
 			qs_options['code'] = enterprise.code
 
+		# cache
+		queryset_position = self.get_queryset_position(date=dtend,
+		                                               startdate=dtstart,
+		                                               **options)
+		queryset_assets = self.get_queryset(**qs_options)
+
 		for date in range_dates(dtstart, dtend):  # calcula um dia por vez
-			position = self.get_position(date, query_enddate="date", **options)
-			if position:
-				assets.update(position)
-			queryset = self.get_queryset(date=date, **qs_options)
+			assets_position = self.get_assets_position(queryset=queryset_position.filter(date=date))
+			if assets_position:
+				assets.update(assets_position)
+			queryset = queryset_assets.filter(date=date)
 			for instance in queryset:
 				# calculo de compra, venda, boficiação, etc
 				try:
