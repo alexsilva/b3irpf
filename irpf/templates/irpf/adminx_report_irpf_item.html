@@ -47,7 +47,7 @@
 
     {% if item.asset.earnings %}
       <hr/>
-      <h6 class="card-subtitle mb-2 text-info">Proventos e bonificações</h6>
+      <h6 class="card-subtitle mb-2 text-info">Rendimentos</h6>
       {% if item.asset.earnings.dividendo %}
         <p class="card-text">{{ item.asset.earnings.dividendo.title }}:
           <span>R$ {{ item.asset.earnings.dividendo.value|moneyformat }}</span>
