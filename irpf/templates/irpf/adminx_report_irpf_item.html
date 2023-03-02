@@ -75,10 +75,11 @@
         <hr/>
         <h6 class="card-subtitle mb-2 text-info">Outros ganhos</h6>
         {% for key, item_val in item_others.items %}
-          <p class="card-text">{% get_obj_val item_val "title" %}:
-            <span>Quantidade {% get_obj_val item_val "quantity" %}</span>,
-            <span>R$ {% get_obj_val item_val "value" %}</span>
-          </p>
+          <p class="card-text">{% get_obj_val item_val "title" %}</p>
+          <div class="card-text">
+            {% get_obj_val item_val "value" as item_value %}
+            Quantidade: {% get_obj_val item_val "quantity" %} / R$ {{ item_value|moneyformat }}
+          </div>
         {% endfor %}
       {% endif %}
     {% endif %}

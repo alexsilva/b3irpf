@@ -1,6 +1,7 @@
 import copy
 import datetime
 
+from django.utils.formats import date_format
 from django.utils.text import slugify
 
 from irpf.models import Enterprise, Earnings, Bonus, Position
@@ -98,15 +99,20 @@ class NegotiationReport:
 			history_asset = history_date_ex[bonus.enterprise.code]
 
 			# valor quantidade e valores recebidos de bonificação
-			bonus_quantity = int(history_asset.buy.quantity * (bonus.proportion / 100.0))
+			bonus_quantity = history_asset.buy.quantity * (bonus.proportion / 100.0)
 			bonus_value = bonus_quantity * bonus.base_value
 
+			from_date = date_format(date)
+			title = f"Bonificação na proporção de {bonus.proportion}%, em {from_date}"
+			asset.earnings[title] = Earning(title, quantity=bonus_quantity, value=bonus_value)
+
 			# adição dos novos ativos
-			asset.buy.quantity += bonus_quantity
-			asset.buy.total += bonus_value
+			bonus_base_quantity = int(bonus_quantity)
+			asset.buy.quantity += bonus_base_quantity
+			asset.buy.total += bonus_base_quantity * bonus_value
 
 			# novo preço médio já com a bonifição
-			asset.buy.avg_price = asset.buy.total / float(asset.buy.quantity)
+			asset.buy.avg_price = asset.buy.total / asset.buy.quantity
 
 	def consolidate(self, instance, asset: Asset):
 		kind = instance.kind.lower()
