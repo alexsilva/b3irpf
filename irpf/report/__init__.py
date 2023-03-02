@@ -122,7 +122,7 @@ class NegotiationReport:
 			asset.sell.tax += instance.tax
 			asset.sell.quantity += instance.quantity
 			asset.sell.total += ((instance.quantity * instance.price) - instance.tax)
-			asset.sell.avg_price = (asset.sell.total / asset.sell.quantity)
+			asset.sell.avg_price = asset.sell.total / asset.sell.quantity
 
 			# ganho de capital de todas a vendas
 			asset.sell.capital += (instance.quantity * (asset.sell.avg_price - asset.buy.avg_price))
