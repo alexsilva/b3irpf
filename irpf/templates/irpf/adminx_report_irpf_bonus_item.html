@@ -1,0 +1,26 @@
+{% load irpf_tags %}
+<p class="card-text">{{ bonus.title }}</p>
+<table class="table">
+  <thead>
+  <tr>
+    <th scope="col">{{ bonus.base.title }} ({{ bonus.base.quantity }})
+      <button type="button" class="btn btn-link" data-toggle="popover"
+            data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações.">
+        <i class="fa fa-info-circle"></i>
+      </button>
+    </th>
+    <th scope="col">{{ bonus.fractional.title }} ({{ bonus.fractional.quantity }})
+      <button type="button" class="btn btn-link" data-toggle="popover"
+            data-content="Rendimentos Isentos e Não Tributáveis / Outros / Descrição: Venda residual de ações bonificadas.">
+        <i class="fa fa-info-circle"></i>
+      </button>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <th scope="row">R$ {{ bonus.base.value|moneyformat }}</th>
+    <td>R$ {{ bonus.fractional.value|moneyformat }}</td>
+  </tr>
+  </tbody>
+</table>

@@ -93,6 +93,10 @@ class NegotiationReport:
 			# ignora os registros que já foram contabilizados na posição
 			if asset.position and bonus.date < asset.position.date:
 				continue
+			try:
+				bonus_earnings = asset.earnings['bonificacoes']
+			except KeyError:
+				bonus_earnings = asset.earnings['bonificacoes'] = []
 
 			# total de ativos na data ex
 			history_date_ex = history[bonus.date_ex]
@@ -100,16 +104,30 @@ class NegotiationReport:
 
 			# valor quantidade e valores recebidos de bonificação
 			bonus_quantity = history_asset.buy.quantity * (bonus.proportion / 100.0)
-			bonus_value = bonus_quantity * bonus.base_value
-
-			from_date = date_format(date)
-			title = f"Bonificação na proporção de {bonus.proportion}%, em {from_date}"
-			asset.earnings[title] = Earning(title, quantity=bonus_quantity, value=bonus_value)
 
 			# adição dos novos ativos
 			bonus_base_quantity = int(bonus_quantity)
+			bonus_base_value = bonus_base_quantity * bonus.base_value
+
+			try:
+				bonus_frac_quantity = bonus_quantity % bonus_base_quantity
+			except ZeroDivisionError:
+				# bonus_base_quantity == 0, bonus_quantity < 1
+				bonus_frac_quantity = bonus_quantity
+
+			from_date = date_format(date)
+			bonus_earnings.append({
+				'title': f"Proporção de {bonus.proportion}%, em {from_date}",
+				# o correto é a parte fracionária ser vendidada
+				'fractional': Earning("Bônus fracionado",
+				                      quantity=bonus_frac_quantity,
+				                      value=0.0),
+				'base': Earning("Bônus principal",
+				                quantity=bonus_base_quantity,
+				                value=bonus_base_value),
+			})
 			asset.buy.quantity += bonus_base_quantity
-			asset.buy.total += bonus_base_quantity * bonus_value
+			asset.buy.total += bonus_base_value
 
 			# novo preço médio já com a bonifição
 			asset.buy.avg_price = asset.buy.total / asset.buy.quantity
@@ -170,12 +188,12 @@ class NegotiationReport:
 			              enterprise=position.enterprise,
 			              position=position,
 			              buy=Buy(
-							quantity=position.quantity,
-							avg_price=position.avg_price,
-							total=position.total,
-							tax=position.tax,
-							date=position.date
-						))
+				              quantity=position.quantity,
+				              avg_price=position.avg_price,
+				              total=position.total,
+				              tax=position.tax,
+				              date=position.date
+			              ))
 			assets[ticker] = asset
 		return assets
 
