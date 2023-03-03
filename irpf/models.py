@@ -121,12 +121,11 @@ class Negotiation(BaseIRPFModel):
 
 	total = models.FloatField(verbose_name="Valor (total)", default=0.0)
 
-	position = models.ForeignKey(to="Position",
-	                             on_delete=models.SET_NULL,
-	                             verbose_name="Posição",
-	                             null=True, blank=True,
-	                             editable=False,
-	                             help_text="Esta relação serve apenas para fins de histórico de posição")
+	positions = models.ManyToManyField(to="Position",
+									verbose_name="Posições",
+									blank=True,
+									editable=False,
+									help_text="Esta relação serve apenas para fins de histórico de posição")
 
 	tax = models.FloatField(verbose_name="Taxas", default=0.0)
 	irrf = models.FloatField(verbose_name="IRRF", default=0.0,

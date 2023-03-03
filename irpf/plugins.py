@@ -180,14 +180,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		elif asset.items:
 			# relaciona a intância (Negotiation) com a posição
 			for obj in asset.items:
-				try:
-					if obj.position == instance:
-						continue
-				except self.position_model.DoesNotExist:
-					# pode ter sido removido por estar a frente da data
-					continue
-				obj.position = instance
-				obj.save()
+				obj.positions.add(instance)
 		# permissões de objeto
 		for name in self.position_permission:
 			if not self.has_model_perm(self.position_model, name, self.user):
