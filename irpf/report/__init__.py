@@ -115,9 +115,9 @@ class NegotiationReport:
 				# bonus_base_quantity == 0, bonus_quantity < 1
 				bonus_frac_quantity = bonus_quantity
 
-			from_date = date_format(date)
 			bonus_earnings.append({
-				'title': f"Proporção de {bonus.proportion}%, em {from_date}",
+				'spec': bonus,
+				'asset': history_asset,
 				# o correto é a parte fracionária ser vendidada
 				'fractional': Earning("Bônus fracionado",
 				                      quantity=bonus_frac_quantity,

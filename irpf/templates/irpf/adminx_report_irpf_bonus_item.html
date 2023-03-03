@@ -1,5 +1,8 @@
 {% load irpf_tags %}
-<p class="card-text">{{ bonus.title }}</p>
+<p class="card-text">
+  Proporção <span class="text-muted">{{ bonus.spec.proportion }}%</span> de
+  <span class="text-muted">{{ bonus.asset.buy.quantity }}</span> ativos no dia {{ bonus.spec.date_ex }}
+</p>
 <table class="table">
   <thead>
   <tr>
