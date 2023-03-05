@@ -99,8 +99,8 @@ class NegotiationReport:
 				bonus_earnings = asset.earnings['bonificacoes'] = []
 
 			# total de ativos na data ex
-			history_date_ex = history[bonus.date_ex]
-			history_asset = history_date_ex[bonus.enterprise.code]
+			history_data_com = history[bonus.data_com]
+			history_asset = history_data_com[bonus.enterprise.code]
 
 			# valor quantidade e valores recebidos de bonificação
 			bonus_quantity = history_asset.buy.quantity * (bonus.proportion / 100.0)
