@@ -170,12 +170,6 @@ class NegotiationAdmin(BaseIRPFAdmin):
 		"date",
 	)
 
-	def get_readonly_fields(self):
-		readonly_fields = list(super().get_readonly_fields())
-		if getattr(self, "org_obj", None):
-			readonly_fields.append('position')
-		return readonly_fields
-
 
 @sites.register(Bonus)
 class BonusAdmin(BaseIRPFAdmin):
