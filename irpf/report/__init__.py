@@ -1,7 +1,6 @@
 import copy
 import datetime
 
-from django.utils.formats import date_format
 from django.utils.text import slugify
 
 from irpf.models import Enterprise, Earnings, Bonus, Position
