@@ -29,9 +29,6 @@ class EaningsReport:
 		institution = options.get('institution')
 		if institution:
 			qs_options['institution'] = institution.name
-		enterprise = options.get('enterprise')
-		if enterprise:
-			qs_options['code'] = enterprise.code
 		if end is not None:
 			qs_options['date__lte'] = end
 		earnings = {}
