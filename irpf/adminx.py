@@ -187,7 +187,7 @@ class BonusAdmin(BaseIRPFAdmin):
 
 
 @sites.register(AssetEvent)
-class AssetEventAdmin:
+class AssetEventAdmin(BaseIRPFAdmin):
 	list_display = (
 		'date',
 		'date_com',

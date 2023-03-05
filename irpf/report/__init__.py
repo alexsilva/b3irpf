@@ -3,7 +3,7 @@ import datetime
 
 from django.utils.text import slugify
 
-from irpf.models import Enterprise, Earnings, Bonus, Position
+from irpf.models import Enterprise, Earnings, Bonus, Position, AssetEvent
 from irpf.report.utils import Earning, Asset, Buy
 from irpf.utils import range_dates
 
@@ -52,6 +52,7 @@ class EaningsReport:
 class NegotiationReport:
 	enterprise_model = Enterprise
 	position_model = Position
+	event_model = AssetEvent
 	bonus_model = Bonus
 
 	buy, sell = "compra", "venda"
@@ -127,6 +128,34 @@ class NegotiationReport:
 
 			# novo preço médio já com a bonifição
 			asset.buy.avg_price = asset.buy.total / asset.buy.quantity
+
+	def apply_events(self, date, assets, **options):
+		"""Eventos de desdobramento/grupamento"""
+		qs_options = {}
+		enterprise = options.get('enterprise')
+		if enterprise:
+			qs_options['enterprise'] = enterprise
+		event_model = self.event_model
+		queryset = event_model.objects.filter(date_com=date, user=self.user, **qs_options)
+		for instance in queryset:
+			try:
+				asset = assets[instance.enterprise.code]
+			except KeyError:
+				continue
+			if asset.buy.quantity == 0:
+				continue
+			# ignora os registros que já foram contabilizados na posição
+			elif asset.position and instance.date_com < asset.position.date:
+				continue
+			elif instance.event == event_model.SPLIT:  # Desdobramento
+				quantity = asset.buy.quantity / instance.factor_from  # correção
+				asset.buy.quantity = quantity * instance.factor_to
+				asset.buy.avg_price = asset.buy.total / asset.buy.quantity
+
+			elif instance.event == event_model.INPLIT:  # Grupamento
+				quantity = asset.buy.quantity / instance.factor_from  # correção
+				asset.buy.quantity = quantity * instance.factor_to
+				asset.buy.avg_price = asset.buy.total / asset.buy.quantity
 
 	def consolidate(self, instance, asset: Asset):
 		kind = instance.kind.lower()
@@ -234,6 +263,7 @@ class NegotiationReport:
 				history[date] = copy.deepcopy(assets)
 
 			# aplica a bonificiação na data do histórico
+			self.apply_events(date, assets, **options)
 			self.add_bonus(date, history, assets, **options)
 		results = []
 		for code in assets:
