@@ -54,7 +54,8 @@
         {% get_obj_val redimento "value" as redimento_val %}
           <li class="list-group-item d-flex justify-content-between align-items-center">
             <span class="text-secondary">
-              {% get_obj_val redimento "title" %} ({% get_obj_val redimento "flow" %}):
+              {% get_obj_val redimento "flow" as redimento_flow %}
+              {% get_obj_val redimento "title" %} (<span class="{% if redimento_flow == "credito" %}text-success{% else %}text-danger{% endif %}">{{ redimento_flow }}</span>):
               <span class="text-muted">R$ {{ redimento_val|moneyformat }}</span>
             </span>
             <span class="badge badge-secondary badge-pill" title="Quantidade">{% get_obj_val redimento "quantity" %}</span>
