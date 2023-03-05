@@ -59,6 +59,10 @@ class NegotiationReport:
 	buy, sell = "compra", "venda"
 	debt, credit = "debito", "credito"
 
+	BONIFICAO_EM_ATIVOS = "bonificacao_em_ativos"
+	LEILAO_DE_ATIVOS = "leilao_de_fracao"
+	FRACAO_EM_ATIVOS = "fracao_em_ativos"
+
 	def __init__(self, model, user, **options):
 		self.model = model
 		self.user = user
@@ -223,16 +227,19 @@ class NegotiationReport:
 		earning.value += instance.total
 
 		if flow == self.credit:
-			if kind == "leilao_de_fracao":
-				asset.sell.quantity += instance.quantity
+			if kind == self.LEILAO_DE_ATIVOS:
 				asset.sell.total += instance.total
 				# ganho de capital de todas a vendas
 				asset.sell.capital += instance.total
+			elif kind == self.BONIFICAO_EM_ATIVOS:
+				asset.buy.quantity += instance.quantity
+				asset.buy.total += instance.total
+				asset.buy.avg_price = asset.buy.quantity * asset.buy.avg_price
+		elif flow == self.debt:
+			if kind == self.FRACAO_EM_ATIVOS:
 				# redução das frações vendidas
 				asset.buy.quantity -= instance.quantity
 				asset.buy.total = asset.buy.quantity * asset.buy.avg_price
-		elif flow == self.debt:
-			...
 
 	def apply_earnings(self, date, assets, **options):
 		queryset = self.get_earnings_queryset(date, **options)
@@ -326,7 +333,7 @@ class NegotiationReport:
 			# aplica a bonificiação na data do histórico
 			self.apply_earnings(date, assets, **options)
 			self.apply_events(date, assets, **options)
-			self.add_bonus(date, history, assets, **options)
+			# self.add_bonus(date, history, assets, **options)
 		results = []
 		for code in assets:
 			asset = assets[code]
