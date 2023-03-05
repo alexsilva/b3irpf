@@ -1,15 +1,15 @@
-from django.contrib.auth import get_permission_codename
-
 from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
+from django.contrib.auth import get_permission_codename
+from xadmin import sites, site
+from xadmin.views import ListAdminView, ModelFormAdminView
+
 from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision, Bonus, Bookkeeping, \
-	BrokerageNote
+	BrokerageNote, AssetEvent
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from irpf.views.xlsx_viewer import AdminXlsxViewer
-from xadmin import sites, site
-from xadmin.views import ListAdminView, ModelFormAdminView
 
 site.register_plugin(ListActionModelPlugin, ListAdminView)
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
@@ -183,6 +183,17 @@ class BonusAdmin(BaseIRPFAdmin):
 		'enterprise',
 		'base_value',
 		'proportion'
+	)
+
+
+@sites.register(AssetEvent)
+class AssetEventAdmin:
+	list_display = (
+		'date',
+		'date_com',
+		'event',
+		'factor_from',
+		'factor_to'
 	)
 
 

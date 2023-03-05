@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils.formats import number_format, date_format
-from django.utils.functional import cached_property
+from django.utils.functional import cached_property, classproperty
 
 from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField
 from irpf.storage import FileSystemOverwriteStorage
@@ -234,6 +234,44 @@ class BrokerageNote(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Nota de corretagem"
 		verbose_name_plural = "Notas de corretagem"
+
+
+class AssetEvent(BaseIRPFModel):
+	SPLIT, INPLIT = 1, 2
+	EVENT_CHOICES = (
+		(SPLIT, "Desdobramento"),
+		(INPLIT, "Grupamento")
+	)
+	enterprise = models.ForeignKey(Enterprise, verbose_name="Empresa",
+	                               on_delete=models.CASCADE)
+	date = models.DateField(verbose_name="Data do anúncio")
+	date_com = models.DateField(verbose_name="Data com")
+	factor_from = models.IntegerField(verbose_name="Fator de")
+	factor_to = models.IntegerField(verbose_name="Fator para")
+	event = models.IntegerField(verbose_name="Evento", choices=EVENT_CHOICES, help_text="""	
+	<span class="fw-900 text-main-secondary-light">Desdobramento (Split):</span> É quando a que empresas divide suas ações disponíveis em um número maior de ações.
+	<br>
+	<span class="fw-900 text-main-secondary-light">Grupamento (Inplit):</span> É a operação contrária ao split, onde reúne várias ações em uma.
+	<br>
+	<span class="fw-900 text-main-secondary-light">Fator:</span> É a proporção que o split/inplit será aplicado sobre o total de ações disponíveis
+	<br>
+	No processo do split/inplit, o número total de ações aumenta/diminui mas o valor das ações cai/sobe na mesma proporção, mantendo o valor do investimento inalterado.
+	""")
+
+	def __str__(self):
+		return f"{self.enterprise.name} / {self.event_name} {self.factor_from}:{self.factor_to}"
+
+	@classproperty
+	def event_choices(cls):
+		return dict(cls.EVENT_CHOICES)
+
+	@property
+	def event_name(self):
+		return self.event_choices[self.event]
+
+	class Meta:
+		verbose_name = "Evento"
+		verbose_name_plural = verbose_name + "s"
 
 
 class Provision(BaseIRPFModel):
