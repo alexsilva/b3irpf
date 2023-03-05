@@ -46,9 +46,10 @@
       <p class="card-text">Valor total de compra: R$ {{ item.asset.buy.total|moneyformat }}</p>
 
     {% if item.asset.earnings %}
+      {% exclude_obj_keys item.asset.earnings "bonificacoes" as redimentos %}
+      {% if redimentos %}
       <hr/>
       <h6 class="card-subtitle mb-2 text-info">Rendimentos</h6>
-      {% exclude_obj_keys item.asset.earnings "bonificacoes" as redimentos %}
       <ul class="list-group">
       {% for key, redimento in redimentos.items %}
         {% get_obj_val redimento "value" as redimento_val %}
@@ -62,6 +63,8 @@
           </li>
       {% endfor %}
       </ul>
+      {% endif %}
+
       {% if item.asset.earnings.bonificacoes %}
       <hr/>
       <h6 class="card-subtitle mb-2 text-info">Bonificações</h6>
@@ -70,6 +73,7 @@
         {% endfor %}
       {% endif %}
     {% endif %}
+
     {% if item.enterprise and item.enterprise.bookkeeping %}
       <hr/>
       <h6 class="card-subtitle mb-2 text-info">Escriturador:
