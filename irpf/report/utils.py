@@ -3,10 +3,12 @@ import datetime
 
 
 class Earning:
-	def __init__(self, title: str, quantity: float = 0.0, value: float = 0.0):
+	def __init__(self, title: str, quantity: float = 0.0, value: float = 0.0,
+	             flow: str = None):
 		self.title = title
 		self.quantity = quantity
 		self.value = value
+		self.flow = flow
 		self.items = []
 
 	def __str__(self):

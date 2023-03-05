@@ -50,18 +50,21 @@ class EaningsReport:
 
 
 class NegotiationReport:
+	earnings_model = Earnings
 	enterprise_model = Enterprise
 	position_model = Position
 	event_model = AssetEvent
 	bonus_model = Bonus
 
 	buy, sell = "compra", "venda"
+	debt, credit = "debito", "credito"
 
 	def __init__(self, model, user, **options):
 		self.model = model
 		self.user = user
 		self.options = options
 		self.earnings_report = EaningsReport("Credito", user=self.user)
+		self._caches = {}
 
 	def get_enterprise(self, code):
 		"""A empresa"""
@@ -108,9 +111,11 @@ class NegotiationReport:
 
 			try:
 				bonus_frac_quantity = bonus_quantity % bonus_base_quantity
+				bonus_frac_value = bonus_frac_quantity * bonus.base_value
 			except ZeroDivisionError:
 				# bonus_base_quantity == 0, bonus_quantity < 1
 				bonus_frac_quantity = bonus_quantity
+				bonus_frac_value = bonus_frac_quantity * bonus.base_value
 
 			bonus_earnings.append({
 				'spec': bonus,
@@ -118,7 +123,7 @@ class NegotiationReport:
 				# o correto é a parte fracionária ser vendidada
 				'fractional': Earning("Bônus fracionado",
 				                      quantity=bonus_frac_quantity,
-				                      value=0.0),
+				                      value=bonus_frac_value),
 				'base': Earning("Bônus principal",
 				                quantity=bonus_base_quantity,
 				                value=bonus_base_value),
@@ -180,6 +185,62 @@ class NegotiationReport:
 			asset.buy.quantity -= instance.quantity
 			asset.buy.total = asset.buy.quantity * asset.buy.avg_price
 		return asset
+
+	def get_earning_kind(self, instance):
+		try:
+			kind = self._caches[instance.kind]
+		except KeyError:
+			kind = slugify(instance.kind).replace('-', "_")
+			kind = self._caches[instance.kind] = kind
+		return kind
+
+	def get_earnings_queryset(self, date, **options):
+		qs_options = dict(
+			user=self.user,
+			date=date
+		)
+		institution = options.get('institution')
+		if institution:
+			qs_options['institution'] = institution.name
+		enterprise = options.get('enterprise')
+		if enterprise:
+			qs_options['code'] = enterprise.code
+		queryset = self.earnings_model.objects.filter(**qs_options)
+		return queryset
+
+	def calc_earnings(self, instance, asset: Asset):
+		flow = instance.flow.lower()
+		kind = self.get_earning_kind(instance)
+		try:
+			earning = asset.earnings[kind]
+		except KeyError:
+			earning = Earning(instance.kind)
+			earning.flow = flow
+			asset.earnings[kind] = earning
+
+		earning.items.append(instance)
+		earning.quantity += instance.quantity
+		earning.value += instance.total
+
+		if flow == self.credit:
+			if kind == "leilao_de_fracao":
+				asset.sell.quantity += instance.quantity
+				asset.sell.total += instance.total
+				# ganho de capital de todas a vendas
+				asset.sell.capital += instance.total
+				# redução das frações vendidas
+				asset.buy.quantity -= instance.quantity
+				asset.buy.total = asset.buy.quantity * asset.buy.avg_price
+		elif flow == self.debt:
+			...
+
+	def apply_earnings(self, date, assets, **options):
+		queryset = self.get_earnings_queryset(date, **options)
+		for instance in queryset:
+			try:
+				self.calc_earnings(instance, assets[instance.code])
+			except KeyError:
+				continue
 
 	def get_queryset_position(self, date, **options):
 		"""Mota e retorna a queryset de posição"""
@@ -263,19 +324,17 @@ class NegotiationReport:
 				history[date] = copy.deepcopy(assets)
 
 			# aplica a bonificiação na data do histórico
+			self.apply_earnings(date, assets, **options)
 			self.apply_events(date, assets, **options)
 			self.add_bonus(date, history, assets, **options)
 		results = []
 		for code in assets:
 			asset = assets[code]
 			asset.enterprise = asset.enterprise or self.get_enterprise(code)
-			earnings = self.earnings_report.report(code, dtstart, dtend, **options)
-			asset.earnings.update(earnings)
 			results.append({
 				'code': code,
 				'institution': institution,
 				'enterprise': asset.enterprise,
-				'earnings': earnings,
 				'asset': asset
 			})
 
