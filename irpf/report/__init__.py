@@ -39,7 +39,7 @@ class EaningsReport:
 				try:
 					earning = earnings[kind]
 				except KeyError:
-					earnings[kind] = earning = Earning(instance.kind)
+					earning = earnings[kind] = Earning(instance.kind)
 
 				earning.items.append(instance)
 				earning.quantity += instance.quantity
