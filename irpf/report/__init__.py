@@ -128,7 +128,7 @@ class NegotiationReport:
 				                quantity=bonus_base_quantity,
 				                value=bonus_base_value),
 			})
-			asset.buy.quantity += bonus_base_quantity
+			asset.buy.quantity += bonus_quantity
 			asset.buy.total += bonus_base_value
 
 			# novo preço médio já com a bonifição
