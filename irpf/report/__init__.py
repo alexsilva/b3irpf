@@ -264,8 +264,8 @@ class NegotiationReport:
 		startdate = options.get('startdate')
 		if startdate is None:
 			startdate = date - datetime.timedelta(days=365)
-		qs_options.setdefault(options.get('query_startdate', 'date__gte'), startdate)
-		qs_options.setdefault(options.get('query_enddate', 'date__lte'), date)
+		qs_options.setdefault(options.get('startdate_lookup', 'date__gte'), startdate)
+		qs_options.setdefault(options.get('enddate_lookup', 'date__lte'), date)
 		queryset = self.position_model.objects.filter(
 			user=self.user,
 			**qs_options
