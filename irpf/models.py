@@ -234,6 +234,7 @@ class BrokerageNote(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Nota de corretagem"
 		verbose_name_plural = "Notas de corretagem"
+		ordering = ('-reference_date',)
 
 
 class AssetEvent(BaseIRPFModel):
