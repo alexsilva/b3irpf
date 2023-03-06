@@ -39,6 +39,7 @@ class BookkeepingAdmin:
 
 @sites.register(Instituition)
 class InstituitionAdmin:
+	model_icon = "fa fa-university"
 	list_display = (
 		"name",
 		"cnpj"
@@ -68,6 +69,7 @@ class BaseIRPFAdmin:
 
 @sites.register(Enterprise)
 class EnterpriseAdmin:
+	model_icon = "fa fa-coffee"
 	list_filter = ("category", "bookkeeping")
 	search_fields = ("code", "name", "cnpj")
 	list_display = (
@@ -126,6 +128,7 @@ class NegotiationInline:
 
 @sites.register(BrokerageNote)
 class BrokerageNoteAdmin(BaseIRPFAdmin):
+	model_icon = "fa fa-book"
 	fields = ('note', 'institution')
 	list_display = ('note', 'institution', 'reference_date')
 	brokerage_note_parsers = {
@@ -157,6 +160,7 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 
 @sites.register(Negotiation)
 class NegotiationAdmin(BaseIRPFAdmin):
+	model_icon = "fa fa-credit-card-alt"
 	list_filter = ("kind", "date")
 	search_fields = ("code",)
 	list_display = (
@@ -182,6 +186,7 @@ class BonusAdmin(BaseIRPFAdmin):
 
 @sites.register(AssetEvent)
 class AssetEventAdmin(BaseIRPFAdmin):
+	model_icon = "fa fa-sticky-note-o"
 	list_display = (
 		'date',
 		'date_com',
