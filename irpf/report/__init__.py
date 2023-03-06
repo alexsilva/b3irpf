@@ -194,13 +194,12 @@ class NegotiationReport:
 			asset.buy.total = asset.buy.quantity * asset.buy.avg_price
 		return asset
 
-	def get_earning_kind(self, instance, suffix=None):
-		suffix = f"_{suffix}" if suffix else ''
+	def get_earning_kind(self, instance):
 		try:
-			kind = self._caches[instance.kind + suffix]
+			kind = self._caches[instance.kind]
 		except KeyError:
-			kind = slugify(instance.kind).replace('-', "_") + suffix
-			kind = self._caches[instance.kind + suffix] = kind
+			kind = slugify(instance.kind).replace('-', "_")
+			self._caches[instance.kind] = kind
 		return kind
 
 	def get_earnings_queryset(self, date, **options):
@@ -219,12 +218,13 @@ class NegotiationReport:
 
 	def calc_earnings(self, instance, asset: Asset):
 		flow = instance.flow.lower()
-		kind = self.get_earning_kind(instance, suffix=flow)
+		kind = self.get_earning_kind(instance)
+		earning_flow_key = f"{kind}_{flow}"
 		try:
-			earning = asset.earnings[kind]
+			earning = asset.earnings[earning_flow_key]
 		except KeyError:
 			earning = Earning(instance.kind, flow=flow)
-			asset.earnings[kind] = earning
+			asset.earnings[earning_flow_key] = earning
 
 		earning.items.append(instance)
 		earning.quantity += instance.quantity
