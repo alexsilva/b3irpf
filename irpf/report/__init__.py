@@ -249,7 +249,7 @@ class NegotiationReport:
 			except KeyError:
 				continue
 
-	def get_queryset_position(self, date, **options):
+	def get_position_queryset(self, date, **options):
 		"""Mota e retorna a queryset de posição"""
 		qs_options = {}
 		related_fields = []
@@ -278,7 +278,7 @@ class NegotiationReport:
 		"""Retorna dados de posição para caculo do período"""
 		assets = {}
 		if queryset is None:
-			queryset = self.get_queryset_position(date, **options)
+			queryset = self.get_position_queryset(date, **options)
 		for position in queryset:
 			ticker = position.enterprise.code
 			asset = Asset(ticker=ticker,
@@ -306,16 +306,14 @@ class NegotiationReport:
 			qs_options['code'] = enterprise.code
 
 		# cache
-		queryset_position = self.get_queryset_position(date=dtend,
-		                                               startdate=dtstart,
-		                                               **options)
-		queryset_assets = self.get_queryset(**qs_options)
+		position_queryset = self.get_position_queryset(date=dtend, startdate=dtstart, **options)
+		assets_queryset = self.get_queryset(**qs_options)
 
 		for date in range_dates(dtstart, dtend):  # calcula um dia por vez
-			assets_position = self.get_assets_position(queryset=queryset_position.filter(date=date))
+			assets_position = self.get_assets_position(queryset=position_queryset.filter(date=date))
 			if assets_position:
 				assets.update(assets_position)
-			queryset = queryset_assets.filter(date=date)
+			queryset = assets_queryset.filter(date=date)
 			for instance in queryset:
 				# calculo de compra, venda, boficiação, etc
 				try:
