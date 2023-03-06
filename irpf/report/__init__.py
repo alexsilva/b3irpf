@@ -252,12 +252,15 @@ class NegotiationReport:
 	def get_queryset_position(self, date, **options):
 		"""Mota e retorna a queryset de posição"""
 		qs_options = {}
+		related_fields = []
 		institution = options.get('institution')
 		if institution:
 			qs_options['institution'] = institution
+			related_fields.append('institution')
 		enterprise = options.get('enterprise')
 		if enterprise:
 			qs_options['enterprise'] = enterprise
+			related_fields.append('enterprise')
 		startdate = options.get('startdate')
 		if startdate is None:
 			startdate = date - datetime.timedelta(days=365)
@@ -266,8 +269,10 @@ class NegotiationReport:
 		queryset = self.position_model.objects.filter(
 			user=self.user,
 			**qs_options
-		).order_by('date')
-		return queryset
+		)
+		if related_fields:
+			queryset = queryset.select_related(*related_fields)
+		return queryset.order_by('date')
 
 	def get_assets_position(self, date=None, queryset=None, **options):
 		"""Retorna dados de posição para caculo do período"""
