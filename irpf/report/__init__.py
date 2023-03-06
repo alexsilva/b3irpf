@@ -142,10 +142,14 @@ class NegotiationReport:
 		"""Eventos de desdobramento/grupamento"""
 		qs_options = {}
 		enterprise = options.get('enterprise')
+		related_fields = []
 		if enterprise:
 			qs_options['enterprise'] = enterprise
+			related_fields.append('enterprise')
 		event_model = self.event_model
 		queryset = event_model.objects.filter(date_com=date, user=self.user, **qs_options)
+		if related_fields:
+			queryset = queryset.select_related(*related_fields)
 		for instance in queryset:
 			try:
 				asset = assets[instance.enterprise.code]
