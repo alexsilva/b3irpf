@@ -48,21 +48,26 @@
     {% if item.asset.earnings %}
       {% exclude_obj_keys item.asset.earnings "bonificacoes" as redimentos %}
       {% if redimentos %}
-      <hr/>
-      <h6 class="card-subtitle mb-2 text-info">Rendimentos</h6>
-      <ul class="list-group">
-      {% for key, redimento in redimentos.items %}
-        {% get_obj_val redimento "value" as redimento_val %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span class="text-secondary">
-              {% get_obj_val redimento "flow" as redimento_flow %}
-              {% get_obj_val redimento "title" %} (<span class="{% if redimento_flow == "credito" %}text-success{% else %}text-danger{% endif %}">{{ redimento_flow }}</span>):
-              <span class="text-muted">R$ {{ redimento_val|moneyformat }}</span>
-            </span>
-            <span class="badge badge-secondary badge-pill" title="Quantidade">{% get_obj_val redimento "quantity" %}</span>
-          </li>
-      {% endfor %}
-      </ul>
+      <div class="card" style="max-width: 45rem;">
+        <div class="card-header text-info">Movimentações</div>
+        <ul class="list-group">
+        {% for key, redimento in redimentos.items %}
+          {% get_obj_val redimento "value" as rendimento_val %}
+          {% get_obj_val redimento "flow" as rendimento_flow %}
+           <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-row justify-content-start align-items-center">
+              <span class="badge badge-{% if rendimento_flow == "credito" %}success{% else %}danger{% endif %} badge-pill text-monospace">
+                {{ rendimento_flow }}
+              </span>
+              <div class="p-2">
+                {% get_obj_val redimento "title" %}:<span class="text-muted m-1">R$ {{ rendimento_val|moneyformat }}</span>
+              </div>
+            </div>
+            <span title="Quantidade" class="badge badge-secondary badge-pill">{% get_obj_val redimento "quantity" %}</span>
+            </li>
+        {% endfor %}
+        </ul>
+      </div>
       {% endif %}
 
       {% if item.asset.earnings.bonificacoes %}
