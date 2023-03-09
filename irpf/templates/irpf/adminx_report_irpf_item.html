@@ -62,8 +62,8 @@
                     <span title="Quantidade" class="badge badge-light badge-pill">{% get_obj_val redimento "quantity" %}</span>
                   </span>
                 </div>
-                <div class="col-sm">{% get_obj_val redimento "title" %}</div>
-                <div class="col">
+                <div class="col-sm text-center">{% get_obj_val redimento "title" %}</div>
+                <div class="col text-center">
                 <span class="text-muted">R$ {{ rendimento_val|moneyformat }}</span>
                 </div>
               </div>
@@ -84,9 +84,9 @@
 
     {% if item.enterprise and item.enterprise.bookkeeping %}
       <hr/>
-      <h6 class="card-subtitle mb-2 text-info">Escriturador:
+      <p class="card-subtitle text-info">Escriturador:
       <a href="{{ item.enterprise.bookkeeping.link }}" target="_blank">{{ item.enterprise.bookkeeping.name }}</a>
-      </h6>
+      </p>
     {% endif %}
     </div>
   </div>
