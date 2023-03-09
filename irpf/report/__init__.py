@@ -60,7 +60,7 @@ class NegotiationReport:
 	debt, credit = "debito", "credito"
 
 	BONIFICAO_EM_ATIVOS = "bonificacao_em_ativos"
-	LEILAO_DE_ATIVOS = "leilao_de_fracao"
+	LEILAO_DE_FRACAO = "leilao_de_fracao"
 	FRACAO_EM_ATIVOS = "fracao_em_ativos"
 
 	def __init__(self, model, user, **options):
@@ -234,7 +234,7 @@ class NegotiationReport:
 		if asset.position and instance.date < asset.position.date:
 			return
 		elif flow == self.credit:
-			if kind == self.LEILAO_DE_ATIVOS:
+			if kind == self.LEILAO_DE_FRACAO:
 				asset.sell.total += instance.total
 				# ganho de capital de todas a vendas
 				asset.sell.capital += instance.total
