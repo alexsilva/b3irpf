@@ -230,7 +230,10 @@ class NegotiationReport:
 		earning.quantity += instance.quantity
 		earning.value += instance.total
 
-		if flow == self.credit:
+		# ignora os registros que já foram contabilizados na posição
+		if asset.position and instance.date < asset.position.date:
+			return
+		elif flow == self.credit:
 			if kind == self.LEILAO_DE_ATIVOS:
 				asset.sell.total += instance.total
 				# ganho de capital de todas a vendas
