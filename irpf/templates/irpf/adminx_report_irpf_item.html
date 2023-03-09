@@ -54,16 +54,19 @@
         {% for key, redimento in redimentos.items %}
           {% get_obj_val redimento "value" as rendimento_val %}
           {% get_obj_val redimento "flow" as rendimento_flow %}
-           <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div class="d-flex flex-row justify-content-start align-items-center">
-              <span class="badge badge-{% if rendimento_flow == "credito" %}success{% else %}danger{% endif %} badge-pill text-monospace">
-                {{ rendimento_flow }}
-              </span>
-              <div class="p-2">
-                {% get_obj_val redimento "title" %}:<span class="text-muted m-1">R$ {{ rendimento_val|moneyformat }}</span>
+           <li class="list-group-item">
+              <div class="row">
+                <div class="col-sm-auto">
+                  <span class="badge badge-{% if rendimento_flow == "credito" %}success{% else %}danger{% endif %}">
+                    {{ rendimento_flow }}
+                    <span title="Quantidade" class="badge badge-light badge-pill">{% get_obj_val redimento "quantity" %}</span>
+                  </span>
+                </div>
+                <div class="col-sm">{% get_obj_val redimento "title" %}</div>
+                <div class="col">
+                <span class="text-muted">R$ {{ rendimento_val|moneyformat }}</span>
+                </div>
               </div>
-            </div>
-            <span title="Quantidade" class="badge badge-secondary badge-pill">{% get_obj_val redimento "quantity" %}</span>
             </li>
         {% endfor %}
         </ul>
