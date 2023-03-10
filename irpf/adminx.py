@@ -4,7 +4,7 @@ from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView
 
 from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision, Bonus, Bookkeeping, \
-	BrokerageNote, AssetEvent
+	BrokerageNote, AssetEvent, FoundsAdministrator
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin
 from irpf.views.import_list import AdminImportListModelView
@@ -34,6 +34,14 @@ class BookkeepingAdmin:
 		"name",
 		"cnpj",
 		"link"
+	)
+
+
+@sites.register(FoundsAdministrator)
+class FoundsAdministratorAdmin:
+	list_display = search_fields = (
+		"name",
+		"cnpj"
 	)
 
 
@@ -71,12 +79,13 @@ class BaseIRPFAdmin:
 class EnterpriseAdmin:
 	model_icon = "fa fa-coffee"
 	list_filter = ("category", "bookkeeping")
-	search_fields = ("code", "name", "cnpj")
+	search_fields = ("code", "name", "cnpj", "adminstrator__name")
 	list_display = (
 		'code',
 		'category',
 		'name',
 		'cnpj',
+		'adminstrator',
 		'bookkeeping_name'
 	)
 

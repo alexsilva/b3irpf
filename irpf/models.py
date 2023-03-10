@@ -21,6 +21,19 @@ class Bookkeeping(models.Model):
 		verbose_name_plural = "Agentes escrituradores"
 
 
+class FoundsAdministrator(models.Model):
+	"""Geramente quem adminstra Fiis"""
+	name = models.CharField(verbose_name="Nome", max_length=512)
+	cnpj = models.CharField(verbose_name="CNPJ", max_length=32)
+
+	def __str__(self):
+		return f"{self.name} / {self.cnpj}"
+
+	class Meta:
+		verbose_name = "Adminstrador de fundo"
+		verbose_name_plural = "Adminstradores de fundos"
+
+
 class Enterprise(models.Model):
 	CATEGORY_ACAO = 1
 	CATEGORY_FII = 2
@@ -45,6 +58,12 @@ class Enterprise(models.Model):
 	                                verbose_name=Bookkeeping._meta.verbose_name,
 	                                on_delete=models.SET_NULL,
 	                                null=True, blank=False)
+
+	adminstrator = models.ForeignKey(FoundsAdministrator,
+	                                 verbose_name="Adminstrador",
+	                                 help_text="Aquele que adminstra esse ativo.",
+	                                 on_delete=models.SET_NULL,
+	                                 null=True, blank=True)
 
 	@cached_property
 	def category_choices(self):

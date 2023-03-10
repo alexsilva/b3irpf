@@ -13,7 +13,8 @@
           {% elif item.enterprise.is_acao %}ações
           {% elif item.enterprise.is_bdr %}bdr{{ item.asset.buy.quantity|pluralize:"s" }}
           {% endif %}
-          {{ item.code }} // {{ item.enterprise.name }} // {{ item.enterprise.cnpj }}
+          {{ item.code }} // {{ item.enterprise.name }} - {{ item.enterprise.cnpj }}
+          {% if item.enterprise.adminstrator %} // Adminstrador: {{ item.enterprise.adminstrator.name }} - {{ item.enterprise.adminstrator.cnpj }}{% endif %}
         {% else %}
           {{ item.code }}
         {% endif %}">
