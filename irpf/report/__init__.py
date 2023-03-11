@@ -241,7 +241,7 @@ class NegotiationReport:
 			elif kind == self.BONIFICAO_EM_ATIVOS:
 				asset.buy.quantity += instance.quantity
 				asset.buy.total += instance.total
-				asset.buy.avg_price = asset.buy.quantity * asset.buy.avg_price
+				asset.buy.avg_price = asset.buy.total / asset.buy.quantity
 		elif flow == self.debt:
 			if kind == self.FRACAO_EM_ATIVOS:
 				# redução das frações vendidas
