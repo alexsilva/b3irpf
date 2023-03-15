@@ -41,10 +41,12 @@
       <hr/>
     {% endif %}
 
+      {% with period=item.asset.period %}
       <h6 class="card-subtitle mb-2 text-success">Posição do período</h6>
-      <p class="card-text">Quantidade líquida: {{ item.asset.buy.quantity }}</p>
-      <p class="card-text">Preço médio de compra: R$ {{ item.asset.buy.avg_price|moneyformat }}</p>
-      <p class="card-text">Valor total de compra: R$ {{ item.asset.buy.total|moneyformat }}</p>
+      <p class="card-text">Quantidade líquida: {{ period.quantity }}</p>
+      <p class="card-text">Preço médio de compra: R$ {{ period.avg_price|moneyformat }}</p>
+      <p class="card-text">Valor total de compra: R$ {{ period.total|moneyformat }}</p>
+      {% endwith %}
 
     {% if item.asset.earnings %}
       {% exclude_obj_keys item.asset.earnings "bonificacoes" as redimentos %}

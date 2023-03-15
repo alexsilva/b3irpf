@@ -152,12 +152,13 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 			# empresa não cadastrada
 			return
 		institution = asset.institution
-
+		# considera a posição do período que deriva da diferença entre compas e vendas
+		period = asset.period
 		defaults = {
-			'quantity': asset.buy.quantity,
-			'avg_price': asset.buy.avg_price,
-			'total': asset.buy.total,
-			'tax': asset.buy.tax
+			'quantity': period.quantity,
+			'avg_price': period.avg_price,
+			'total': period.total,
+			'tax': period.tax
 		}
 		# remove registro acima da data
 		self.position_model.objects.filter(

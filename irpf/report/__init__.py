@@ -189,10 +189,6 @@ class NegotiationReport:
 
 			# ganho de capital de todas a vendas
 			asset.sell.capital += (instance.quantity * (asset.sell.avg_price - asset.buy.avg_price))
-
-			# novos valores para compra
-			asset.buy.quantity -= instance.quantity
-			asset.buy.total = asset.buy.quantity * asset.buy.avg_price
 		return asset
 
 	def get_earning_kind(self, instance):
@@ -237,6 +233,7 @@ class NegotiationReport:
 		elif flow == self.credit:
 			if kind == self.LEILAO_DE_FRACAO:
 				asset.sell.total += instance.total
+				asset.sell.avg_price = asset.sell.total / asset.sell.quantity
 				# ganho de capital de todas a vendas
 				asset.sell.capital += instance.total
 			elif kind == self.BONIFICAO_EM_ATIVOS:
@@ -245,9 +242,7 @@ class NegotiationReport:
 				asset.buy.avg_price = asset.buy.total / asset.buy.quantity
 		elif flow == self.debt:
 			if kind == self.FRACAO_EM_ATIVOS:
-				# redução das frações vendidas
-				asset.buy.quantity -= instance.quantity
-				asset.buy.total = asset.buy.quantity * asset.buy.avg_price
+				asset.sell.quantity += instance.quantity
 
 	def apply_earnings(self, date, assets, **options):
 		queryset = self.get_earnings_queryset(date, **options)

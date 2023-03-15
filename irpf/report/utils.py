@@ -50,6 +50,21 @@ class Sell:
 		return bool(self.quantity)
 
 
+class Period:
+	"""Compas menos vendas no intervalo de tempo"""
+
+	def __init__(self, quantity: float = 0,
+	             avg_price: float = 0.0,
+	             total: float = 0.0,
+	             tax: float = 0.0,
+	             position=None):
+		self.quantity = quantity
+		self.avg_price = avg_price
+		self.position = position
+		self.total = total
+		self.tax = tax
+
+
 class Asset:
 	"""Ativos"""
 
@@ -74,6 +89,19 @@ class Asset:
 			self.sell = Sell()
 		if earnings is None:
 			self.earnings = {}
+
+	@property
+	def period(self) -> Period:
+		"""Compras menos vendas no intervalo de tempo"""
+		quantity = self.buy.quantity - self.sell.quantity
+		total = quantity * self.buy.avg_price
+		avg_price = (total / quantity) if quantity > 0 else 0.0
+		period = Period(quantity=quantity,
+		                avg_price=avg_price,
+		                total=total,
+		                tax=self.buy.tax,
+		                position=self.position)
+		return period
 
 	def __deepcopy__(self, memo):
 		memo[id(self)] = cpy = type(self)(
