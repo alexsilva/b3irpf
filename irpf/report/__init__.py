@@ -233,13 +233,13 @@ class NegotiationReport:
 		elif flow == self.credit:
 			if kind == self.LEILAO_DE_FRACAO:
 				asset.sell.total += instance.total
-				asset.sell.avg_price = asset.sell.total / asset.sell.quantity
+				asset.sell.avg_price = (asset.sell.total / asset.sell.quantity) if asset.sell.quantity > 0 else 0.0
 				# ganho de capital de todas a vendas
 				asset.sell.capital += instance.total
 			elif kind == self.BONIFICAO_EM_ATIVOS:
 				asset.buy.quantity += instance.quantity
 				asset.buy.total += instance.total
-				asset.buy.avg_price = asset.buy.total / asset.buy.quantity
+				asset.buy.avg_price = (asset.buy.total / asset.buy.quantity) if asset.buy.quantity > 0 else 0.0
 		elif flow == self.debt:
 			if kind == self.FRACAO_EM_ATIVOS:
 				asset.sell.quantity += instance.quantity
