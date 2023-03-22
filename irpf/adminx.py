@@ -99,6 +99,7 @@ class EnterpriseAdmin:
 
 @sites.register(Position)
 class PositionAdmin(BaseIRPFAdmin):
+	collect_related_nested_objects = False
 	list_filter = ("enterprise__code", 'institution')
 	search_fields = (
 		'enterprise__code',
