@@ -4,7 +4,7 @@ import datetime
 from django.utils.text import slugify
 
 from irpf.models import Enterprise, Earnings, Bonus, Position, AssetEvent
-from irpf.report.utils import Earning, Asset, Buy
+from irpf.report.utils import Event, Asset, Buy
 from irpf.utils import range_dates
 
 
@@ -39,7 +39,7 @@ class EaningsReport:
 				try:
 					earning = earnings[kind]
 				except KeyError:
-					earning = earnings[kind] = Earning(instance.kind)
+					earning = earnings[kind] = Event(instance.kind)
 
 				earning.items.append(instance)
 				earning.quantity += instance.quantity
@@ -98,9 +98,9 @@ class NegotiationReport:
 			if asset.position and bonus.date < asset.position.date:
 				continue
 			try:
-				bonus_earnings = asset.earnings['bonificacoes']
+				bonus_event = asset.events['bonificacoes']
 			except KeyError:
-				bonus_earnings = asset.earnings['bonificacoes'] = []
+				bonus_event = asset.events['bonificacoes'] = []
 
 			# total de ativos na data ex
 			history_data_com = history[bonus.data_com]
@@ -121,16 +121,16 @@ class NegotiationReport:
 				bonus_frac_quantity = bonus_quantity
 				bonus_frac_value = bonus_frac_quantity * bonus.base_value
 
-			bonus_earnings.append({
+			bonus_event.append({
 				'spec': bonus,
 				'asset': history_asset,
 				# o correto é a parte fracionária ser vendidada
-				'fractional': Earning("Bônus fracionado",
-				                      quantity=bonus_frac_quantity,
-				                      value=bonus_frac_value),
-				'base': Earning("Bônus principal",
-				                quantity=bonus_base_quantity,
-				                value=bonus_base_value),
+				'fractional': Event("Bônus fracionado",
+				                    quantity=bonus_frac_quantity,
+				                    value=bonus_frac_value),
+				'base': Event("Bônus principal",
+				              quantity=bonus_base_quantity,
+				              value=bonus_base_value),
 			})
 			asset.buy.quantity += bonus_quantity
 			asset.buy.total += bonus_base_value
@@ -214,18 +214,17 @@ class NegotiationReport:
 		return queryset
 
 	def calc_earnings(self, instance, asset: Asset):
-		flow = instance.flow.lower()
 		kind = self.get_earning_kind(instance)
-		earning_flow_key = f"{kind}_{flow}"
+		flow = instance.flow.lower()
+		obj = getattr(asset, "credit" if flow == "credito" else "debit")
 		try:
-			earning = asset.earnings[earning_flow_key]
+			event = obj[kind]
 		except KeyError:
-			earning = Earning(instance.kind, flow=flow)
-			asset.earnings[earning_flow_key] = earning
+			obj[kind] = event = Event(instance.kind)
 
-		earning.items.append(instance)
-		earning.quantity += instance.quantity
-		earning.value += instance.total
+		event.items.append(instance)
+		event.quantity += instance.quantity
+		event.value += instance.total
 
 		# ignora os registros que já foram contabilizados na posição
 		if asset.position and instance.date < asset.position.date:
@@ -339,7 +338,7 @@ class NegotiationReport:
 			# aplica a bonificiação na data do histórico
 			self.apply_earnings(date, assets, **options)
 			self.apply_events(date, assets, **options)
-			# self.add_bonus(date, history, assets, **options)
+			self.add_bonus(date, history, assets, **options)
 		results = []
 		for code in assets:
 			asset = assets[code]

@@ -2,17 +2,29 @@ import copy
 import datetime
 
 
-class Earning:
-	def __init__(self, title: str, quantity: float = 0.0, value: float = 0.0,
-	             flow: str = None):
+class Event:
+	def __init__(self, title: str,
+	             quantity: float = 0.0,
+	             value: float = 0.0):
 		self.title = title
 		self.quantity = quantity
 		self.value = value
-		self.flow = flow
 		self.items = []
 
 	def __str__(self):
 		return self.title
+
+
+class Credit(dict):
+	"""credito"""
+
+
+class Debit(dict):
+	"""Débito"""
+
+
+class Events(dict):
+	"""Eventos"""
 
 
 class Buy:
@@ -71,7 +83,9 @@ class Asset:
 	def __init__(self, ticker,
 	             buy: Buy = None, sell: Sell = None,
 	             position=None,
-	             earnings: dict = None,
+	             credit: Credit = None,
+	             debit: Debit = None,
+	             events: Events = None,
 	             institution=None,
 	             enterprise=None):
 		self.items = []
@@ -79,7 +93,9 @@ class Asset:
 		self.buy = buy
 		self.sell = sell
 		self.position = position
-		self.earnings = earnings
+		self.credit = credit
+		self.debit = debit
+		self.events = events
 		self.institution = institution
 		self.enterprise = enterprise
 
@@ -87,8 +103,12 @@ class Asset:
 			self.buy = Buy()
 		if sell is None:
 			self.sell = Sell()
-		if earnings is None:
-			self.earnings = {}
+		if credit is None:
+			self.credit = Credit()
+		if debit is None:
+			self.debit = Debit()
+		if events is None:
+			self.events = Events()
 
 	@property
 	def period(self) -> Period:
@@ -108,7 +128,9 @@ class Asset:
 			ticker=self.ticker,
 			buy=copy.deepcopy(self.buy, memo),
 			sell=copy.deepcopy(self.sell, memo),
-			earnings=copy.deepcopy(self.earnings, memo),
+			credit=copy.deepcopy(self.credit, memo),
+			debit=copy.deepcopy(self.debit, memo),
+			events=copy.deepcopy(self.events, memo),
 			institution=self.institution,
 			enterprise=self.enterprise,
 			position=self.position

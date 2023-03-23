@@ -9,10 +9,10 @@
     <button type="button" class="btn btn-link" data-toggle="popover"
             data-content="
         {% if item.enterprise %}
-          {{ asset_period.buy.quantity }}
-          {% if item.enterprise.is_fii %}cota{{ asset_period.buy.quantity|pluralize:"s" }}
+          {{ asset_period.quantity }}
+          {% if item.enterprise.is_fii %}cota{{ asset_period.quantity|pluralize:"s" }}
           {% elif item.enterprise.is_acao %}ações
-          {% elif item.enterprise.is_bdr %}bdr{{ asset_period.buy.quantity|pluralize:"s" }}
+          {% elif item.enterprise.is_bdr %}bdr{{ asset_period.quantity|pluralize:"s" }}
           {% endif %}
           {{ item.code }} // {{ item.enterprise.name }} - {{ item.enterprise.cnpj }}
           {% if item.enterprise.adminstrator %} // Adminstrador: {{ item.enterprise.adminstrator.name }} - {{ item.enterprise.adminstrator.cnpj }}{% endif %}
@@ -47,41 +47,26 @@
     <p class="card-text">Preço médio de compra: R$ {{ asset_period.avg_price|moneyformat }}</p>
     <p class="card-text">Valor total de compra: R$ {{ asset_period.total|moneyformat }}</p>
 
-    {% if item.asset.earnings %}
-      {% exclude_obj_keys item.asset.earnings "bonificacoes" as redimentos %}
-      {% if redimentos %}
-      <div class="card" style="max-width: 45rem;">
-        <div class="card-header text-info">Movimentações</div>
-        <ul class="list-group">
-        {% for key, redimento in redimentos.items %}
-          {% get_obj_val redimento "value" as rendimento_val %}
-          {% get_obj_val redimento "flow" as rendimento_flow %}
-           <li class="list-group-item">
-              <div class="row">
-                <div class="col-sm-auto">
-                  <span class="badge badge-{% if rendimento_flow == "credito" %}success{% else %}danger{% endif %}">
-                    {{ rendimento_flow }}
-                    <span title="Quantidade" class="badge badge-light badge-pill">{% get_obj_val redimento "quantity" %}</span>
-                  </span>
-                </div>
-                <div class="col-sm text-center">{% get_obj_val redimento "title" %}</div>
-                <div class="col text-center">
-                <span class="text-muted">R$ {{ rendimento_val|moneyformat }}</span>
-                </div>
-              </div>
-            </li>
-        {% endfor %}
-        </ul>
-      </div>
-      {% endif %}
+    {% if item.asset.credit or item.asset.debit %}
+    <div class="card" style="max-width: 45rem;">
+      <div class="card-header text-info">Movimentações</div>
+      <ul class="list-group">
+      {% for key, event in item.asset.credit.items %}
+         {% include "irpf/adminx_report_irpf_asset_event.html" with type="credit" event=event %}
+      {% endfor %}
+      {% for key, event in item.asset.debit.items %}
+         {% include "irpf/adminx_report_irpf_asset_event.html" with type="debit" event=event %}
+      {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
 
-      {% if item.asset.earnings.bonificacoes %}
-      <hr/>
-      <h6 class="card-subtitle mb-2 text-info">Bonificações</h6>
-        {% for bonus in item.asset.earnings.bonificacoes %}
-          {% include "irpf/adminx_report_irpf_bonus_item.html" %}
-        {% endfor %}
-      {% endif %}
+    {% if item.asset.events.bonificacoes %}
+    <hr/>
+    <h6 class="card-subtitle mb-2 text-info">Bonificações</h6>
+      {% for bonus in item.asset.events.bonificacoes %}
+        {% include "irpf/adminx_report_irpf_bonus_item.html" %}
+      {% endfor %}
     {% endif %}
 
     {% if item.enterprise and item.enterprise.bookkeeping %}
