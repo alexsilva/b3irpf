@@ -338,7 +338,7 @@ class NegotiationReport:
 			# aplica a bonificiação na data do histórico
 			self.apply_earnings(date, assets, **options)
 			self.apply_events(date, assets, **options)
-			self.add_bonus(date, history, assets, **options)
+			# self.add_bonus(date, history, assets, **options)
 		results = []
 		for code in assets:
 			asset = assets[code]
