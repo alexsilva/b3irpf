@@ -1,4 +1,5 @@
 {% load irpf_tags %}
+{% with asset_period=item.asset.period %}
 <div class="card mt-1 mb-2 unsort irpfreport">
   <div class="card-header">
     <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
@@ -8,10 +9,10 @@
     <button type="button" class="btn btn-link" data-toggle="popover"
             data-content="
         {% if item.enterprise %}
-          {{ item.asset.buy.quantity }}
-          {% if item.enterprise.is_fii %}cota{{ item.asset.buy.quantity|pluralize:"s" }}
+          {{ asset_period.buy.quantity }}
+          {% if item.enterprise.is_fii %}cota{{ asset_period.buy.quantity|pluralize:"s" }}
           {% elif item.enterprise.is_acao %}ações
-          {% elif item.enterprise.is_bdr %}bdr{{ item.asset.buy.quantity|pluralize:"s" }}
+          {% elif item.enterprise.is_bdr %}bdr{{ asset_period.buy.quantity|pluralize:"s" }}
           {% endif %}
           {{ item.code }} // {{ item.enterprise.name }} - {{ item.enterprise.cnpj }}
           {% if item.enterprise.adminstrator %} // Adminstrador: {{ item.enterprise.adminstrator.name }} - {{ item.enterprise.adminstrator.cnpj }}{% endif %}
@@ -41,12 +42,10 @@
       <hr/>
     {% endif %}
 
-      {% with period=item.asset.period %}
-      <h6 class="card-subtitle mb-2 text-success">Posição do período</h6>
-      <p class="card-text">Quantidade líquida: {{ period.quantity }}</p>
-      <p class="card-text">Preço médio de compra: R$ {{ period.avg_price|moneyformat }}</p>
-      <p class="card-text">Valor total de compra: R$ {{ period.total|moneyformat }}</p>
-      {% endwith %}
+    <h6 class="card-subtitle mb-2 text-success">Posição do período</h6>
+    <p class="card-text">Quantidade líquida: {{ asset_period.quantity }}</p>
+    <p class="card-text">Preço médio de compra: R$ {{ asset_period.avg_price|moneyformat }}</p>
+    <p class="card-text">Valor total de compra: R$ {{ asset_period.total|moneyformat }}</p>
 
     {% if item.asset.earnings %}
       {% exclude_obj_keys item.asset.earnings "bonificacoes" as redimentos %}
@@ -94,3 +93,4 @@
     </div>
   </div>
 </div>
+{% endwith %}
