@@ -1,0 +1,11 @@
+{% load irpf_tags %}
+<div class="card mt-1 mb-2 unsort" style="max-width: 50rem;">
+  <div class="card-header {{ card_title_class }}">
+    {% block card_title %}{{ card_title }}{% endblock %}
+  </div>
+  <div class="card-body">
+    <ul class="list-group list-group-flush">
+      {% block card_list_group %}{% endblock %}
+    </ul>
+  </div>
+</div>

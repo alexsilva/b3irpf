@@ -1,0 +1,10 @@
+{% extends "irpf/adminx_report_irpf_asset_box.html" %}
+{% load irpf_tags %}
+{% block card_list_group %}
+  {% for event in item.asset.credit.values %}
+    {% include "irpf/adminx_report_irpf_asset_movement_item.html" with title="crédito" title_class="success" %}
+  {% endfor %}
+  {% for event in item.asset.debit.values %}
+    {% include "irpf/adminx_report_irpf_asset_movement_item.html" with title="débito" title_class="danger" %}
+  {% endfor %}
+{% endblock %}

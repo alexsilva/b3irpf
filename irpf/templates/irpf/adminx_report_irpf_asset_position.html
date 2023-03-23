@@ -1,0 +1,33 @@
+{% extends "irpf/adminx_report_irpf_asset_box.html" %}
+{% load irpf_tags %}
+
+{% block card_title %}
+  Posição atual <span class="text-muted">{{ item.asset.position.date }}</span>
+{% endblock %}
+
+{% block card_list_group %}
+  <li class="list-group-item py-2">
+    <div class="row">
+      <div class="col-sm-8">Quantidade</div>
+      <div class="col-sm-4 text-center">
+        <span class="text-muted">{{ item.asset.position.quantity }}</span>
+      </div>
+    </div>
+  </li>
+  <li class="list-group-item py-2">
+    <div class="row">
+      <div class="col-sm-8">Preço médio</div>
+      <div class="col-sm-4 text-center">
+        <span class="text-muted">R$ {{ item.asset.position.avg_price|moneyformat }}</span>
+      </div>
+    </div>
+  </li>
+  <li class="list-group-item py-2">
+    <div class="row">
+      <div class="col-sm-8">Valor total</div>
+      <div class="col-sm-4 text-center">
+        <span class="text-muted">R$ {{ item.asset.position.total|moneyformat }}</span>
+      </div>
+    </div>
+  </li>
+{% endblock %}

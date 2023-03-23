@@ -25,56 +25,34 @@
   </div>
   <div id="collapsebody-{{ forloop.counter }}" class="collapse show">
     <div class="card-body">
-    {% if item.asset.position %}
-      <h6 class="card-subtitle mb-2 mt-2 text-primary">Posição atual{% if item.asset.position.date %} ({{ item.asset.position.date }}){% endif %}</h6>
-      <p class="card-text">Quantidade: {{ item.asset.position.quantity|default:0 }}</p>
-      <p class="card-text">Preço médio: R$ {{ item.asset.position.avg_price|default:0|moneyformat }}</p>
-      <p class="card-text">Valor total: R$ {{ item.asset.position.total|default:0|moneyformat }}</p>
+      {% if item.asset.position %}
+       {% include "irpf/adminx_report_irpf_asset_position.html" with card_title_class="text-primary" %}
+      {% endif %}
+
+      {% if item.asset.sell %}
+        {% include "irpf/adminx_report_irpf_asset_sell.html" with card_title="Vendas do período" card_title_class="text-danger"%}
+      {% endif %}
+
+      {% include "irpf/adminx_report_irpf_asset_period.html" with card_title="Posição do período" card_title_class="text-success"%}
+
+      {% if item.asset.credit or item.asset.debit %}
+        {% include "irpf/adminx_report_irpf_asset_movement.html" with card_title="Movimentações" card_title_class="text-info"%}
+      {% endif %}
+
+      {% if item.asset.events.bonificacoes %}
       <hr/>
-    {% endif %}
+      <h6 class="card-subtitle mb-2 text-info">Bonificações</h6>
+        {% for bonus in item.asset.events.bonificacoes %}
+          {% include "irpf/adminx_report_irpf_bonus_item.html" %}
+        {% endfor %}
+      {% endif %}
 
-    {% if item.asset.sell %}
-      <h6 class="card-subtitle mb-2 text-muted">Vendas do período</h6>
-      <p class="card-text">Quantidade de venda: {{ item.asset.sell.quantity }}</p>
-      <p class="card-text">Preço médio de venda: R$ {{ item.asset.sell.avg_price|moneyformat }}</p>
-      <p class="card-text">Valor total de venda: R$ {{ item.asset.sell.total|moneyformat }}</p>
-      <p class="card-text">Ganho de capital: R$ {{ item.asset.sell.capital|moneyformat }}</p>
-      <hr/>
-    {% endif %}
-
-    <h6 class="card-subtitle mb-2 text-success">Posição do período</h6>
-    <p class="card-text">Quantidade líquida: {{ asset_period.quantity }}</p>
-    <p class="card-text">Preço médio de compra: R$ {{ asset_period.avg_price|moneyformat }}</p>
-    <p class="card-text">Valor total de compra: R$ {{ asset_period.total|moneyformat }}</p>
-
-    {% if item.asset.credit or item.asset.debit %}
-    <div class="card" style="max-width: 45rem;">
-      <div class="card-header text-info">Movimentações</div>
-      <ul class="list-group">
-      {% for key, event in item.asset.credit.items %}
-         {% include "irpf/adminx_report_irpf_asset_event.html" with type="credit" event=event %}
-      {% endfor %}
-      {% for key, event in item.asset.debit.items %}
-         {% include "irpf/adminx_report_irpf_asset_event.html" with type="debit" event=event %}
-      {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
-
-    {% if item.asset.events.bonificacoes %}
-    <hr/>
-    <h6 class="card-subtitle mb-2 text-info">Bonificações</h6>
-      {% for bonus in item.asset.events.bonificacoes %}
-        {% include "irpf/adminx_report_irpf_bonus_item.html" %}
-      {% endfor %}
-    {% endif %}
-
-    {% if item.enterprise and item.enterprise.bookkeeping %}
-      <hr/>
-      <p class="card-subtitle text-info">Escriturador:
-      <a href="{{ item.enterprise.bookkeeping.link }}" target="_blank">{{ item.enterprise.bookkeeping.name }}</a>
-      </p>
-    {% endif %}
+      {% if item.enterprise and item.enterprise.bookkeeping %}
+        <hr/>
+        <p class="card-subtitle text-info">Escriturador:
+        <a href="{{ item.enterprise.bookkeeping.link }}" target="_blank">{{ item.enterprise.bookkeeping.name }}</a>
+        </p>
+      {% endif %}
     </div>
   </div>
 </div>
