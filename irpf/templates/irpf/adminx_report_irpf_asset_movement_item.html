@@ -7,7 +7,7 @@
         </span>
     </div>
     <div class="col-sm-4 text-center">{% get_obj_val event "title" %}</div>
-    <div class="col-4 text-center">
+    <div class="col-sm-4 text-center">
       {% get_obj_val event "value" as event_value %}
       <span class="text-muted">R$ {{ event_value|moneyformat }}</span>
     </div>
