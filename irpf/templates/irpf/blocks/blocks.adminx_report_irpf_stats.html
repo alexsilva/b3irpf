@@ -44,4 +44,14 @@
       </div>
     </li>
   {% endif %}
+  {% if report.stats.patrimony %}
+    <li class="list-group-item py-2">
+      <div class="row">
+        <div class="col-sm-8 text-muted">Patrimônio investido</div>
+        <div class="col-sm-4 text-center">
+          <span class="text-muted">R$ {{ report.stats.patrimony|moneyformat }}</span>
+        </div>
+      </div>
+    </li>
+  {% endif %}
 {% endblock %}

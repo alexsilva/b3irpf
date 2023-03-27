@@ -362,16 +362,18 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 	def get_stats(self):
 		"""Gera dados estatísticos"""
 		results = self.admin_view.results
-		buy, sell, capital, tax = 'buy', 'sell', 'capital', 'tax'
+		buy, sell, capital, tax, patrimony = 'buy', 'sell', 'capital', 'tax', 'patrimony'
 		stats = {
 			buy: 0.0,
 			sell: 0.0,
 			capital: 0.0,
+			patrimony: 0.0,
 			tax: 0.0
 		}
 		for item in results:
 			asset = item['asset']
 			period = asset.period
+			stats[patrimony] += period.total
 			if asset.position:
 				stats[buy] += (period.total - asset.position.total)
 			else:
