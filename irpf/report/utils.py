@@ -132,11 +132,12 @@ class Asset:
 	def period_buy(self) -> Buy:
 		"""Compras do perído (sem posição)"""
 		if self.position:
-			quantity = self.buy.quantity - self.position.quantity
+			quantity = int(self.buy.quantity - self.position.quantity)
 			total = self.buy.total - self.position.total
-			buy = Buy(quantity=int(quantity),
+			tax = self.buy.tax - self.position.tax
+			buy = Buy(quantity=quantity,
 			          total=total,
-			          tax=self.buy.tax,
+			          tax=tax,
 			          date=self.position.date)
 		else:
 			buy = self.buy
