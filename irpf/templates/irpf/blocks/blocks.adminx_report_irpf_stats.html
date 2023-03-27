@@ -5,7 +5,7 @@
   {% if report.stats.buy %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8">Compras do período</div>
+        <div class="col-sm-8 text-primary">Compras do período</div>
         <div class="col-sm-4 text-center">
           <span class="text-muted">R$ {{ report.stats.buy|moneyformat }}</span>
         </div>
@@ -15,7 +15,7 @@
   {% if report.stats.sell %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8">Vendas do período</div>
+        <div class="col-sm-8 text-secondary">Vendas do período</div>
         <div class="col-sm-4 text-center">
           <span class="text-muted">R$ {{ report.stats.sell|moneyformat }}</span>
         </div>
@@ -37,7 +37,7 @@
   {% if report.stats.tax %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8">Taxas</div>
+        <div class="col-sm-8 text-info">Taxas</div>
         <div class="col-sm-4 text-center">
           <span class="text-muted">R$ {{ report.stats.tax|moneyformat }}</span>
         </div>
