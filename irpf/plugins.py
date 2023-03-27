@@ -360,13 +360,21 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 		return True
 
 	def get_stats(self):
-		stats = {}
 		results = self.admin_view.results
 		buy, sell, capital, tax = 'buy', 'sell', 'capital', 'tax'
-		stats[capital] = stats[buy] = stats[sell] = stats[tax] = 0.0
+		stats = {
+			buy: 0.0,
+			sell: 0.0,
+			capital: 0.0,
+			tax: 0.0
+		}
 		for item in results:
 			asset = item['asset']
-			stats[buy] += asset.buy.total
+			period = asset.period
+			if asset.position:
+				stats[buy] += (period.total - asset.position.total)
+			else:
+				stats[buy] += period.total
 			stats[sell] += asset.sell.total
 			stats[capital] += asset.sell.capital
 			stats[tax] += (asset.buy.tax + asset.sell.tax)
