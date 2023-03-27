@@ -114,7 +114,7 @@ class Asset:
 	def period(self) -> Period:
 		"""Compras menos vendas no intervalo de tempo"""
 		quantity = self.buy.quantity - self.sell.quantity
-		total = quantity * self.buy.avg_price
+		total = quantity * ((self.buy.total / quantity) if quantity > 0.0 else 0.0)
 		avg_price = (total / quantity) if quantity > 0 else 0.0
 		period = Period(quantity=quantity,
 		                avg_price=avg_price,
