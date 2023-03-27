@@ -129,6 +129,20 @@ class Asset:
 			self.events = Events()
 
 	@property
+	def period_buy(self) -> Buy:
+		"""Compras do perído (sem posição)"""
+		if self.position:
+			quantity = self.buy.quantity - self.position.quantity
+			total = quantity * self.buy.avg_price
+			buy = Buy(quantity=int(quantity),
+			          total=total,
+			          tax=self.buy.tax,
+			          date=self.position.date)
+		else:
+			buy = self.buy
+		return buy
+
+	@property
 	def period(self) -> Period:
 		"""Compras menos vendas no intervalo de tempo"""
 		quantity = self.buy.quantity - self.sell.quantity
