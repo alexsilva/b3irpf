@@ -1,37 +1,47 @@
+{% extends "irpf/adminx_report_irpf_asset_box.html" %}
 {% load irpf_tags %}
 
-<div class="card mt-1 mb-2 unsort irpfreport">
-  <div class="card-body">
-    <ul class="list-group list-group-flush">
-      {% if report.stats.buy %}
-        <li class="list-group-item">
-          <div class="text-primary">Compras do período:
-            <span class="text-secondary"> R$ {{ report.stats.buy|moneyformat }}</span>
-          </div>
-        </li>
-      {% endif %}
-      {% if report.stats.sell %}
-        <li class="list-group-item">
-          <div class="text-primary">Vendas do período:
-            <span class="text-secondary">R$ {{ report.stats.sell|moneyformat }}</span>
-          </div>
-        </li>
-      {% endif %}
-      {% if report.stats.capital %}
-        <li class="list-group-item">
-          <div class="text-{% if report.stats.capital > 0 %}success{% else %}danger{% endif %}">
-            Lucros do período:
-            <span class="text-secondary">R$ {{ report.stats.capital|moneyformat }}</span>
-          </div>
-        </li>
-      {% endif %}
-      {% if report.stats.tax %}
-          <li class="list-group-item">
-            <div class="text-danger">Taxas:
-              <span class="text-secondary">R$ {{ report.stats.tax|moneyformat }}</span>
-            </div>
-          </li>
-        {% endif %}
-    </ul>
-  </div>
-</div>
+{% block card_list_group %}
+  {% if report.stats.buy %}
+    <li class="list-group-item py-2">
+      <div class="row">
+        <div class="col-sm-8">Compras do período</div>
+        <div class="col-sm-4 text-center">
+          <span class="text-muted">R$ {{ report.stats.buy|moneyformat }}</span>
+        </div>
+      </div>
+    </li>
+  {% endif %}
+  {% if report.stats.sell %}
+    <li class="list-group-item py-2">
+      <div class="row">
+        <div class="col-sm-8">Vendas do período</div>
+        <div class="col-sm-4 text-center">
+          <span class="text-muted">R$ {{ report.stats.sell|moneyformat }}</span>
+        </div>
+      </div>
+    </li>
+  {% endif %}
+  {% if report.stats.capital %}
+    <li class="list-group-item py-2">
+      <div class="row">
+        <div class="col-sm-8 text-{% if report.stats.capital > 0 %}success{% else %}danger{% endif %}">
+          Ganho de capital
+        </div>
+        <div class="col-sm-4 text-center">
+          <span class="text-muted">R$ {{ report.stats.capital|moneyformat }}</span>
+        </div>
+      </div>
+    </li>
+  {% endif %}
+  {% if report.stats.tax %}
+    <li class="list-group-item py-2">
+      <div class="row">
+        <div class="col-sm-8">Taxas</div>
+        <div class="col-sm-4 text-center">
+          <span class="text-muted">R$ {{ report.stats.tax|moneyformat }}</span>
+        </div>
+      </div>
+    </li>
+  {% endif %}
+{% endblock %}
