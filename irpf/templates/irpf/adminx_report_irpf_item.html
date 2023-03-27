@@ -24,7 +24,7 @@
 
   </div>
   <div id="collapsebody-{{ forloop.counter }}" class="collapse show">
-    <div class="card-body">
+    <div class="card-body p-2">
       {% if item.asset.position %}
        {% include "irpf/adminx_report_irpf_asset_position.html" with card_title_class="text-primary" %}
       {% endif %}
