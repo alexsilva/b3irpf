@@ -18,7 +18,6 @@ $(function () {
         var is_checked = $(this).is(":checked"),
             $btn = $form.find("button[name='position']");
         $btn.prop("disabled", !is_checked);
-        form_submit_handler($form, $btn);
     });
     $form.submit(function (evt) {
         var $fm = $(this),
