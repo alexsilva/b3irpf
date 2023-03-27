@@ -360,6 +360,7 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 		return True
 
 	def get_stats(self):
+		"""Gera dados estatísticos"""
 		results = self.admin_view.results
 		buy, sell, capital, tax = 'buy', 'sell', 'capital', 'tax'
 		stats = {
