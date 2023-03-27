@@ -98,9 +98,9 @@ class NegotiationReport:
 			if asset.position and bonus.date < asset.position.date:
 				continue
 			try:
-				bonus_event = asset.events['bonificacoes']
+				bonus_event = asset.events['bonus']
 			except KeyError:
-				bonus_event = asset.events['bonificacoes'] = []
+				bonus_event = asset.events['bonus'] = []
 
 			# total de ativos na data ex
 			history_data_com = history[bonus.data_com]
@@ -132,11 +132,10 @@ class NegotiationReport:
 				              quantity=bonus_base_quantity,
 				              value=bonus_base_value),
 			})
-			asset.buy.quantity += bonus_quantity
-			asset.buy.total += bonus_base_value
-
-			# novo preço médio já com a bonifição
-			asset.buy.avg_price = asset.buy.total / asset.buy.quantity
+			# asset.buy.quantity += bonus_quantity
+			# asset.buy.total += bonus_base_value
+			# # novo preço médio já com a bonifição
+			# asset.buy.avg_price = asset.buy.total / asset.buy.quantity
 
 	def apply_events(self, date, assets, **options):
 		"""Eventos de desdobramento/grupamento"""
@@ -338,7 +337,7 @@ class NegotiationReport:
 			# aplica a bonificiação na data do histórico
 			self.apply_earnings(date, assets, **options)
 			self.apply_events(date, assets, **options)
-			# self.add_bonus(date, history, assets, **options)
+			self.add_bonus(date, history, assets, **options)
 		results = []
 		for code in assets:
 			asset = assets[code]

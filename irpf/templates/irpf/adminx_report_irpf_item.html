@@ -39,10 +39,10 @@
         {% include "irpf/adminx_report_irpf_asset_movement.html" with card_title="Movimentações" card_title_class="text-info"%}
       {% endif %}
 
-      {% if item.asset.events.bonificacoes %}
+      {% if item.asset.events.bonus %}
       <hr/>
       <h6 class="card-subtitle mb-2 text-info">Bonificações</h6>
-        {% for bonus in item.asset.events.bonificacoes %}
+        {% for bonus in item.asset.events.bonus %}
           {% include "irpf/adminx_report_irpf_bonus_item.html" %}
         {% endfor %}
       {% endif %}
