@@ -199,11 +199,19 @@ class AssetEventAdmin(BaseIRPFAdmin):
 	model_icon = "fa fa-sticky-note-o"
 	list_display = (
 		'date',
+		'enterprise_name',
 		'date_com',
 		'event',
 		'factor_from',
 		'factor_to'
 	)
+
+	def enterprise_name(self, instance):
+		return instance.enterprise.name
+
+	enterprise_name.is_column = True
+	enterprise_name.admin_order_field = "enterprise__name"
+	enterprise_name.short_description = _get_field_opts("name", Enterprise).verbose_name
 
 
 @sites.register(Earnings)
