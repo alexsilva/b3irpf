@@ -1,9 +1,8 @@
 {% extends "irpf/adminx_report_irpf_asset_box.html" %}
 {% load irpf_tags %}
 
-{% block card_title %}
-  Posição atual <span class="text-muted">{{ item.asset.position.date }}</span>
-{% endblock %}
+{% block card_title %}Posição atual{% endblock %}
+{% block card_subtitle %}{{ item.asset.position.date }}{% endblock %}
 
 {% block card_list_group %}
   <li class="list-group-item py-2">
