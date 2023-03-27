@@ -1,8 +1,11 @@
 {% load irpf_tags %}
 <div class="card mt-1 mb-2 unsort" style="max-width: 50rem;">
   <div class="card-body">
-    <h6 class="card-title {{ card_title_class }}">
+    <h5 class="card-title {{ card_title_class }}">
       {% block card_title %}{{ card_title }}{% endblock %}
+    </h5>
+    <h6 class="card-subtitle mb-2 text-muted">
+      {% block card_subtitle %}{{ card_subtitle }}{% endblock %}
     </h6>
     <ul class="list-group list-group-flush">
       {% block card_list_group %}{% endblock %}

@@ -1,29 +1,37 @@
+{% extends "irpf/adminx_report_irpf_asset_box.html" %}
 {% load irpf_tags %}
-<p class="card-text">
+{% block card_title %}Bonificações{% endblock %}
+{% block card_subtitle %}
   Proporção <span class="text-muted">{{ bonus.spec.proportion }}%</span> de
   <span class="text-muted">{{ bonus.asset.buy.quantity }}</span> ativos no dia {{ bonus.spec.data_com }}
-</p>
-<table class="table">
-  <thead>
-  <tr>
-    <th scope="col">{{ bonus.base.title }}
-      <button type="button" class="btn btn-link" data-toggle="popover"
-            data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações.">
-        <i class="fa fa-info-circle"></i>
-      </button>
-    </th>
-    <th scope="col">{{ bonus.fractional.title }}
-      <button type="button" class="btn btn-link" data-toggle="popover"
-            data-content="Rendimentos Isentos e Não Tributáveis / Outros / Descrição: Venda residual de ações bonificadas.">
-        <i class="fa fa-info-circle"></i>
-      </button>
-    </th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <th scope="row">{{ bonus.base.quantity }} ativo{{ bonus.base.quantity|pluralize }}, R$ {{ bonus.base.value|moneyformat }}</th>
-    <td>{{ bonus.fractional.quantity }}, R$ {{ bonus.fractional.value|moneyformat }}</td>
-  </tr>
-  </tbody>
-</table>
+{% endblock %}
+
+{% block card_list_group %}
+  <li class="list-group-item py-2">
+    <div class="row">
+      <div class="col-sm-8">{{ bonus.base.title }}
+        <button type="button" class="btn btn-link" data-toggle="popover"
+                data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações.">
+          <i class="fa fa-info-circle"></i>
+        </button>
+      </div>
+      <div class="col-sm-4 text-center">
+        <span
+            class="text-muted">{{ bonus.base.quantity }} ativo{{ bonus.base.quantity|pluralize }}, R$ {{ bonus.base.value|moneyformat }}</span>
+      </div>
+    </div>
+  </li>
+  <li class="list-group-item py-2">
+    <div class="row">
+      <div class="col-sm-8">{{ bonus.fractional.title }}
+        <button type="button" class="btn btn-link" data-toggle="popover"
+                data-content="Rendimentos Isentos e Não Tributáveis / Outros / Descrição: Venda residual de ações bonificadas.">
+          <i class="fa fa-info-circle"></i>
+        </button>
+      </div>
+      <div class="col-sm-4 text-center">
+        <span class="text-muted">{{ bonus.fractional.quantity }}, R$ {{ bonus.fractional.value|moneyformat }}</span>
+      </div>
+    </div>
+  </li>
+{% endblock %}
