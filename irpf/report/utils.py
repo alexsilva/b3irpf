@@ -133,7 +133,7 @@ class Asset:
 		"""Compras do perído (sem posição)"""
 		if self.position:
 			quantity = self.buy.quantity - self.position.quantity
-			total = quantity * self.buy.avg_price
+			total = self.buy.total - self.position.total
 			buy = Buy(quantity=int(quantity),
 			          total=total,
 			          tax=self.buy.tax,
