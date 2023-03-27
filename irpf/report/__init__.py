@@ -132,10 +132,6 @@ class NegotiationReport:
 				              quantity=bonus_base_quantity,
 				              value=bonus_base_value),
 			})
-			# asset.buy.quantity += bonus_quantity
-			# asset.buy.total += bonus_base_value
-			# # novo preço médio já com a bonifição
-			# asset.buy.avg_price = asset.buy.total / asset.buy.quantity
 
 	def apply_events(self, date, assets, **options):
 		"""Eventos de desdobramento/grupamento"""
@@ -162,12 +158,10 @@ class NegotiationReport:
 			elif instance.event == event_model.SPLIT:  # Desdobramento
 				quantity = asset.buy.quantity / instance.factor_from  # correção
 				asset.buy.quantity = quantity * instance.factor_to
-				asset.buy.avg_price = asset.buy.total / asset.buy.quantity
 
 			elif instance.event == event_model.INPLIT:  # Grupamento
 				quantity = asset.buy.quantity / instance.factor_from  # correção
 				asset.buy.quantity = quantity * instance.factor_to
-				asset.buy.avg_price = asset.buy.total / asset.buy.quantity
 
 	def consolidate(self, instance, asset: Asset):
 		kind = instance.kind.lower()
@@ -177,14 +171,11 @@ class NegotiationReport:
 			asset.buy.tax += instance.tax
 			asset.buy.quantity += instance.quantity
 			asset.buy.total += ((instance.quantity * instance.price) + instance.tax)
-			if asset.buy.quantity > 0:
-				asset.buy.avg_price = asset.buy.total / asset.buy.quantity
 		elif kind == self.sell:
 			# valores de venda
 			asset.sell.tax += instance.tax
 			asset.sell.quantity += instance.quantity
 			asset.sell.total += ((instance.quantity * instance.price) - instance.tax)
-			asset.sell.avg_price = asset.sell.total / asset.sell.quantity
 
 			# ganho de capital de todas a vendas
 			asset.sell.capital += (instance.quantity * (asset.sell.avg_price - asset.buy.avg_price))
@@ -231,13 +222,11 @@ class NegotiationReport:
 		elif flow == self.credit:
 			if kind == self.LEILAO_DE_FRACAO:
 				asset.sell.total += instance.total
-				asset.sell.avg_price = (asset.sell.total / asset.sell.quantity) if asset.sell.quantity > 0 else 0.0
 				# ganho de capital de todas a vendas
 				asset.sell.capital += instance.total
 			elif kind == self.BONIFICAO_EM_ATIVOS:
 				asset.buy.quantity += instance.quantity
 				asset.buy.total += instance.total
-				asset.buy.avg_price = (asset.buy.total / asset.buy.quantity) if asset.buy.quantity > 0 else 0.0
 		elif flow == self.debt:
 			if kind == self.FRACAO_EM_ATIVOS:
 				asset.sell.quantity += instance.quantity
@@ -288,7 +277,6 @@ class NegotiationReport:
 			              position=position,
 			              buy=Buy(
 				              quantity=position.quantity,
-				              avg_price=position.avg_price,
 				              total=position.total,
 				              tax=position.tax,
 				              date=position.date

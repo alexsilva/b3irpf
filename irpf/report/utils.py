@@ -31,32 +31,44 @@ class Buy:
 	"""Compas"""
 
 	def __init__(self, quantity: float = 0,
-	             avg_price: float = 0.0,
 	             total: float = 0.0,
 	             tax: float = 0.0,
 	             date: datetime.date = None):
 		self.quantity = quantity
-		self.avg_price = avg_price
 		self.total = total
 		self.tax = tax
 		self.date = date
+
+	@property
+	def avg_price(self):
+		if self.quantity > 0:
+			avg_price = self.total / int(self.quantity)
+		else:
+			avg_price = 0.0
+		return avg_price
 
 
 class Sell:
 	"""Vendas"""
 
 	def __init__(self, quantity: float = 0,
-	             avg_price: float = 0.0,
 	             total: float = 0.0,
 	             capital: float = 0.0,
 	             tax: float = 0.0,
 	             date: datetime.date = None):
 		self.quantity = quantity
-		self.avg_price = avg_price
 		self.capital = capital
 		self.total = total
 		self.tax = tax
 		self.date = date
+
+	@property
+	def avg_price(self):
+		if self.quantity > 0:
+			avg_price = self.total / self.quantity
+		else:
+			avg_price = 0.0
+		return avg_price
 
 	def __bool__(self):
 		return bool(self.quantity)
@@ -66,15 +78,21 @@ class Period:
 	"""Compas menos vendas no intervalo de tempo"""
 
 	def __init__(self, quantity: float = 0,
-	             avg_price: float = 0.0,
 	             total: float = 0.0,
 	             tax: float = 0.0,
 	             position=None):
 		self.quantity = quantity
-		self.avg_price = avg_price
 		self.position = position
 		self.total = total
 		self.tax = tax
+
+	@property
+	def avg_price(self):
+		if self.quantity > 0:
+			avg_price = self.total / int(self.quantity)
+		else:
+			avg_price = 0.0
+		return avg_price
 
 
 class Asset:
@@ -114,8 +132,7 @@ class Asset:
 	def period(self) -> Period:
 		"""Compras menos vendas no intervalo de tempo"""
 		quantity = self.buy.quantity - self.sell.quantity
-		total = quantity * ((self.buy.total / quantity) if quantity > 0.0 else 0.0)
-		avg_price = (total / quantity) if quantity > 0 else 0.0
+		total = quantity * self.buy.avg_price
 		try:
 			# 5.0 % 5 == 0, 5.5 % 5 = 0.5
 			if quantity % quantity == 0:
@@ -124,7 +141,6 @@ class Asset:
 		except ZeroDivisionError:
 			...
 		period = Period(quantity=quantity,
-		                avg_price=avg_price,
 		                total=total,
 		                tax=self.buy.tax,
 		                position=self.position)
@@ -146,4 +162,3 @@ class Asset:
 
 	def __iter__(self):
 		return iter(self.items)
-
