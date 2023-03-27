@@ -116,6 +116,13 @@ class Asset:
 		quantity = self.buy.quantity - self.sell.quantity
 		total = quantity * ((self.buy.total / quantity) if quantity > 0.0 else 0.0)
 		avg_price = (total / quantity) if quantity > 0 else 0.0
+		try:
+			# 5.0 % 5 == 0, 5.5 % 5 = 0.5
+			if quantity % quantity == 0:
+				# converte para inteiro porque o valor não tem fração relevante
+				quantity = int(quantity)
+		except ZeroDivisionError:
+			...
 		period = Period(quantity=quantity,
 		                avg_price=avg_price,
 		                total=total,
