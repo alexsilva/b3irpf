@@ -6,8 +6,8 @@
           <span title="Quantidade" class="badge badge-light badge-pill">{% get_obj_val event "quantity" %}</span>
         </span>
     </div>
-    <div class="col-sm-4 text-center">{% get_obj_val event "title" %}</div>
-    <div class="col-sm-4 text-center">
+    <div class="col-sm-4 text-center text-nowrap">{% get_obj_val event "title" %}</div>
+    <div class="col-sm-4 text-center text-sm-right">
       {% get_obj_val event "value" as event_value %}
       <span class="text-muted">R$ {{ event_value|moneyformat }}</span>
     </div>

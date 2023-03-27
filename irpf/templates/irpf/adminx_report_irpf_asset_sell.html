@@ -4,32 +4,32 @@
 {% block card_list_group %}
   <li class="list-group-item py-2">
     <div class="row">
-      <div class="col-sm-8">Quantidade vendida</div>
-      <div class="col-sm-4 text-center">
+      <div class="col-sm-8 text-center text-sm-left">Quantidade vendida</div>
+      <div class="col-sm-4 text-center text-sm-right">
         <span class="text-muted">{{ item.asset.sell.quantity }}</span>
       </div>
     </div>
   </li>
   <li class="list-group-item py-2">
     <div class="row">
-      <div class="col-sm-8">Preço médio de venda</div>
-      <div class="col-sm-4 text-center">
+      <div class="col-sm-8 text-center text-sm-left">Preço médio de venda</div>
+      <div class="col-sm-4 text-center text-sm-right">
         <span class="text-muted">R$ {{ item.asset.sell.avg_price|moneyformat }}</span>
       </div>
     </div>
   </li>
   <li class="list-group-item py-2">
     <div class="row">
-      <div class="col-sm-8">Valor total de venda</div>
-      <div class="col-sm-4 text-center">
+      <div class="col-sm-8 text-center text-sm-left">Valor total de venda</div>
+      <div class="col-sm-4 text-center text-sm-right">
         <span class="text-muted">R$ {{ item.asset.sell.total|moneyformat }}</span>
       </div>
     </div>
   </li>
   <li class="list-group-item py-2">
     <div class="row">
-      <div class="col-sm-8">Ganho de capital</div>
-      <div class="col-sm-4 text-center">
+      <div class="col-sm-8 text-center text-sm-left">Ganho de capital</div>
+      <div class="col-sm-4 text-center text-sm-right">
         <span class="text-muted">R$ {{ item.asset.sell.capital|moneyformat }}</span>
       </div>
     </div>

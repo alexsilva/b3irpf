@@ -5,8 +5,8 @@
   {% if report.stats.buy %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8 text-primary">Compras do período</div>
-        <div class="col-sm-4 text-center">
+        <div class="col-sm-8 text-center text-sm-left text-primary">Compras do período</div>
+        <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">R$ {{ report.stats.buy|moneyformat }}</span>
         </div>
       </div>
@@ -15,8 +15,8 @@
   {% if report.stats.sell %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8 text-secondary">Vendas do período</div>
-        <div class="col-sm-4 text-center">
+        <div class="col-sm-8 text-secondary text-center text-sm-left">Vendas do período</div>
+        <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">R$ {{ report.stats.sell|moneyformat }}</span>
         </div>
       </div>
@@ -25,10 +25,10 @@
   {% if report.stats.capital %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8 text-{% if report.stats.capital > 0 %}success{% else %}danger{% endif %}">
+        <div class="col-sm-8 text-center text-sm-left text-{% if report.stats.capital > 0 %}success{% else %}danger{% endif %}">
           Ganho de capital
         </div>
-        <div class="col-sm-4 text-center">
+        <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">R$ {{ report.stats.capital|moneyformat }}</span>
         </div>
       </div>
@@ -37,8 +37,8 @@
   {% if report.stats.tax %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8 text-info">Taxas</div>
-        <div class="col-sm-4 text-center">
+        <div class="col-sm-8 text-center text-sm-left text-info">Taxas</div>
+        <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">R$ {{ report.stats.tax|moneyformat }}</span>
         </div>
       </div>
@@ -47,8 +47,8 @@
   {% if report.stats.patrimony %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8 text-muted">Patrimônio investido</div>
-        <div class="col-sm-4 text-center">
+        <div class="col-sm-8 text-center text-sm-left text-muted">Patrimônio investido</div>
+        <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">R$ {{ report.stats.patrimony|moneyformat }}</span>
         </div>
       </div>
