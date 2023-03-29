@@ -132,7 +132,7 @@ class Asset:
 	def period_buy(self) -> Buy:
 		"""Compras do perído (sem posição)"""
 		if self.position:
-			quantity = int(self.buy.quantity - self.position.quantity)
+			quantity = int(self.buy.quantity) - int(self.position.quantity)
 			total = self.buy.total - self.position.total
 			tax = self.buy.tax - self.position.tax
 			buy = Buy(quantity=quantity,
@@ -147,7 +147,7 @@ class Asset:
 	def period(self) -> Period:
 		"""Compras menos vendas no intervalo de tempo"""
 		quantity = self.buy.quantity - self.sell.quantity
-		total = quantity * self.buy.avg_price
+		total = int(quantity) * self.buy.avg_price
 		try:
 			# 5.0 % 5 == 0, 5.5 % 5 = 0.5
 			if quantity % quantity == 0:
