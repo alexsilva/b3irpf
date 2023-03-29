@@ -2,6 +2,18 @@ import copy
 import datetime
 
 
+def smart_int(value):
+	"""Converte 'value' para int quanto a parte decimal for zero"""
+	try:
+		# 5.0 % 5 == 0, 5.5 % 5 = 0.5
+		if value % value == 0:
+			# converte para inteiro porque o valor não tem fração relevante
+			value = int(value)
+	except ZeroDivisionError:
+		...
+	return value
+
+
 class Event:
 	def __init__(self, title: str,
 	             quantity: float = 0.0,
@@ -148,14 +160,7 @@ class Asset:
 		"""Compras menos vendas no intervalo de tempo"""
 		quantity = self.buy.quantity - self.sell.quantity
 		total = int(quantity) * self.buy.avg_price
-		try:
-			# 5.0 % 5 == 0, 5.5 % 5 = 0.5
-			if quantity % quantity == 0:
-				# converte para inteiro porque o valor não tem fração relevante
-				quantity = int(quantity)
-		except ZeroDivisionError:
-			...
-		period = Period(quantity=quantity,
+		period = Period(quantity=smart_int(quantity),
 		                total=total,
 		                tax=self.buy.tax,
 		                position=self.position)
