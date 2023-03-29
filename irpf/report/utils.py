@@ -53,8 +53,9 @@ class Buy:
 
 	@property
 	def avg_price(self):
-		if self.quantity > 0:
-			avg_price = self.total / int(self.quantity)
+		quantity = int(self.quantity)
+		if quantity > 0:
+			avg_price = self.total / quantity
 		else:
 			avg_price = 0.0
 		return avg_price
@@ -100,8 +101,9 @@ class Period:
 
 	@property
 	def avg_price(self):
-		if self.quantity > 0:
-			avg_price = self.total / int(self.quantity)
+		quantity = int(self.quantity)
+		if quantity > 0:
+			avg_price = self.total / quantity
 		else:
 			avg_price = 0.0
 		return avg_price
