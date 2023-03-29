@@ -1,3 +1,5 @@
+import decimal
+
 import datetime
 import re
 from decimal import Decimal
@@ -101,7 +103,7 @@ class DecimalZeroField(models.FloatField):
 		if isinstance(value, str):
 			try:
 				value = Decimal(value)
-			except ValueError:
+			except (decimal.DecimalException, ValueError):
 				value = Decimal(0)
 		return value
 
