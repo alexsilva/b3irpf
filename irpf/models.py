@@ -240,7 +240,7 @@ class Earnings(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Provento"
 		verbose_name_plural = "Proventos"
-		ordering = ("date",)
+		ordering = ("-date",)
 
 
 class BrokerageNote(BaseIRPFModel):
