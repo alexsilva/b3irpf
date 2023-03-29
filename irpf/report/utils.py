@@ -1,3 +1,5 @@
+import decimal
+
 import copy
 import datetime
 from decimal import Decimal
@@ -10,7 +12,7 @@ def smart_desc(value):
 		if value % value == 0:
 			# converte para inteiro porque o valor não tem fração relevante
 			value = Decimal(int(value))
-	except ZeroDivisionError:
+	except decimal.InvalidOperation:
 		...
 	return value
 
