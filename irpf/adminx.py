@@ -140,7 +140,7 @@ class NegotiationInline:
 class BrokerageNoteAdmin(BaseIRPFAdmin):
 	model_icon = "fa fa-book"
 	fields = ('note', 'institution')
-	list_display = ('note', 'institution', 'reference_date')
+	list_display = ('note', 'institution', 'reference_date', 'negotiation_count')
 	brokerage_note_parsers = {
 		# NU INVEST CORRETORA DE VALORES S.A.
 		'62169875000179': NunInvestParser
@@ -159,6 +159,12 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 		'others'
 	]
 	inlines = [NegotiationInline]
+
+	def negotiation_count(self, instance):
+		"""Informa de total de ativos vinculados a nota"""
+		return instance.negotiation_set.count()
+
+	negotiation_count.short_description = "Total de negociações"
 
 	def get_readonly_fields(self):
 		readonly_fields = list(super().get_readonly_fields())
