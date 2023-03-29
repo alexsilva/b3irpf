@@ -60,7 +60,7 @@ class Buy:
 		if quantity > 0:
 			avg_price = self.total / quantity
 		else:
-			avg_price = 0.0
+			avg_price = Decimal(0)
 		return avg_price
 
 
