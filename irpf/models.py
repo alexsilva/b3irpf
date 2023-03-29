@@ -249,7 +249,7 @@ class BrokerageNote(BaseIRPFModel):
 	reference_date = models.DateField(verbose_name="Data do pregão", null=True)
 	settlement_fee = models.DecimalField(verbose_name="Taxa de liquidação",
 	                                     max_digits=DECIMAL_MAX_DIGITS,
-	                                     decimal_places=DECMIAL_PLACES,
+	                                     decimal_places=4,
 	                                     default=Decimal(0))
 	registration_fee = models.DecimalField(verbose_name="Taxa de registro",
 	                                       max_digits=DECIMAL_MAX_DIGITS,
@@ -257,35 +257,35 @@ class BrokerageNote(BaseIRPFModel):
 	                                       default=Decimal(0))
 	term_fee = models.DecimalField(verbose_name="Taxa de termo/opções",
 	                               max_digits=DECIMAL_MAX_DIGITS,
-	                               decimal_places=DECMIAL_PLACES,
+	                               decimal_places=4,
 	                               default=Decimal(0))
 	ana_fee = models.DecimalField(verbose_name="Taxa A.N.A",
 	                              max_digits=DECIMAL_MAX_DIGITS,
-	                              decimal_places=DECMIAL_PLACES,
+	                              decimal_places=4,
 	                              default=Decimal(0))
 	emoluments = models.DecimalField(verbose_name="Emolumentos",
 	                                 max_digits=DECIMAL_MAX_DIGITS,
-	                                 decimal_places=DECMIAL_PLACES,
+	                                 decimal_places=4,
 	                                 default=Decimal(0))
 	operational_fee = models.DecimalField(verbose_name="Taxa Operacional",
 	                                      max_digits=DECIMAL_MAX_DIGITS,
-	                                      decimal_places=DECMIAL_PLACES,
+	                                      decimal_places=4,
 	                                      default=Decimal(0))
 	execution = models.DecimalField(verbose_name="Execução",
 	                                max_digits=DECIMAL_MAX_DIGITS,
-	                                decimal_places=DECMIAL_PLACES,
+	                                decimal_places=4,
 	                                default=Decimal(0))
 	custody_fee = models.DecimalField(verbose_name="Taxa de custódia",
 	                                  max_digits=DECIMAL_MAX_DIGITS,
-	                                  decimal_places=DECMIAL_PLACES,
+	                                  decimal_places=4,
 	                                  default=Decimal(0))
 	taxes = models.DecimalField(verbose_name="Impostos",
 	                            max_digits=DECIMAL_MAX_DIGITS,
-	                            decimal_places=DECMIAL_PLACES,
+	                            decimal_places=4,
 	                            default=Decimal(0))
 	others = models.DecimalField(verbose_name="Outros",
 	                             max_digits=DECIMAL_MAX_DIGITS,
-	                             decimal_places=DECMIAL_PLACES,
+	                             decimal_places=4,
 	                             default=Decimal(0))
 
 	transactions = models.ManyToManyField(Negotiation, verbose_name="Transações")
