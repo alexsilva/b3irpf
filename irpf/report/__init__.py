@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.utils.text import slugify
 
 from irpf.models import Enterprise, Earnings, Bonus, Position, AssetEvent
-from irpf.report.utils import Event, Asset, Buy
+from irpf.report.utils import Event, Asset, Buy, smart_desc
 from irpf.utils import range_dates
 
 
@@ -278,7 +278,7 @@ class NegotiationReport:
 			              enterprise=position.enterprise,
 			              position=position,
 			              buy=Buy(
-				              quantity=position.quantity,
+				              quantity=smart_desc(position.quantity),
 				              total=position.total,
 				              tax=position.tax,
 				              date=position.date
