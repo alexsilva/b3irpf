@@ -18,7 +18,7 @@ def smart_int(value):
 class Event:
 	def __init__(self, title: str,
 	             quantity: float = 0.0,
-	             value: Decimal = 0.0):
+	             value: Decimal = Decimal(0)):
 		self.title = title
 		self.quantity = quantity
 		self.value = value

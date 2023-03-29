@@ -98,7 +98,7 @@ class FloatBRField(models.FloatField):
 		return super().to_python(value)
 
 
-class DecimalZeroField(models.FloatField):
+class DecimalZeroField(models.DecimalField):
 	def _get_safe_value(self, value):
 		if isinstance(value, str):
 			try:

@@ -217,7 +217,10 @@ class Earnings(BaseIRPFModel):
 	institution = models.CharField(verbose_name="Instituição",
 	                               max_length=512)
 	quantity = FloatBRField(verbose_name="Quantidade", default=0.0)
-	total = DecimalZeroField(verbose_name="Valor da operação", default=Decimal(0))
+	total = DecimalZeroField(verbose_name="Valor da operação",
+	                         max_digits=DECIMAL_MAX_DIGITS,
+	                         decimal_places=DECMIAL_PLACES,
+	                         default=Decimal(0))
 
 	date.sheet_header = "Data"
 	flow.sheet_header = "Entrada/Saída"
