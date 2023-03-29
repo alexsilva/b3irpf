@@ -322,12 +322,10 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 			if kind is None:
 				continue
 			# rateio de taxas proporcional ao valor pago
-			asset_total = asset.amount * asset.unit_price
-			avg_tax = tax * (asset_total / paid)
+			avg_tax = tax * ((asset.amount * asset.unit_price) / paid)
 			qs = qs.filter(code__iexact=ticker,
 			               kind__iexact=kind,
-			               quantity=asset.amount,
-			               total=asset_total)
+			               quantity=asset.amount)
 			if self.is_save_transactions and not qs.exists():
 				self._save_trasaction(
 					asset, instance,
