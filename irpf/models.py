@@ -253,7 +253,7 @@ class BrokerageNote(BaseIRPFModel):
 	                                     default=Decimal(0))
 	registration_fee = models.DecimalField(verbose_name="Taxa de registro",
 	                                       max_digits=DECIMAL_MAX_DIGITS,
-	                                       decimal_places=DECMIAL_PLACES,
+	                                       decimal_places=4,
 	                                       default=Decimal(0))
 	term_fee = models.DecimalField(verbose_name="Taxa de termo/opções",
 	                               max_digits=DECIMAL_MAX_DIGITS,
