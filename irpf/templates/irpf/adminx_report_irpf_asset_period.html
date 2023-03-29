@@ -4,7 +4,7 @@
 {% block card_list_group %}
   <li class="list-group-item py-2">
     <div class="row">
-      <div class="col-sm-8 text-center text-sm-left">Quantidade líquida</div>
+      <div class="col-sm-8 text-center text-sm-left">Quantidade</div>
       <div class="col-sm-4 text-center text-sm-right">
         <span class="text-muted">{{ asset_period.quantity }}</span>
       </div>
@@ -12,7 +12,7 @@
   </li>
   <li class="list-group-item py-2">
     <div class="row">
-      <div class="col-sm-8 text-center text-sm-left">Preço médio de compra</div>
+      <div class="col-sm-8 text-center text-sm-left">Preço médio</div>
       <div class="col-sm-4 text-center text-sm-right">
         <span class="text-muted">R$ {{ asset_period.avg_price|moneyformat }}</span>
       </div>
@@ -20,7 +20,7 @@
   </li>
   <li class="list-group-item py-2">
     <div class="row">
-      <div class="col-sm-8 text-center text-sm-left">Valor total de compra</div>
+      <div class="col-sm-8 text-center text-sm-left">Valor total</div>
       <div class="col-sm-4 text-center text-sm-right">
         <span class="text-muted">R$ {{ asset_period.total|moneyformat }}</span>
       </div>
