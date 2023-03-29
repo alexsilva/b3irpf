@@ -1,5 +1,6 @@
 import copy
 import datetime
+from decimal import Decimal
 
 
 def smart_int(value):
@@ -17,7 +18,7 @@ def smart_int(value):
 class Event:
 	def __init__(self, title: str,
 	             quantity: float = 0.0,
-	             value: float = 0.0):
+	             value: Decimal = 0.0):
 		self.title = title
 		self.quantity = quantity
 		self.value = value
@@ -43,8 +44,8 @@ class Buy:
 	"""Compas"""
 
 	def __init__(self, quantity: float = 0,
-	             total: float = 0.0,
-	             tax: float = 0.0,
+	             total: Decimal = Decimal(0),
+	             tax: Decimal = Decimal(0),
 	             date: datetime.date = None):
 		self.quantity = quantity
 		self.total = total
@@ -65,9 +66,9 @@ class Sell:
 	"""Vendas"""
 
 	def __init__(self, quantity: float = 0,
-	             total: float = 0.0,
-	             capital: float = 0.0,
-	             tax: float = 0.0,
+	             total: Decimal = Decimal(0),
+	             capital: Decimal = Decimal(0),
+	             tax: Decimal = Decimal(0),
 	             date: datetime.date = None):
 		self.quantity = quantity
 		self.capital = capital
@@ -78,9 +79,9 @@ class Sell:
 	@property
 	def avg_price(self):
 		if self.quantity > 0:
-			avg_price = self.total / self.quantity
+			avg_price = self.total / Decimal(self.quantity)
 		else:
-			avg_price = 0.0
+			avg_price = Decimal(0)
 		return avg_price
 
 	def __bool__(self):
@@ -91,8 +92,8 @@ class Period:
 	"""Compas menos vendas no intervalo de tempo"""
 
 	def __init__(self, quantity: float = 0,
-	             total: float = 0.0,
-	             tax: float = 0.0,
+	             total: Decimal = Decimal(0),
+	             tax: Decimal = Decimal(0),
 	             position=None):
 		self.quantity = quantity
 		self.position = position
@@ -105,7 +106,7 @@ class Period:
 		if quantity > 0:
 			avg_price = self.total / quantity
 		else:
-			avg_price = 0.0
+			avg_price = Decimal(0)
 		return avg_price
 
 
@@ -113,7 +114,8 @@ class Asset:
 	"""Ativos"""
 
 	def __init__(self, ticker,
-	             buy: Buy = None, sell: Sell = None,
+	             buy: Buy = None,
+	             sell: Sell = None,
 	             position=None,
 	             credit: Credit = None,
 	             debit: Debit = None,

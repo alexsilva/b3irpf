@@ -2,7 +2,7 @@ import collections
 import io
 import itertools
 import re
-
+from decimal import Decimal
 import django.forms as django_forms
 from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
@@ -326,11 +326,12 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 			if kind is None:
 				continue
 			# rateio de taxas proporcional ao valor pago
-			avg_tax = tax * ((asset.amount * asset.unit_price) / paid)
+			asset_total = asset.amount * asset.unit_price
+			avg_tax = tax * (asset_total / paid)
 			qs = qs.filter(code__iexact=ticker,
 			               kind__iexact=kind,
 			               quantity=asset.amount,
-			               price=asset.unit_price)
+			               total=asset_total)
 			if self.is_save_transactions and not qs.exists():
 				self._save_trasaction(
 					asset, instance,
@@ -364,11 +365,11 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 		results = self.admin_view.results
 		buy, sell, capital, tax, patrimony = 'buy', 'sell', 'capital', 'tax', 'patrimony'
 		stats = {
-			buy: 0.0,
-			sell: 0.0,
-			capital: 0.0,
-			patrimony: 0.0,
-			tax: 0.0
+			buy: Decimal(0),
+			sell: Decimal(0),
+			capital: Decimal(0),
+			patrimony: Decimal(0),
+			tax: Decimal(0)
 		}
 		for item in results:
 			asset = item['asset']

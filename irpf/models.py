@@ -1,10 +1,15 @@
+from decimal import Decimal
 from django.conf import settings
 from django.db import models
 from django.utils.formats import number_format, date_format
 from django.utils.functional import cached_property, classproperty
 
-from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField
+from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField, \
+	DecimalZeroField
 from irpf.storage import FileSystemOverwriteStorage
+
+DECIMAL_MAX_DIGITS = 28
+DECMIAL_PLACES = 16
 
 
 class Bookkeeping(models.Model):
@@ -136,25 +141,36 @@ class Negotiation(BaseIRPFModel):
 
 	quantity = models.PositiveBigIntegerField(verbose_name="Quantidade")
 
-	price = models.FloatField(verbose_name="Preço", default=0.0)
-
-	total = models.FloatField(verbose_name="Valor (total)", default=0.0)
+	price = models.DecimalField(verbose_name="Preço",
+	                            max_digits=DECIMAL_MAX_DIGITS,
+	                            decimal_places=DECMIAL_PLACES,
+	                            default=Decimal(0))
+	total = models.DecimalField(verbose_name="Valor (total)",
+	                            max_digits=DECIMAL_MAX_DIGITS,
+	                            decimal_places=DECMIAL_PLACES,
+	                            default=Decimal(0))
 
 	positions = models.ManyToManyField(to="Position",
-									verbose_name="Posições",
-									blank=True,
-									editable=False,
-									help_text="Esta relação serve apenas para fins de histórico de posição")
+	                                   verbose_name="Posições",
+	                                   blank=True,
+	                                   editable=False,
+	                                   help_text="Esta relação serve apenas para fins de histórico de posição")
 
-	tax = models.FloatField(verbose_name="Taxas", default=0.0)
-	irrf = models.FloatField(verbose_name="IRRF", default=0.0,
-	                         help_text="Imposto que pode ter sido retido na fonte")
+	tax = models.DecimalField(verbose_name="Taxas",
+	                          max_digits=DECIMAL_MAX_DIGITS,
+	                          decimal_places=DECMIAL_PLACES,
+	                          default=Decimal(0))
+	irrf = models.DecimalField(verbose_name="IRRF",
+	                           max_digits=DECIMAL_MAX_DIGITS,
+	                           decimal_places=DECMIAL_PLACES,
+	                           default=Decimal(0),
+	                           help_text="Imposto que pode ter sido retido na fonte")
 
 	brokerage_note = models.ForeignKey("BrokerageNote",
 	                                   on_delete=models.SET_NULL,
 	                                   verbose_name="Notas",
-		                               null=True,
-		                               editable=False)
+	                                   null=True,
+	                                   editable=False)
 
 	# relates the name of the headers with the fields.
 	date.sheet_header = "Data do Negócio"
@@ -180,7 +196,10 @@ class Bonus(BaseIRPFModel):
 	data_com = DateField(verbose_name="Data com")
 	date_ex = DateField(verbose_name="Data ex")
 	date = DateField(verbose_name="Data de incorporação")
-	base_value = models.FloatField(verbose_name="Valor de base", default=0.0)
+	base_value = models.DecimalField(verbose_name="Valor de base",
+	                                 max_digits=DECIMAL_MAX_DIGITS,
+	                                 decimal_places=DECMIAL_PLACES,
+	                                 default=Decimal(0))
 	proportion = models.FloatField(verbose_name="Proporção", default=0.0,
 	                               help_text="valor expresso em porcentagem.")
 
@@ -204,7 +223,7 @@ class Earnings(BaseIRPFModel):
 	institution = models.CharField(verbose_name="Instituição",
 	                               max_length=512)
 	quantity = FloatBRField(verbose_name="Quantidade", default=0.0)
-	total = FloatZeroField(verbose_name="Valor da operação", default=0.0)
+	total = DecimalZeroField(verbose_name="Valor da operação", default=Decimal(0))
 
 	date.sheet_header = "Data"
 	flow.sheet_header = "Entrada/Saída"
@@ -234,16 +253,46 @@ class BrokerageNote(BaseIRPFModel):
 	                                verbose_name="Corretora",
 	                                help_text="A corretora que gerou esssa nota.")
 	reference_date = models.DateField(verbose_name="Data do pregão", null=True)
-	settlement_fee = models.FloatField(verbose_name="Taxa de liquidação", default=0.0)
-	registration_fee = models.FloatField(verbose_name="Taxa de registro", default=0.0)
-	term_fee = models.FloatField(verbose_name="Taxa de termo/opções", default=0.0)
-	ana_fee = models.FloatField(verbose_name="Taxa A.N.A", default=0.0)
-	emoluments = models.FloatField(verbose_name="Emolumentos", default=0.0)
-	operational_fee = models.FloatField(verbose_name="Taxa Operacional", default=0.0)
-	execution = models.FloatField(verbose_name="Execução", default=0.0)
-	custody_fee = models.FloatField(verbose_name="Taxa de custódia", default=0.0)
-	taxes = models.FloatField(verbose_name="Impostos", default=0.0)
-	others = models.FloatField(verbose_name="Outros", default=0.0)
+	settlement_fee = models.DecimalField(verbose_name="Taxa de liquidação",
+	                                     max_digits=DECIMAL_MAX_DIGITS,
+	                                     decimal_places=DECMIAL_PLACES,
+	                                     default=Decimal(0))
+	registration_fee = models.DecimalField(verbose_name="Taxa de registro",
+	                                       max_digits=DECIMAL_MAX_DIGITS,
+	                                       decimal_places=DECMIAL_PLACES,
+	                                       default=Decimal(0))
+	term_fee = models.DecimalField(verbose_name="Taxa de termo/opções",
+	                               max_digits=DECIMAL_MAX_DIGITS,
+	                               decimal_places=DECMIAL_PLACES,
+	                               default=Decimal(0))
+	ana_fee = models.DecimalField(verbose_name="Taxa A.N.A",
+	                              max_digits=DECIMAL_MAX_DIGITS,
+	                              decimal_places=DECMIAL_PLACES,
+	                              default=Decimal(0))
+	emoluments = models.DecimalField(verbose_name="Emolumentos",
+	                                 max_digits=DECIMAL_MAX_DIGITS,
+	                                 decimal_places=DECMIAL_PLACES,
+	                                 default=Decimal(0))
+	operational_fee = models.DecimalField(verbose_name="Taxa Operacional",
+	                                      max_digits=DECIMAL_MAX_DIGITS,
+	                                      decimal_places=DECMIAL_PLACES,
+	                                      default=Decimal(0))
+	execution = models.DecimalField(verbose_name="Execução",
+	                                max_digits=DECIMAL_MAX_DIGITS,
+	                                decimal_places=DECMIAL_PLACES,
+	                                default=Decimal(0))
+	custody_fee = models.DecimalField(verbose_name="Taxa de custódia",
+	                                  max_digits=DECIMAL_MAX_DIGITS,
+	                                  decimal_places=DECMIAL_PLACES,
+	                                  default=Decimal(0))
+	taxes = models.DecimalField(verbose_name="Impostos",
+	                            max_digits=DECIMAL_MAX_DIGITS,
+	                            decimal_places=DECMIAL_PLACES,
+	                            default=Decimal(0))
+	others = models.DecimalField(verbose_name="Outros",
+	                             max_digits=DECIMAL_MAX_DIGITS,
+	                             decimal_places=DECMIAL_PLACES,
+	                             default=Decimal(0))
 
 	transactions = models.ManyToManyField(Negotiation, verbose_name="Transações")
 
@@ -333,9 +382,18 @@ class Position(BaseIRPFModel):
 	                                verbose_name="Instituição",
 	                                blank=True, null=True)
 	quantity = models.IntegerField(verbose_name="Quantidade", default=0)
-	avg_price = models.FloatField(verbose_name="Preço médio", default=0.0)
-	total = FloatZeroField(verbose_name="Valor total", default=0.0)
-	tax = models.FloatField(verbose_name="Taxas", default=0.0)
+	avg_price = models.DecimalField(verbose_name="Preço médio",
+	                                max_digits=DECIMAL_MAX_DIGITS,
+	                                decimal_places=DECMIAL_PLACES,
+	                                default=Decimal(0))
+	total = models.DecimalField(verbose_name="Valor total",
+	                            max_digits=DECIMAL_MAX_DIGITS,
+	                            decimal_places=DECMIAL_PLACES,
+	                            default=Decimal(0))
+	tax = models.DecimalField(verbose_name="Taxas",
+	                          max_digits=DECIMAL_MAX_DIGITS,
+	                          decimal_places=DECMIAL_PLACES,
+	                          default=Decimal(0))
 	date = DateField(verbose_name="Data")
 
 	def __str__(self):

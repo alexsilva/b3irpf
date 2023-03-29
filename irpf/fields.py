@@ -1,5 +1,6 @@
 import datetime
 import re
+from decimal import Decimal
 
 from django.db import models
 
@@ -84,6 +85,24 @@ class FloatBRField(models.FloatField):
 	def _get_safe_value(self, value):
 		if isinstance(value, str):
 			value = float(value.replace(',', '.'))
+		return value
+
+	def get_prep_value(self, value):
+		value = self._get_safe_value(value)
+		return super().get_prep_value(value)
+
+	def to_python(self, value):
+		value = self._get_safe_value(value)
+		return super().to_python(value)
+
+
+class DecimalZeroField(models.FloatField):
+	def _get_safe_value(self, value):
+		if isinstance(value, str):
+			try:
+				value = Decimal(value)
+			except ValueError:
+				value = Decimal(0)
 		return value
 
 	def get_prep_value(self, value):
