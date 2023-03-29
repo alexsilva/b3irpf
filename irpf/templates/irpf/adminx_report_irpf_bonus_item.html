@@ -31,7 +31,7 @@
         </button>
       </div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ bonus.fractional.quantity }}, R$ {{ bonus.fractional.value|moneyformat }}</span>
+        <span class="text-muted">{{ bonus.fractional.quantity|floatformat }}, R$ {{ bonus.fractional.value|moneyformat }}</span>
       </div>
     </div>
   </li>
