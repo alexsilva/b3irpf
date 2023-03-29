@@ -150,12 +150,6 @@ class Negotiation(BaseIRPFModel):
 	                            decimal_places=DECMIAL_PLACES,
 	                            default=Decimal(0))
 
-	positions = models.ManyToManyField(to="Position",
-	                                   verbose_name="Posições",
-	                                   blank=True,
-	                                   editable=False,
-	                                   help_text="Esta relação serve apenas para fins de histórico de posição")
-
 	tax = models.DecimalField(verbose_name="Taxas",
 	                          max_digits=DECIMAL_MAX_DIGITS,
 	                          decimal_places=DECMIAL_PLACES,
