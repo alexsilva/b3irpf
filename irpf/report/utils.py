@@ -3,13 +3,13 @@ import datetime
 from decimal import Decimal
 
 
-def smart_int(value):
-	"""Converte 'value' para int quanto a parte decimal for zero"""
+def smart_desc(value):
+	"""Converte 'value' para decimal quanto a parte fracionária for zero"""
 	try:
 		# 5.0 % 5 == 0, 5.5 % 5 = 0.5
 		if value % value == 0:
 			# converte para inteiro porque o valor não tem fração relevante
-			value = int(value)
+			value = Decimal(int(value))
 	except ZeroDivisionError:
 		...
 	return value
@@ -17,7 +17,7 @@ def smart_int(value):
 
 class Event:
 	def __init__(self, title: str,
-	             quantity: float = 0.0,
+	             quantity: Decimal = Decimal(0),
 	             value: Decimal = Decimal(0)):
 		self.title = title
 		self.quantity = quantity
@@ -43,7 +43,7 @@ class Events(dict):
 class Buy:
 	"""Compas"""
 
-	def __init__(self, quantity: float = 0,
+	def __init__(self, quantity: Decimal = Decimal(0),
 	             total: Decimal = Decimal(0),
 	             tax: Decimal = Decimal(0),
 	             date: datetime.date = None):
@@ -65,7 +65,7 @@ class Buy:
 class Sell:
 	"""Vendas"""
 
-	def __init__(self, quantity: float = 0,
+	def __init__(self, quantity: Decimal = Decimal(0),
 	             total: Decimal = Decimal(0),
 	             capital: Decimal = Decimal(0),
 	             tax: Decimal = Decimal(0),
@@ -79,7 +79,7 @@ class Sell:
 	@property
 	def avg_price(self):
 		if self.quantity > 0:
-			avg_price = self.total / Decimal(self.quantity)
+			avg_price = self.total / self.quantity
 		else:
 			avg_price = Decimal(0)
 		return avg_price
@@ -91,7 +91,7 @@ class Sell:
 class Period:
 	"""Compas menos vendas no intervalo de tempo"""
 
-	def __init__(self, quantity: float = 0,
+	def __init__(self, quantity: Decimal = Decimal(0),
 	             total: Decimal = Decimal(0),
 	             tax: Decimal = Decimal(0),
 	             position=None):
@@ -148,7 +148,7 @@ class Asset:
 	def period_buy(self) -> Buy:
 		"""Compras do perído (sem posição)"""
 		if self.position:
-			quantity = int(self.buy.quantity) - int(self.position.quantity)
+			quantity = Decimal(int(self.buy.quantity) - int(self.position.quantity))
 			total = self.buy.total - self.position.total
 			tax = self.buy.tax - self.position.tax
 			buy = Buy(quantity=quantity,
@@ -164,7 +164,7 @@ class Asset:
 		"""Compras menos vendas no intervalo de tempo"""
 		quantity = self.buy.quantity - self.sell.quantity
 		total = int(quantity) * self.buy.avg_price
-		period = Period(quantity=smart_int(quantity),
+		period = Period(quantity=smart_desc(quantity),
 		                total=total,
 		                tax=self.buy.tax,
 		                position=self.position)

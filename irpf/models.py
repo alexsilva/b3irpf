@@ -5,7 +5,7 @@ from django.utils.formats import number_format, date_format
 from django.utils.functional import cached_property, classproperty
 
 from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField, \
-	DecimalZeroField
+	DecimalZeroField, DecimalBRField
 from irpf.storage import FileSystemOverwriteStorage
 
 DECIMAL_MAX_DIGITS = 28
@@ -139,7 +139,9 @@ class Negotiation(BaseIRPFModel):
 	code = CharCodeField(verbose_name="Código de negociação",
 	                     max_length=8)
 
-	quantity = models.PositiveBigIntegerField(verbose_name="Quantidade")
+	quantity = models.DecimalField(verbose_name="Quantidade",
+	                               max_digits=19,
+	                               decimal_places=2)
 
 	price = models.DecimalField(verbose_name="Preço",
 	                            max_digits=DECIMAL_MAX_DIGITS,
@@ -194,8 +196,11 @@ class Bonus(BaseIRPFModel):
 	                                 max_digits=DECIMAL_MAX_DIGITS,
 	                                 decimal_places=DECMIAL_PLACES,
 	                                 default=Decimal(0))
-	proportion = models.FloatField(verbose_name="Proporção", default=0.0,
-	                               help_text="valor expresso em porcentagem.")
+	proportion = models.DecimalField(verbose_name="Proporção",
+	                                 max_digits=6,
+	                                 decimal_places=2,
+	                                 default=Decimal(0),
+	                                 help_text="valor expresso em porcentagem.")
 
 	def __str__(self):
 		value = number_format(self.base_value)
@@ -216,7 +221,10 @@ class Earnings(BaseIRPFModel):
 	name = CharCodeNameField(verbose_name="Empresa", max_length=256)
 	institution = models.CharField(verbose_name="Instituição",
 	                               max_length=512)
-	quantity = FloatBRField(verbose_name="Quantidade", default=0.0)
+	quantity = DecimalBRField(verbose_name="Quantidade",
+	                          max_digits=19,
+	                          decimal_places=2,
+	                          default=Decimal(0))
 	total = DecimalZeroField(verbose_name="Valor da operação",
 	                         max_digits=DECIMAL_MAX_DIGITS,
 	                         decimal_places=DECMIAL_PLACES,
@@ -378,7 +386,10 @@ class Position(BaseIRPFModel):
 	                                on_delete=models.SET_NULL,
 	                                verbose_name="Instituição",
 	                                blank=True, null=True)
-	quantity = models.IntegerField(verbose_name="Quantidade", default=0)
+	quantity = models.DecimalField(verbose_name="Quantidade",
+	                               max_digits=19,
+	                               decimal_places=2,
+	                               default=Decimal(0))
 	avg_price = models.DecimalField(verbose_name="Preço médio",
 	                                max_digits=DECIMAL_MAX_DIGITS,
 	                                decimal_places=DECMIAL_PLACES,

@@ -83,6 +83,24 @@ class DateNoneField(DateField):
 		return super().get_prep_value(value)
 
 
+class DecimalBRField(models.DecimalField):
+	def _get_safe_value(self, value):
+		if isinstance(value, str):
+			try:
+				value = Decimal(value.replace(',', '.'))
+			except (decimal.ConversionSyntax, ValueError):
+				value = Decimal(0)
+		return value
+
+	def get_prep_value(self, value):
+		value = self._get_safe_value(value)
+		return super().get_prep_value(value)
+
+	def to_python(self, value):
+		value = self._get_safe_value(value)
+		return super().to_python(value)
+
+
 class FloatBRField(models.FloatField):
 	def _get_safe_value(self, value):
 		if isinstance(value, str):
@@ -103,7 +121,7 @@ class DecimalZeroField(models.DecimalField):
 		if isinstance(value, str):
 			try:
 				value = Decimal(value)
-			except (decimal.DecimalException, ValueError):
+			except (decimal.ConversionSyntax, ValueError):
 				value = Decimal(0)
 		return value
 

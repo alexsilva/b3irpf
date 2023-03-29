@@ -1,6 +1,6 @@
 import copy
 import datetime
-
+from decimal import Decimal
 from django.utils.text import slugify
 
 from irpf.models import Enterprise, Earnings, Bonus, Position, AssetEvent
@@ -107,10 +107,10 @@ class NegotiationReport:
 			history_asset = history_data_com[bonus.enterprise.code]
 
 			# valor quantidade e valores recebidos de bonificação
-			bonus_quantity = history_asset.buy.quantity * (bonus.proportion / 100.0)
+			bonus_quantity = history_asset.buy.quantity * (bonus.proportion / 100)
 
 			# adição dos novos ativos
-			bonus_base_quantity = int(bonus_quantity)
+			bonus_base_quantity = Decimal(int(bonus_quantity))
 			bonus_base_value = bonus_base_quantity * bonus.base_value
 
 			try:
