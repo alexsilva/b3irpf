@@ -11,7 +11,7 @@
         {% if item.enterprise %}
           {{ asset_period.quantity }}
           {% if item.enterprise.is_fii %}cota{{ asset_period.quantity|pluralize:"s" }}
-          {% elif item.enterprise.is_acao %}ações
+          {% elif item.enterprise.is_stock %}ações
           {% elif item.enterprise.is_bdr %}bdr{{ asset_period.quantity|pluralize:"s" }}
           {% endif %}
           {{ item.code }} // {{ item.enterprise.name }} - {{ item.enterprise.cnpj }}

@@ -40,11 +40,11 @@ class FoundsAdministrator(models.Model):
 
 
 class Enterprise(models.Model):
-	CATEGORY_ACAO = 1
+	CATEGORY_STOCK = 1
 	CATEGORY_FII = 2
 	CATEGORY_BDR = 3
 	CATEGORY_CHOICES = (
-		(CATEGORY_ACAO, "AÇÃO"),
+		(CATEGORY_STOCK, "AÇÃO"),
 		(CATEGORY_FII, "FII"),
 		(CATEGORY_BDR, "BDR")
 	)
@@ -75,8 +75,8 @@ class Enterprise(models.Model):
 		return dict(self.CATEGORY_CHOICES)
 
 	@property
-	def is_acao(self):
-		return self.category == self.CATEGORY_ACAO
+	def is_stock(self):
+		return self.category == self.CATEGORY_STOCK
 
 	@property
 	def is_fii(self):
