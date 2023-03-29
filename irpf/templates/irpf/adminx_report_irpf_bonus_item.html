@@ -17,7 +17,7 @@
       </div>
       <div class="col-sm-4 text-center text-sm-right btn btn-link" data-toggle="popover" data-content="{{ bonus.base.value }}">
         <span class="text-muted">
-          {{ bonus.base.quantity }} ativo{{ bonus.base.quantity|pluralize }}, R$ {{ bonus.base.value|moneyformat }}
+          {{ bonus.base.quantity|smart_desc }} ativo{{ bonus.base.quantity|pluralize }}, R$ {{ bonus.base.value|moneyformat }}
         </span>
       </div>
     </div>
