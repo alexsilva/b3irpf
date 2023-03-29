@@ -1,3 +1,5 @@
+import decimal
+
 import copy
 import datetime
 from decimal import Decimal
@@ -116,7 +118,7 @@ class NegotiationReport:
 			try:
 				bonus_frac_quantity = bonus_quantity % bonus_base_quantity
 				bonus_frac_value = bonus_frac_quantity * bonus.base_value
-			except ZeroDivisionError:
+			except decimal.InvalidOperation:
 				# bonus_base_quantity == 0, bonus_quantity < 1
 				bonus_frac_quantity = bonus_quantity
 				bonus_frac_value = bonus_frac_quantity * bonus.base_value
