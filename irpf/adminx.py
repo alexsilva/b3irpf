@@ -170,6 +170,7 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 
 @sites.register(Negotiation)
 class NegotiationAdmin(BaseIRPFAdmin):
+	collect_related_nested_objects = False
 	model_icon = "fa fa-credit-card-alt"
 	list_filter = ("kind", "date")
 	search_fields = ("code",)
