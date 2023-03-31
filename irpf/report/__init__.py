@@ -152,17 +152,19 @@ class NegotiationReport:
 				asset = assets[instance.enterprise.code]
 			except KeyError:
 				continue
-			if asset.buy.quantity == 0:
+			# posição na data
+			asset_period = asset.period
+			if asset_period.quantity == 0:
 				continue
 			# ignora os registros que já foram contabilizados na posição
 			elif asset.position and instance.date_com < asset.position.date:
 				continue
 			elif instance.event == event_model.SPLIT:  # Desdobramento
-				quantity = asset.buy.quantity / instance.factor_from  # correção
+				quantity = asset_period.quantity / instance.factor_from  # correção
 				asset.buy.quantity = quantity * instance.factor_to
 
 			elif instance.event == event_model.INPLIT:  # Grupamento
-				quantity = asset.buy.quantity / instance.factor_from  # correção
+				quantity = asset_period.quantity / instance.factor_from  # correção
 				asset.buy.quantity = quantity * instance.factor_to
 
 	def consolidate(self, instance, asset: Asset):
