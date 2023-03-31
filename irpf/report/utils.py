@@ -3,15 +3,17 @@ import decimal
 import copy
 import datetime
 from decimal import Decimal
+import math
 
 
-def smart_desc(value):
+def smart_desc(value) -> Decimal:
 	"""Converte 'value' para decimal quanto a parte fracionária for zero"""
 	try:
 		# 5.0 % 5 == 0, 5.5 % 5 = 0.5
-		if value % value == 0:
+		parts = math.modf(value)
+		if parts[0] == 0:
 			# converte para inteiro porque o valor não tem fração relevante
-			value = Decimal(int(value))
+			value = Decimal(parts[1])
 	except decimal.InvalidOperation:
 		...
 	return value
