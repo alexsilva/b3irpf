@@ -158,7 +158,7 @@ class Asset:
 				continue
 			buy.quantity += instance.quantity
 			buy.total += instance.total
-			buy.tax += instance.total
+			buy.tax += instance.tax
 		return buy
 
 	@property
