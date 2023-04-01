@@ -237,6 +237,7 @@ class NegotiationReport:
 		elif flow == self.debt:
 			if kind == self.FRACAO_EM_ATIVOS:
 				asset.sell.quantity += instance.quantity
+				asset.buy.quantity -= instance.quantity
 
 	def apply_earnings(self, date, assets, **options):
 		queryset = self.get_earnings_queryset(date, **options)
