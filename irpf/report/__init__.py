@@ -168,14 +168,12 @@ class NegotiationReport:
 				asset.buy.quantity = quantity * instance.factor_to
 
 	def consolidate(self, instance, asset: Asset):
-		kind = instance.kind.lower()
-
-		if kind == self.buy:
+		if instance.is_buy:
 			# valores de compras
 			asset.buy.tax += instance.tax
 			asset.buy.quantity += instance.quantity
 			asset.buy.total += ((instance.quantity * instance.price) + instance.tax)
-		elif kind == self.sell:
+		elif instance.is_sell:
 			# valores de venda
 			asset.sell.tax += instance.tax
 			asset.sell.quantity += instance.quantity
@@ -183,6 +181,11 @@ class NegotiationReport:
 
 			# ganho de capital de todas a vendas
 			asset.sell.capital += (instance.quantity * (asset.sell.avg_price - asset.buy.avg_price))
+
+			# ajustando compras
+			avg_price_buy = asset.buy.avg_price
+			asset.buy.quantity -= instance.quantity
+			asset.buy.total = int(asset.buy.quantity) * avg_price_buy
 		return asset
 
 	def get_earning_kind(self, instance):

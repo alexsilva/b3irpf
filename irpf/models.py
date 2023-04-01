@@ -177,6 +177,14 @@ class Negotiation(BaseIRPFModel):
 	price.sheet_header = "Preço"
 	total.sheet_header = "Valor"
 
+	@cached_property
+	def is_sell(self):
+		return self.kind.lower() == self.KIND_SELL.lower()
+
+	@cached_property
+	def is_buy(self):
+		return self.kind.lower() == self.KIND_BUY.lower()
+
 	def __str__(self):
 		return f'{self.code}:{self.kind[0]}/{self.quantity} ({self.institution})'
 

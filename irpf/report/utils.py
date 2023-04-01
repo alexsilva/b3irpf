@@ -151,25 +151,20 @@ class Asset:
 	@property
 	def period_buy(self) -> Buy:
 		"""Compras do perído (sem posição)"""
-		if self.position:
-			quantity = Decimal(int(self.buy.quantity) - int(self.position.quantity))
-			total = self.buy.total - self.position.total
-			tax = self.buy.tax - self.position.tax
-			buy = Buy(quantity=quantity,
-			          total=total,
-			          tax=tax,
-			          date=self.position.date)
-		else:
-			buy = self.buy
+		buy = Buy()
+		for instance in self.items:
+			if not instance.is_buy:
+				continue
+			buy.quantity += instance.quantity
+			buy.total += instance.total
+			buy.tax += instance.total
 		return buy
 
 	@property
 	def period(self) -> Period:
 		"""Compras menos vendas no intervalo de tempo"""
-		quantity = self.buy.quantity - self.sell.quantity
-		total = int(quantity) * self.buy.avg_price
-		period = Period(quantity=smart_desc(quantity),
-		                total=total,
+		period = Period(quantity=self.buy.quantity,
+		                total=self.buy.total,
 		                tax=self.buy.tax,
 		                position=self.position)
 		return period

@@ -369,10 +369,7 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 			asset = item['asset']
 			period = asset.period
 			stats[patrimony] += period.total
-			if asset.position:
-				stats[buy] += asset.period_buy.total
-			else:
-				stats[buy] += period.total
+			stats[buy] += asset.period_buy.total
 			stats[sell] += asset.sell.total
 			stats[capital] += asset.sell.capital
 			stats[tax] += (asset.buy.tax + asset.sell.tax)
