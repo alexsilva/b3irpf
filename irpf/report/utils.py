@@ -3,6 +3,7 @@ import decimal
 import copy
 import datetime
 from decimal import Decimal
+from collections import OrderedDict
 import math
 
 
@@ -32,15 +33,15 @@ class Event:
 		return self.title
 
 
-class Credit(dict):
+class Credit(OrderedDict):
 	"""credito"""
 
 
-class Debit(dict):
+class Debit(OrderedDict):
 	"""Débito"""
 
 
-class Events(dict):
+class Events(OrderedDict):
 	"""Eventos"""
 
 
