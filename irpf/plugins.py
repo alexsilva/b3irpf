@@ -209,10 +209,10 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 	"""
 	brokerage_note_parsers = None
 	brokerage_note_field_update = ()
-	brokerage_note_negociation = Negotiation
+	brokerage_note_negotiation = Negotiation
 
 	def init_request(self, *args, **kwargs):
-		return bool(self.brokerage_note_negociation and
+		return bool(self.brokerage_note_negotiation and
 		            self.brokerage_note_parsers)
 
 	def setup(self, *args, **kwargs):
@@ -254,7 +254,7 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 		)
 		defaults = options.setdefault('defaults', {})
 		defaults['total'] = asset.amount * asset.unit_price
-		model = self.brokerage_note_negociation
+		model = self.brokerage_note_negotiation
 		opts = model._meta
 		obj, created = model.objects.get_or_create(**options)
 		self.add_permission_for_object(obj, opts=opts)
@@ -264,9 +264,9 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 		# filtro para a categoria de transação
 		kind = None
 		if asset.transaction_type == TransactionType.BUY:
-			kind = self.brokerage_note_negociation.KIND_BUY
+			kind = self.brokerage_note_negotiation.KIND_BUY
 		elif asset.transaction_type == TransactionType.SELL:
-			kind = self.brokerage_note_negociation.KIND_SELL
+			kind = self.brokerage_note_negotiation.KIND_SELL
 		return kind
 
 	def _get_clean_ticker(self, asset):
@@ -300,7 +300,7 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 		return transactions
 
 	def _add_transations(self, note, instance):
-		queryset = self.brokerage_note_negociation.objects.all()
+		queryset = self.brokerage_note_negotiation.objects.all()
 		tax = sum([note.settlement_fee,
 		           note.term_fee,
 		           note.ana_fee,
