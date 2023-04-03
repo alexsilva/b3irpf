@@ -196,12 +196,12 @@ class NegotiationReport:
 		return queryset
 
 	def calc_earnings(self, instance: Earnings, asset: Asset):
-		kind = instance.kind_slug
+		kind_slug = instance.kind_slug
 		obj = getattr(asset, "credit" if instance.is_credit else "debit")
 		try:
-			event = obj[kind]
+			event = obj[kind_slug]
 		except KeyError:
-			obj[kind] = event = Event(instance.kind)
+			obj[kind_slug] = event = Event(instance.kind)
 
 		event.items.append(instance)
 		event.quantity += instance.quantity
@@ -211,15 +211,15 @@ class NegotiationReport:
 		if asset.position and instance.date < asset.position.date:
 			return
 		elif instance.is_credit:
-			if kind == instance.LEILAO_DE_FRACAO:
+			if kind_slug == instance.LEILAO_DE_FRACAO:
 				asset.sell.total += instance.total
 				# ganho de capital de todas a vendas
 				asset.sell.capital += instance.total
-			elif kind == instance.BONIFICAO_EM_ATIVOS:
+			elif kind_slug == instance.BONIFICAO_EM_ATIVOS:
 				asset.buy.quantity += instance.quantity
 				asset.buy.total += instance.total
 		elif instance.is_debit:
-			if kind == instance.FRACAO_EM_ATIVOS:
+			if kind_slug == instance.FRACAO_EM_ATIVOS:
 				asset.sell.quantity += instance.quantity
 				asset.buy.quantity -= instance.quantity
 
