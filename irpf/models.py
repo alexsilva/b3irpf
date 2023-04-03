@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.formats import number_format, date_format
 from django.utils.functional import cached_property, classproperty
+from django.utils.text import slugify
 
 from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField, \
 	DecimalZeroField, DecimalBRField
@@ -248,6 +249,10 @@ class Earnings(BaseIRPFModel):
 	institution.sheet_header = "Instituição"
 	quantity.sheet_header = "Quantidade"
 	total.sheet_header = "Valor da Operação"
+
+	@cached_property
+	def kind_slug(self):
+		return slugify(self.kind).replace('-', "_")
 
 	def __str__(self):
 		return f'{self.code}/{self.name} ({self.institution}) / R${self.total}'

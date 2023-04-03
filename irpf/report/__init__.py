@@ -188,14 +188,6 @@ class NegotiationReport:
 			asset.buy.total = int(asset.buy.quantity) * avg_price_buy
 		return asset
 
-	def get_earning_kind(self, instance):
-		try:
-			kind = self._caches[instance.kind]
-		except KeyError:
-			kind = slugify(instance.kind).replace('-', "_")
-			self._caches[instance.kind] = kind
-		return kind
-
 	def get_earnings_queryset(self, date, **options):
 		qs_options = dict(
 			user=self.user,
@@ -210,8 +202,8 @@ class NegotiationReport:
 		queryset = self.earnings_model.objects.filter(**qs_options)
 		return queryset
 
-	def calc_earnings(self, instance, asset: Asset):
-		kind = self.get_earning_kind(instance)
+	def calc_earnings(self, instance: Earnings, asset: Asset):
+		kind = instance.kind_slug
 		flow = instance.flow.lower()
 		obj = getattr(asset, "credit" if flow == "credito" else "debit")
 		try:
