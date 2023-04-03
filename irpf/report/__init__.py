@@ -58,13 +58,6 @@ class NegotiationReport:
 	event_model = AssetEvent
 	bonus_model = Bonus
 
-	buy, sell = "compra", "venda"
-	debt, credit = "debito", "credito"
-
-	BONIFICAO_EM_ATIVOS = "bonificacao_em_ativos"
-	LEILAO_DE_FRACAO = "leilao_de_fracao"
-	FRACAO_EM_ATIVOS = "fracao_em_ativos"
-
 	def __init__(self, model, user, **options):
 		self.model = model
 		self.user = user
@@ -218,15 +211,15 @@ class NegotiationReport:
 		if asset.position and instance.date < asset.position.date:
 			return
 		elif instance.is_credit:
-			if kind == self.LEILAO_DE_FRACAO:
+			if kind == instance.LEILAO_DE_FRACAO:
 				asset.sell.total += instance.total
 				# ganho de capital de todas a vendas
 				asset.sell.capital += instance.total
-			elif kind == self.BONIFICAO_EM_ATIVOS:
+			elif kind == instance.BONIFICAO_EM_ATIVOS:
 				asset.buy.quantity += instance.quantity
 				asset.buy.total += instance.total
 		elif instance.is_debit:
-			if kind == self.FRACAO_EM_ATIVOS:
+			if kind == instance.FRACAO_EM_ATIVOS:
 				asset.sell.quantity += instance.quantity
 				asset.buy.quantity -= instance.quantity
 

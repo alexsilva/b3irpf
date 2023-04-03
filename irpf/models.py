@@ -224,6 +224,9 @@ class Bonus(BaseIRPFModel):
 
 
 class Earnings(BaseIRPFModel):
+	BONIFICAO_EM_ATIVOS = "bonificacao_em_ativos"
+	LEILAO_DE_FRACAO = "leilao_de_fracao"
+	FRACAO_EM_ATIVOS = "fracao_em_ativos"
 	FLOW_CREDIT = "Credito"
 	FLOW_DEBIT = "Debito"
 	FLOW_CHOICES = (
