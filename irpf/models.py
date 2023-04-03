@@ -179,10 +179,12 @@ class Negotiation(BaseIRPFModel):
 
 	@cached_property
 	def is_sell(self):
+		"""Se é uma venda"""
 		return self.kind.lower() == self.KIND_SELL.lower()
 
 	@cached_property
 	def is_buy(self):
+		"""Se é uma compra"""
 		return self.kind.lower() == self.KIND_BUY.lower()
 
 	def __str__(self):
