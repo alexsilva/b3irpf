@@ -224,6 +224,13 @@ class Bonus(BaseIRPFModel):
 
 
 class Earnings(BaseIRPFModel):
+	FLOW_CREDIT = "Credito"
+	FLOW_DEBIT = "Debito"
+	FLOW_CHOICES = (
+		(FLOW_CREDIT, FLOW_CREDIT),
+		(FLOW_DEBIT, FLOW_DEBIT)
+	)
+
 	date = DateField(verbose_name="Data")
 	flow = models.CharField(verbose_name="Entrada/Saída", max_length=16)
 
@@ -253,6 +260,16 @@ class Earnings(BaseIRPFModel):
 	@cached_property
 	def kind_slug(self):
 		return slugify(self.kind).replace('-', "_")
+
+	@cached_property
+	def is_credit(self):
+		"""Se é crédito"""
+		return self.flow.lower() == self.FLOW_CREDIT.lower()
+
+	@cached_property
+	def is_debit(self):
+		"""Se é débito"""
+		return self.flow.lower() == self.FLOW_DEBIT.lower()
 
 	def __str__(self):
 		return f'{self.code}/{self.name} ({self.institution}) / R${self.total}'

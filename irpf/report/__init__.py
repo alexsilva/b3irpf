@@ -204,8 +204,7 @@ class NegotiationReport:
 
 	def calc_earnings(self, instance: Earnings, asset: Asset):
 		kind = instance.kind_slug
-		flow = instance.flow.lower()
-		obj = getattr(asset, "credit" if flow == "credito" else "debit")
+		obj = getattr(asset, "credit" if instance.is_credit else "debit")
 		try:
 			event = obj[kind]
 		except KeyError:
@@ -218,7 +217,7 @@ class NegotiationReport:
 		# ignora os registros que já foram contabilizados na posição
 		if asset.position and instance.date < asset.position.date:
 			return
-		elif flow == self.credit:
+		elif instance.is_credit:
 			if kind == self.LEILAO_DE_FRACAO:
 				asset.sell.total += instance.total
 				# ganho de capital de todas a vendas
@@ -226,7 +225,7 @@ class NegotiationReport:
 			elif kind == self.BONIFICAO_EM_ATIVOS:
 				asset.buy.quantity += instance.quantity
 				asset.buy.total += instance.total
-		elif flow == self.debt:
+		elif instance.is_debit:
 			if kind == self.FRACAO_EM_ATIVOS:
 				asset.sell.quantity += instance.quantity
 				asset.buy.quantity -= instance.quantity
