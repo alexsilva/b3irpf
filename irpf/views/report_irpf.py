@@ -34,6 +34,14 @@ class ReportIRPFForm(django_forms.Form):
 		widget=AdminDateWidget
 	)
 
+	consolidation = django_forms.IntegerField(
+		label="Declaração",
+		widget=django_forms.Select(choices=[
+				(1, "Anual"),
+				(2, "Mensal")
+			]),
+		initial=1
+	)
 	enterprise = django_forms.ModelChoiceField(Enterprise.objects.all(),
 	                                           label=Enterprise._meta.verbose_name,
 	                                           widget=AdminSelectWidget,
@@ -86,12 +94,14 @@ class AdminReportIrpfModelView(AdminFormView):
 			form_data = form.cleaned_data
 			institution = form_data['institution']
 			enterprise = form_data['enterprise']
+			consolidation = form_data['consolidation']
 			start = form_data['start']
 			end = form_data['end']
 
 			self.results = self.report.report(start, end,
 			                                  institution=institution,
-			                                  enterprise=enterprise)
+			                                  enterprise=enterprise,
+			                                  consolidation=consolidation)
 		return self.render_to_response(self.get_context_data(form=form))
 
 	def get_form_kwargs(self):

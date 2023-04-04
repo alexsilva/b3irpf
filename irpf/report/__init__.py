@@ -58,6 +58,8 @@ class NegotiationReport:
 	event_model = AssetEvent
 	bonus_model = Bonus
 
+	YEARLY, MONTHLY = 1, 2
+
 	def __init__(self, model, user, **options):
 		self.model = model
 		self.user = user
@@ -231,7 +233,7 @@ class NegotiationReport:
 			except KeyError:
 				continue
 
-	def get_position_queryset(self, date, **options):
+	def get_position_queryset(self, date: datetime.date, **options):
 		"""Mota e retorna a queryset de posição"""
 		qs_options = {}
 		related_fields = []
@@ -243,11 +245,21 @@ class NegotiationReport:
 		if enterprise:
 			qs_options['enterprise'] = enterprise
 			related_fields.append('enterprise')
-		startdate = options.get('startdate')
-		if startdate is None:
-			startdate = date - datetime.timedelta(days=365)
+		consolidation = options['consolidation']
+		if consolidation == self.YEARLY:
+			startdate = datetime.date.min.replace(year=date.year - 1)
+			enddate = datetime.date.max.replace(year=date.year - 1)
+		elif consolidation == self.MONTHLY:
+			if date.month - 1 > 0:
+				startdate = datetime.date(year=date.year, month=date.month - 1, day=1)
+				enddate = date - datetime.timedelta(days=1)
+			else:
+				enddate = datetime.date.max.replace(year=date.year - 1)
+				startdate = datetime.date(year=enddate.year, month=enddate.month, day=1)
+		else:
+			startdate = enddate = date
 		qs_options.setdefault(options.get('startdate_lookup', 'date__gte'), startdate)
-		qs_options.setdefault(options.get('enddate_lookup', 'date__lte'), date)
+		qs_options.setdefault(options.get('enddate_lookup', 'date__lte'), enddate)
 		queryset = self.position_model.objects.filter(
 			user=self.user,
 			**qs_options
@@ -277,7 +289,8 @@ class NegotiationReport:
 		return assets
 
 	def report(self, dtstart, dtend, **options):
-		assets, history = self.get_assets_position(date=dtstart, **options), {}
+		options.setdefault('consolidation', self.YEARLY)
+		assets = self.get_assets_position(date=dtstart, **options)
 		qs_options = {'user': self.user}
 		institution = options.get('institution')
 		if institution:
@@ -287,13 +300,10 @@ class NegotiationReport:
 			qs_options['code'] = enterprise.code
 
 		# cache
-		position_queryset = self.get_position_queryset(date=dtend, startdate=dtstart, **options)
 		assets_queryset = self.get_queryset(**qs_options)
+		history = {}
 
 		for date in range_dates(dtstart, dtend):  # calcula um dia por vez
-			assets_position = self.get_assets_position(queryset=position_queryset.filter(date=date))
-			if assets_position:
-				assets.update(assets_position)
 			queryset = assets_queryset.filter(date=date)
 			for instance in queryset:
 				# calculo de compra, venda, boficiação, etc
