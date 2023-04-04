@@ -38,7 +38,7 @@ class ReportIRPFForm(django_forms.Form):
 	                                           label=Enterprise._meta.verbose_name,
 	                                           widget=AdminSelectWidget,
 	                                           required=False)
-	institution = django_forms.ModelChoiceField(Instituition.objects.get_queryset(),
+	institution = django_forms.ModelChoiceField(Instituition.objects.all(),
 	                                            label=Instituition._meta.verbose_name,
 	                                            widget=AdminSelectWidget,
 	                                            required=False)
