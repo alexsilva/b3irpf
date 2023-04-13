@@ -20,7 +20,9 @@
   </li>
   <li class="list-group-item py-2">
     <div class="row">
-      <div class="col-sm-8 text-center text-sm-left">Valor total de venda</div>
+      <div class="col-sm-8 text-center text-sm-left">Valor total de venda
+      <span class="badge badge-light badge-pill" title="Taxas">{{ item.asset.sell.tax|moneyformat }}</span>
+      </div>
       <div class="col-sm-4 text-center text-sm-right">
         <span class="text-muted">R$ {{ item.asset.sell.total|moneyformat }}</span>
       </div>
@@ -31,14 +33,6 @@
       <div class="col-sm-8 text-center text-sm-left">Ganho de capital</div>
       <div class="col-sm-4 text-center text-sm-right">
         <span class="text-muted">R$ {{ item.asset.sell.capital|moneyformat }}</span>
-      </div>
-    </div>
-  </li>
-  <li class="list-group-item py-2">
-    <div class="row">
-      <div class="col-sm-8 text-center text-sm-left">Taxas</div>
-      <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">R$ {{ item.asset.sell.tax|moneyformat }}</span>
       </div>
     </div>
   </li>
