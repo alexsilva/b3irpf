@@ -149,6 +149,10 @@ class Asset:
 		if events is None:
 			self.events = Events()
 
+	def is_position_interval(self, date: datetime.date):
+		"""Se a data presenta uma posição já calculada"""
+		return bool(self.position and date <= self.position.date)
+
 	@property
 	def period_buy(self) -> Buy:
 		"""Compras do perído (sem posição)"""

@@ -92,7 +92,7 @@ class NegotiationReport:
 			except KeyError:
 				continue
 			# ignora os registros que já foram contabilizados na posição
-			if asset.position and bonus.date < asset.position.date:
+			if asset.is_position_interval(bonus.date):
 				continue
 			try:
 				bonus_event = asset.events['bonus']
@@ -152,7 +152,7 @@ class NegotiationReport:
 			if asset_period.quantity == 0:
 				continue
 			# ignora os registros que já foram contabilizados na posição
-			elif asset.position and instance.date_com < asset.position.date:
+			elif asset.is_position_interval(instance.date_com):
 				continue
 			elif instance.event == event_model.SPLIT:  # Desdobramento
 				quantity = asset_period.quantity / instance.factor_from  # correção
@@ -210,7 +210,7 @@ class NegotiationReport:
 		event.value += instance.total
 
 		# ignora os registros que já foram contabilizados na posição
-		if asset.position and instance.date < asset.position.date:
+		if asset.is_position_interval(instance.date):
 			return
 		elif instance.is_credit:
 			if kind_slug == instance.LEILAO_DE_FRACAO:
@@ -316,7 +316,7 @@ class NegotiationReport:
 					assets[instance.code] = asset
 				asset.items.append(instance)
 				# ignora os registros que já foram contabilizados na posição
-				if asset.position and instance.date < asset.position.date:
+				if asset.is_position_interval(instance.date):
 					continue
 				self.consolidate(instance, asset)
 
