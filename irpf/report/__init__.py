@@ -174,13 +174,15 @@ class NegotiationReport:
 			asset.sell.quantity += instance.quantity
 			asset.sell.total += ((instance.quantity * instance.price) - instance.tax)
 
+			# preço médio de compras
+			buy_avg_price = asset.buy.avg_price
+
 			# ganho de capital de todas a vendas
-			asset.sell.capital += (instance.quantity * (asset.sell.avg_price - asset.buy.avg_price))
+			asset.sell.capital += (instance.quantity * (asset.sell.avg_price - buy_avg_price))
 
 			# ajustando compras
-			avg_price_buy = asset.buy.avg_price
 			asset.buy.quantity -= instance.quantity
-			asset.buy.total = int(asset.buy.quantity) * avg_price_buy
+			asset.buy.total = int(asset.buy.quantity) * buy_avg_price
 		return asset
 
 	def get_earnings_queryset(self, date, **options):
