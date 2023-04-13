@@ -3,6 +3,10 @@
 {% load xadmin_tags %}
 {% block nav_title %}{{ title }}{% endblock %}
 
+{% block nav_toggles %}
+{% include "xadmin/includes/toggle_menu.html" %}
+{% endblock %}
+
 {% block content %}
   <form class="exform" method="{% if form_method_post %}post{% else %}get{% endif %}"
         {% if form_method_post %}enctype="multipart/form-data"{% endif %}>
