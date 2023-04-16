@@ -301,7 +301,6 @@ class NegotiationReport:
 	def report(self, dtstart, dtend, **options):
 		options.setdefault('consolidation', self.YEARLY)
 		categories = options.setdefault('categories', ())
-		assets = self.get_assets_position(date=dtstart, **options)
 		qs_options = {'user': self.user}
 		institution = options.get('institution')
 		if institution:
@@ -312,6 +311,7 @@ class NegotiationReport:
 		if categories:
 			qs_options['asset__category__in'] = categories
 		# cache
+		assets = self.get_assets_position(date=dtstart, **options)
 		assets_queryset = self.get_queryset(**qs_options)
 		history = {}
 
