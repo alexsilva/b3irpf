@@ -210,6 +210,7 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 	brokerage_note_parsers = None
 	brokerage_note_field_update = ()
 	brokerage_note_negotiation = Negotiation
+	brokerage_note_asset_model = Enterprise
 
 	def init_request(self, *args, **kwargs):
 		return bool(self.brokerage_note_negotiation and
@@ -241,31 +242,41 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 				instance.save()
 				self._add_transations(note, instance)
 
-	def _save_trasaction(self, asset, instance, **options) -> Negotiation:
+	def get_db_asset(self, ticker: str):
+		"""O ativo"""
+		try:
+			asset = self.brokerage_note_asset_model.objects.get(code__iexact=ticker)
+		except self.brokerage_note_asset_model.DoesNotExist:
+			asset = None
+		return asset
+
+	def _save_trasaction(self, transaction: Transaction, instance, **options) -> Negotiation:
 		"""Cria uma nova 'transaction' com os dados da nota"""
+		ticker = options['code']
 		options.update(
 			date=instance.reference_date,
-			quantity=asset.amount,
-			price=asset.unit_price,
+			quantity=transaction.amount,
+			price=transaction.unit_price,
 			brokerage_note=instance,
-			irrf=asset.source_withheld_taxes,
+			irrf=transaction.source_withheld_taxes,
 			institution=instance.institution.name,
+			asset=self.get_db_asset(ticker),
 			user=self.user
 		)
 		defaults = options.setdefault('defaults', {})
-		defaults['total'] = asset.amount * asset.unit_price
+		defaults['total'] = transaction.amount * transaction.unit_price
 		model = self.brokerage_note_negotiation
 		opts = model._meta
 		obj, created = model.objects.get_or_create(**options)
 		self.add_permission_for_object(obj, opts=opts)
 		return obj
 
-	def _get_transaction_type(self, asset) -> str:
+	def _get_transaction_type(self, transaction: Transaction) -> str:
 		# filtro para a categoria de transação
 		kind = None
-		if asset.transaction_type == TransactionType.BUY:
+		if transaction.transaction_type == TransactionType.BUY:
 			kind = self.brokerage_note_negotiation.KIND_BUY
-		elif asset.transaction_type == TransactionType.SELL:
+		elif transaction.transaction_type == TransactionType.SELL:
 			kind = self.brokerage_note_negotiation.KIND_SELL
 		return kind
 
@@ -313,22 +324,22 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 		paid = sum([(transactions[ticker].amount * transactions[ticker].unit_price)
 		            for ticker in transactions])
 		for ticker in transactions:
-			asset = transactions[ticker]
+			transaction = transactions[ticker]
 			qs = queryset.filter(
 				date=instance.reference_date,
 				institution=instance.institution.name,
 				user=self.user)
-			kind = self._get_transaction_type(asset)
+			kind = self._get_transaction_type(transaction)
 			if kind is None:
 				continue
 			# rateio de taxas proporcional ao valor pago
-			avg_tax = tax * ((asset.amount * asset.unit_price) / paid)
+			avg_tax = tax * ((transaction.amount * transaction.unit_price) / paid)
 			qs = qs.filter(code__iexact=ticker,
 			               kind__iexact=kind,
-			               quantity=asset.amount)
+			               quantity=transaction.amount)
 			if self.is_save_transactions and not qs.exists():
 				self._save_trasaction(
-					asset, instance,
+					transaction, instance,
 					code=ticker,
 					kind=kind,
 					defaults={'tax': avg_tax}
