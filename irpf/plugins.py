@@ -16,7 +16,7 @@ from correpy.domain.entities.security import Security
 from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import TransactionType
 from irpf.fields import CharCodeField
-from irpf.models import Negotiation, Earnings, Provision, Position, Enterprise
+from irpf.models import Negotiation, Earnings, Position, Enterprise
 from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
@@ -76,7 +76,7 @@ class AssignUserAdminPlugin(BaseAdminPlugin):
 class ListActionModelPlugin(BaseAdminPlugin):
 
 	def init_request(self, *args, **kwargs):
-		return issubclass(self.model, (Negotiation, Earnings, Provision))
+		return issubclass(self.model, (Negotiation, Earnings))
 
 	@cached_property
 	def model_app_label(self):

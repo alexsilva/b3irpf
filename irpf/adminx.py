@@ -3,7 +3,7 @@ from django.contrib.auth import get_permission_codename
 from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView
 
-from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Provision, Bonus, Bookkeeping, \
+from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin
@@ -234,18 +234,4 @@ class EarningsAdmin(BaseIRPFAdmin):
 		"quantity",
 		"total",
 		"date"
-	)
-
-
-@sites.register(Provision)
-class ProvisionAdmin(BaseIRPFAdmin):
-	search_fields = ("code", "kind")
-	list_display = (
-		'code',
-		'name',
-		'date_ex',
-		'date_payment',
-		'kind',
-		'quantity',
-		'total'
 	)
