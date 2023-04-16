@@ -1,5 +1,7 @@
 from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from django.contrib.auth import get_permission_codename
+from django.core.management import call_command
+
 from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView
 
@@ -95,6 +97,15 @@ class EnterpriseAdmin:
 	bookkeeping_name.is_column = True
 	bookkeeping_name.admin_order_field = "bookkeeping__name"
 	bookkeeping_name.short_description = "Escriturador"
+
+	def save_models(self):
+		try:
+			return super().save_models()
+		finally:
+			try:
+				call_command("setup_assets")
+			except Exception as exc:
+				self.message_user(f"Falha atualizando assets: {exc}")
 
 
 @sites.register(Position)

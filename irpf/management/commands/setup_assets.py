@@ -7,6 +7,7 @@ class Command(BaseCommand):
 	"""Configura os ativos ao modelo cujo valor é Null
 	"""
 	asset_model = Enterprise
+	update_models = [Earnings, Negotiation]
 
 	def get_db_asset(self, ticker: str):
 		"""O ativo"""
@@ -17,11 +18,12 @@ class Command(BaseCommand):
 		return asset
 
 	def handle(self, *args, **options):
-		models = (Earnings, Negotiation)
-		for model in models:
+		for model in self.update_models:
 			count = 0
 			for instance in model.objects.filter(asset__isnull=True):
 				instance.asset = self.get_db_asset(instance.code)
+				if not instance.asset:
+					continue
 				instance.save()
 				count += 1
 
