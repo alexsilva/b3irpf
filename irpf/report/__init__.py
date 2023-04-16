@@ -170,15 +170,20 @@ class NegotiationReport:
 			asset.buy.total += ((instance.quantity * instance.price) + instance.tax)
 		elif instance.is_sell:
 			# valores de venda
+			sell_total = ((instance.quantity * instance.price) - instance.tax)
+
 			asset.sell.tax += instance.tax
 			asset.sell.quantity += instance.quantity
-			asset.sell.total += ((instance.quantity * instance.price) - instance.tax)
+			asset.sell.total += sell_total
+
+			# preço médio de compras
+			sell_avg_price = sell_total / instance.quantity
 
 			# preço médio de compras
 			buy_avg_price = asset.buy.avg_price
 
 			# ganho de capital de todas a vendas
-			asset.sell.capital += (instance.quantity * (asset.sell.avg_price - buy_avg_price))
+			asset.sell.capital += (instance.quantity * (sell_avg_price - buy_avg_price))
 
 			# ajustando compras
 			asset.buy.tax -= instance.tax
