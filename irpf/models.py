@@ -92,8 +92,8 @@ class Enterprise(models.Model):
 
 	class Meta:
 		ordering = ("name", "code")
-		verbose_name = "Empresa"
-		verbose_name_plural = "Empresas"
+		verbose_name = "Ativo"
+		verbose_name_plural = "Ativos"
 
 
 class Instituition(models.Model):
