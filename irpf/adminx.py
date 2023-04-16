@@ -11,11 +11,11 @@ from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from irpf.views.xlsx_viewer import AdminXlsxViewer
 
-site.register_plugin(ListActionModelPlugin, ListAdminView)
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
 site.register_view("^irpf/report/(?P<model_app_label>.+)/$", AdminReportIrpfModelView, "reportirpf")
-
 site.register_view("^irpf/xlsx/viewer", AdminXlsxViewer, "xlsx_viewer")
+
+site.register_plugin(ListActionModelPlugin, ListAdminView)
 site.register_plugin(GuardianAdminPlugin, ListAdminView)
 site.register_plugin(GuardianAdminPlugin, ModelFormAdminView)
 site.register_plugin(AssignUserAdminPlugin, ModelFormAdminView)
