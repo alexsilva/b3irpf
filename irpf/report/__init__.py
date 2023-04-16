@@ -64,7 +64,6 @@ class NegotiationReport:
 		self.model = model
 		self.user = user
 		self.options = options
-		self.earnings_report = EaningsReport("Credito", user=self.user)
 		self._caches = {}
 
 	def get_enterprise(self, code):
