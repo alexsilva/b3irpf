@@ -83,8 +83,9 @@ class Sell:
 
 	@property
 	def avg_price(self):
-		if self.quantity > 0:
-			avg_price = self.total / self.quantity
+		quantity = int(self.quantity)
+		if quantity > 0:
+			avg_price = self.total / quantity
 		else:
 			avg_price = Decimal(0)
 		return avg_price
