@@ -334,10 +334,10 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 					defaults={'tax': avg_tax}
 				)
 			else:
-				for negociation in qs:
-					negociation.tax = avg_tax
-					negociation.brokerage_note = instance
-					negociation.save()
+				for negotiation in qs:
+					negotiation.tax = avg_tax
+					negotiation.brokerage_note = instance
+					negotiation.save()
 
 	def save_models(self):
 		instance = getattr(self.admin_view, "new_obj", None)
