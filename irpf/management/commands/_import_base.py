@@ -57,6 +57,8 @@ class Command(BaseCommand):
 
 	@atomic
 	def save_instance(self, **data):
+		if hasattr(self.storage_model, "import_before_save_data"):
+			data = self.storage_model.import_before_save_data(**data)
 		instance, created = self.storage_model.objects.get_or_create(**data)
 		if created:
 			self._assign_perm(instance)

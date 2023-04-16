@@ -182,6 +182,16 @@ class Negotiation(BaseIRPFModel):
 	price.sheet_header = "Preço"
 	total.sheet_header = "Valor"
 
+	@classmethod
+	def import_before_save_data(cls, **data):
+		opts = cls._meta
+		try:
+			ticker = opts.get_field("code").to_python(data['code'])
+			data['asset'] = Enterprise.objects.get(code__iexact=ticker)
+		except Enterprise.DoesNotExist:
+			pass
+		return data
+
 	@cached_property
 	def is_sell(self):
 		"""Se é uma venda"""
@@ -243,10 +253,10 @@ class Earnings(BaseIRPFModel):
 
 	kind = models.CharField(verbose_name="Tipo de Movimentação", max_length=256)
 	code = CharCodeNameField(verbose_name="Código", max_length=512, is_code=True)
+	name = CharCodeNameField(verbose_name="Nome do ativo", max_length=256)
 	asset = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
 	                          null=True)
-	name = CharCodeNameField(verbose_name="Empresa", max_length=256)
 	institution = models.CharField(verbose_name="Instituição",
 	                               max_length=512)
 	quantity = DecimalBRField(verbose_name="Quantidade",
@@ -266,6 +276,16 @@ class Earnings(BaseIRPFModel):
 	institution.sheet_header = "Instituição"
 	quantity.sheet_header = "Quantidade"
 	total.sheet_header = "Valor da Operação"
+
+	@classmethod
+	def import_before_save_data(cls, **data):
+		opts = cls._meta
+		try:
+			ticker = opts.get_field("code").to_python(data['code'])
+			data['asset'] = Enterprise.objects.get(code__iexact=ticker)
+		except Enterprise.DoesNotExist:
+			pass
+		return data
 
 	@cached_property
 	def kind_slug(self):
