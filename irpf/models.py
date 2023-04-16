@@ -140,6 +140,10 @@ class Negotiation(BaseIRPFModel):
 	code = CharCodeField(verbose_name="Código de negociação",
 	                     max_length=8)
 
+	asset = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
+	                          verbose_name="Ativo",
+	                          null=True)
+
 	quantity = models.DecimalField(verbose_name="Quantidade",
 	                               max_digits=19,
 	                               decimal_places=2)
