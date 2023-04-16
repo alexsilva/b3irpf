@@ -83,6 +83,9 @@ class NegotiationReport:
 		enterprise = options.get('enterprise')
 		if enterprise:
 			qs_options['enterprise'] = enterprise
+		categories = options['categories']
+		if categories:
+			qs_options['enterprise__category__in'] = categories
 		queryset = self.bonus_model.objects.filter(date=date, user=self.user,
 		                                           **qs_options)
 		for bonus in queryset:
@@ -132,11 +135,14 @@ class NegotiationReport:
 	def apply_events(self, date, assets, **options):
 		"""Eventos de desdobramento/grupamento"""
 		qs_options = {}
-		enterprise = options.get('enterprise')
 		related_fields = []
+		enterprise = options.get('enterprise')
 		if enterprise:
 			qs_options['enterprise'] = enterprise
 			related_fields.append('enterprise')
+		categories = options['categories']
+		if categories:
+			qs_options['enterprise__category__in'] = categories
 		event_model = self.event_model
 		queryset = event_model.objects.filter(date_com=date, user=self.user, **qs_options)
 		if related_fields:
@@ -201,6 +207,9 @@ class NegotiationReport:
 		enterprise = options.get('enterprise')
 		if enterprise:
 			qs_options['code'] = enterprise.code
+		categories = options['categories']
+		if categories:
+			qs_options['asset__category__in'] = categories
 		queryset = self.earnings_model.objects.filter(**qs_options)
 		return queryset
 
