@@ -189,7 +189,7 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 class NegotiationAdmin(BaseIRPFAdmin):
 	collect_related_nested_objects = False
 	model_icon = "fa fa-credit-card-alt"
-	list_filter = ("kind", "date")
+	list_filter = ("kind", "date", "asset")
 	search_fields = ("code",)
 	list_display = (
 		"code",
@@ -234,7 +234,7 @@ class AssetEventAdmin(BaseIRPFAdmin):
 
 @sites.register(Earnings)
 class EarningsAdmin(BaseIRPFAdmin):
-	list_filter = ("kind", "date")
+	list_filter = ("kind", "date", "asset")
 	search_fields = ("code",)
 	list_display = (
 		"flow",
