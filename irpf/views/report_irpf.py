@@ -9,7 +9,7 @@ from irpf.models import Instituition, Enterprise
 from irpf.report import NegotiationReport
 from irpf.views.base import AdminFormView
 from xadmin.views import filter_hook
-from xadmin.widgets import AdminDateWidget, AdminSelectWidget
+from xadmin.widgets import AdminDateWidget, AdminSelectWidget, AdminSelectMultiple
 
 _now = timezone.now()
 
@@ -46,6 +46,10 @@ class ReportIRPFForm(django_forms.Form):
 	                                           label=Enterprise._meta.verbose_name,
 	                                           widget=AdminSelectWidget,
 	                                           required=False)
+	categories = django_forms.MultipleChoiceField(choices=Enterprise.CATEGORY_CHOICES,
+			                                    widget=AdminSelectMultiple,
+			                                    label="Categorias de ativo",
+			                                    required=False)
 	institution = django_forms.ModelChoiceField(Instituition.objects.all(),
 	                                            label=Instituition._meta.verbose_name,
 	                                            widget=AdminSelectWidget,
@@ -95,13 +99,15 @@ class AdminReportIrpfModelView(AdminFormView):
 			institution = form_data['institution']
 			enterprise = form_data['enterprise']
 			consolidation = form_data['consolidation']
+			categories = form_data['categories']
 			start = form_data['start']
 			end = form_data['end']
 
 			self.results = self.report.report(start, end,
 			                                  institution=institution,
 			                                  enterprise=enterprise,
-			                                  consolidation=consolidation)
+			                                  consolidation=consolidation,
+			                                  categories=categories)
 		return self.render_to_response(self.get_context_data(form=form))
 
 	def get_form_kwargs(self):

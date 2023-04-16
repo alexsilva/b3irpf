@@ -252,6 +252,9 @@ class NegotiationReport:
 		if enterprise:
 			qs_options['enterprise'] = enterprise
 			related_fields.append('enterprise')
+		categories = options['categories']
+		if categories:
+			qs_options['enterprise__category__in'] = categories
 		consolidation = options['consolidation']
 		if consolidation == self.YEARLY:
 			startdate = datetime.date.min.replace(year=date.year - 1)
@@ -297,6 +300,7 @@ class NegotiationReport:
 
 	def report(self, dtstart, dtend, **options):
 		options.setdefault('consolidation', self.YEARLY)
+		categories = options.setdefault('categories', ())
 		assets = self.get_assets_position(date=dtstart, **options)
 		qs_options = {'user': self.user}
 		institution = options.get('institution')
@@ -305,7 +309,8 @@ class NegotiationReport:
 		enterprise = options.get('enterprise')
 		if enterprise:  # Permite filtrar por empresa (ativo)
 			qs_options['code'] = enterprise.code
-
+		if categories:
+			qs_options['asset__category__in'] = categories
 		# cache
 		assets_queryset = self.get_queryset(**qs_options)
 		history = {}
