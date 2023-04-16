@@ -243,6 +243,9 @@ class Earnings(BaseIRPFModel):
 
 	kind = models.CharField(verbose_name="Tipo de Movimentação", max_length=256)
 	code = CharCodeNameField(verbose_name="Código", max_length=512, is_code=True)
+	asset = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
+	                          verbose_name="Ativo",
+	                          null=True)
 	name = CharCodeNameField(verbose_name="Empresa", max_length=256)
 	institution = models.CharField(verbose_name="Instituição",
 	                               max_length=512)
