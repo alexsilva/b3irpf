@@ -107,30 +107,17 @@ class NegotiationReport:
 
 			# valor quantidade e valores recebidos de bonificação
 			bonus_quantity = history_asset.buy.quantity * (bonus.proportion / 100)
-
-			# adição dos novos ativos
-			bonus_base_quantity = Decimal(int(bonus_quantity))
-			bonus_base_value = bonus_base_quantity * bonus.base_value
-
-			try:
-				bonus_frac_quantity = bonus_quantity % bonus_base_quantity
-				bonus_frac_value = bonus_frac_quantity * bonus.base_value
-			except decimal.InvalidOperation:
-				# bonus_base_quantity == 0, bonus_quantity < 1
-				bonus_frac_quantity = bonus_quantity
-				bonus_frac_value = bonus_frac_quantity * bonus.base_value
-
+			bonus_value = int(bonus_quantity) * bonus.base_value
 			bonus_event.append({
 				'spec': bonus,
 				'asset': history_asset,
-				# o correto é a parte fracionária ser vendidada
-				'fractional': Event("Bônus fracionado",
-				                    quantity=bonus_frac_quantity,
-				                    value=bonus_frac_value),
-				'base': Event("Bônus principal",
-				              quantity=bonus_base_quantity,
-				              value=bonus_base_value),
+				'event': Event("Valor da bonificação",
+			              quantity=bonus_quantity,
+			              value=bonus_value)
 			})
+			# rebalanceando a carteira
+			asset.buy.quantity += bonus_quantity
+			asset.buy.total += bonus_value
 
 	def apply_events(self, date, assets, **options):
 		"""Eventos de desdobramento/grupamento"""
@@ -234,8 +221,10 @@ class NegotiationReport:
 				# ganho de capital de todas a vendas
 				asset.sell.capital += instance.total
 			elif kind_slug == instance.BONIFICAO_EM_ATIVOS:
-				asset.buy.quantity += instance.quantity
-				asset.buy.total += instance.total
+				# calculada por registro manual
+				# asset.buy.quantity += instance.quantity
+				# asset.buy.total += instance.total
+				...
 		elif instance.is_debit:
 			if kind_slug == instance.FRACAO_EM_ATIVOS:
 				asset.sell.quantity += instance.quantity

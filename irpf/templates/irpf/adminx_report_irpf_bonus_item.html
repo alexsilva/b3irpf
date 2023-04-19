@@ -9,29 +9,16 @@
 {% block card_list_group %}
   <li class="list-group-item py-2">
     <div class="row">
-      <div class="col-sm-8 text-center text-sm-left">{{ bonus.base.title }}
+      <div class="col-sm-8 text-center text-sm-left">{{ bonus.event.title }}
         <button type="button" class="btn btn-link btn-sm" data-toggle="popover"
                 data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações.">
           <i class="fa fa-info-circle"></i>
         </button>
       </div>
-      <div class="col-sm-4 text-center text-sm-right btn btn-link" data-toggle="popover" data-content="{{ bonus.base.value }}">
+      <div class="col-sm-4 text-center text-sm-right btn btn-link" data-toggle="popover" data-content="{{ bonus.event.value }}">
         <span class="text-muted">
-          {{ bonus.base.quantity|smart_desc }} ativo{{ bonus.base.quantity|pluralize }}, R$ {{ bonus.base.value|moneyformat }}
+          {{ bonus.event.quantity|smart_desc }} ativo{{ bonus.event.quantity|pluralize }}, R$ {{ bonus.event.value|moneyformat }}
         </span>
-      </div>
-    </div>
-  </li>
-  <li class="list-group-item py-2">
-    <div class="row">
-      <div class="col-sm-8 text-center text-sm-left">{{ bonus.fractional.title }}
-        <button type="button" class="btn btn-link btn-sm" data-toggle="popover"
-                data-content="Rendimentos Isentos e Não Tributáveis / Outros / Descrição: Venda residual de ações bonificadas.">
-          <i class="fa fa-info-circle"></i>
-        </button>
-      </div>
-      <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ bonus.fractional.quantity|floatformat }}, R$ {{ bonus.fractional.value|moneyformat }}</span>
       </div>
     </div>
   </li>
