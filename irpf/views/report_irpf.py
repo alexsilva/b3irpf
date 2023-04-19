@@ -35,7 +35,7 @@ class ReportIRPFForm(django_forms.Form):
 	)
 
 	consolidation = django_forms.IntegerField(
-		label="Declaração",
+		label="Consolidação",
 		widget=django_forms.Select(choices=[
 				(1, "Anual"),
 				(2, "Mensal")
@@ -48,7 +48,7 @@ class ReportIRPFForm(django_forms.Form):
 	                                           required=False)
 	categories = django_forms.MultipleChoiceField(choices=Enterprise.CATEGORY_CHOICES,
 			                                    widget=AdminSelectMultiple,
-			                                    label="Categorias de ativo",
+			                                    label="Categorias",
 			                                    required=False)
 	institution = django_forms.ModelChoiceField(Instituition.objects.all(),
 	                                            label=Instituition._meta.verbose_name,
