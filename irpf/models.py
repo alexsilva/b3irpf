@@ -208,7 +208,7 @@ class Negotiation(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Negociação"
 		verbose_name_plural = "Negociações"
-		ordering = ("date",)
+		ordering = ("-date",)
 
 
 class Bonus(BaseIRPFModel):
