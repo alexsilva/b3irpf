@@ -4,7 +4,7 @@
     <div class="col-sm-4">
         <span class="badge badge-{{ title_class }}">{{ title }}
           {% get_obj_val event "quantity" as event_quantity %}
-          <span title="Quantidade" class="badge badge-light badge-pill">{{ event_quantity|smart_desc }}</span>
+          <span title="Quantidade" class="badge badge-light badge-pill">{{ event_quantity }}</span>
         </span>
     </div>
     <div class="col-sm-4 text-center text-nowrap">{% get_obj_val event "title" %}</div>
