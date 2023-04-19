@@ -12,10 +12,7 @@ from xadmin.views import filter_hook
 from xadmin.widgets import AdminDateWidget, AdminSelectWidget, AdminSelectMultiple
 
 _now = timezone.now()
-
-year = _now.year - 1
-startdt = datetime.date.min.replace(year=year)
-enddt = datetime.date.max.replace(year=year)
+startdt, enddt = datetime.date.min.replace(year=_now.year), _now
 
 
 class ReportIRPFForm(django_forms.Form):
