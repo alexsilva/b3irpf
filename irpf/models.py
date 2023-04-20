@@ -227,6 +227,11 @@ class Bonus(BaseIRPFModel):
 	                                 default=Decimal(0),
 	                                 help_text="valor expresso em porcentagem.")
 
+	notice = models.FileField(verbose_name='Arquivo de anúncio',
+	                          upload_to='bonus/notice',
+	                          storage=FileSystemOverwriteStorage(),
+	                          null=True, blank=True)
+
 	def __str__(self):
 		value = number_format(self.base_value)
 		return f"{self.enterprise} / R$ {value} {self.proportion}%"
