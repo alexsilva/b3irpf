@@ -366,8 +366,6 @@ class BrokerageNote(BaseIRPFModel):
 	                             decimal_places=4,
 	                             default=Decimal(0))
 
-	transactions = models.ManyToManyField(Negotiation, verbose_name="Transações")
-
 	def __str__(self):
 		return f"{self.note} / {self.institution.name}"
 
