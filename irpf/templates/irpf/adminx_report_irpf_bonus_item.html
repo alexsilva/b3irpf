@@ -1,25 +1,42 @@
 {% extends "irpf/adminx_report_irpf_asset_box.html" %}
-{% load irpf_tags %}
-{% block card_title %}Bonificações{% endblock %}
-{% block card_subtitle %}
-  Proporção <span class="text-muted">{{ bonus.spec.proportion }}%</span> de
-  <span class="text-muted">{{ bonus.asset.buy.quantity }}</span> ativos no dia {{ bonus.spec.data_com }}
+{% load irpf_tags xadmin_tags %}
+{% block card_header %}
+  <h5 class="card-header text-center text-primary">
+    Bonificações
+  </h5>
 {% endblock %}
 
-{% block card_list_group %}
-  <li class="list-group-item py-2">
-    <div class="row">
-      <div class="col-sm-8 text-center text-sm-left">{{ bonus.event.title }}
-        <button type="button" class="btn btn-link btn-sm" data-toggle="popover"
-                data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações.">
-          <i class="fa fa-info-circle"></i>
-        </button>
-      </div>
-      <div class="col-sm-4 text-center text-sm-right btn btn-link" data-toggle="popover" data-content="{{ bonus.event.value }}">
-        <span class="text-muted">
-          {{ bonus.event.quantity|smart_desc }} ativo{{ bonus.event.quantity|pluralize }}, R$ {{ bonus.event.value|moneyformat }}
-        </span>
-      </div>
-    </div>
-  </li>
+{% block card_body %}
+<div class="card-body">
+  {% for bonus in item.asset.events.bonus %}
+    <h6 class="card-text mb-1">
+      Proporção <span class="text-muted">{{ bonus.spec.proportion }}%</span> de
+      <span class="text-muted">{{ bonus.history_asset.buy.quantity }}</span> ativos no dia {{ bonus.spec.data_com }}
+    </h6>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item py-2">
+        <div class="row">
+          <div class="col-sm-8 text-center text-sm-left">{{ bonus.event.title }}
+            <button type="button" class="btn btn-link btn-sm" data-toggle="popover"
+                    data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações.">
+              <i class="fa fa-info-circle"></i>
+            </button>
+          </div>
+          <div class="col-sm-4 text-center text-sm-right btn btn-link" data-toggle="popover"
+               data-content="{{ bonus.event.value }}">
+            <span class="text-muted">
+              {{ bonus.event.quantity|smart_desc }} ativo{{ bonus.event.quantity|pluralize }}, R$ {{ bonus.event.value|moneyformat }}
+            </span>
+          </div>
+        </div>
+      </li>
+    </ul>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block card_footer %}
+  <div class="card-footer">
+    {% view_block 'bonus_stats' %}
+  </div>
 {% endblock %}

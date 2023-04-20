@@ -17,6 +17,7 @@ from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import TransactionType
 from irpf.fields import CharCodeField
 from irpf.models import Negotiation, Earnings, Position, Enterprise
+from irpf.report.utils import Stats, Event
 from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
@@ -368,28 +369,39 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 	def get_stats(self):
 		"""Gera dados estatísticos"""
 		results = self.admin_view.results
-		buy, sell, capital, tax, patrimony = 'buy', 'sell', 'capital', 'tax', 'patrimony'
-		stats = {
-			buy: Decimal(0),
-			sell: Decimal(0),
-			capital: Decimal(0),
-			patrimony: Decimal(0),
-			tax: Decimal(0)
-		}
+		stats = Stats()
 		for item in results:
 			asset = item['asset']
 			period = asset.period
-			stats[patrimony] += period.total
-			stats[buy] += asset.period_buy.total
-			stats[sell] += asset.sell.total
-			stats[capital] += asset.sell.capital
-			stats[tax] += (asset.buy.tax + asset.sell.tax)
+			stats.patrimony += period.total
+			stats.buy += asset.period_buy.total
+			stats.sell += asset.sell.total
+			stats.capital += asset.sell.capital
+			stats.tax += (asset.buy.tax + asset.sell.tax)
 		return stats
 
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.report and self.admin_view.results:
 			context['report']['stats'] = self.get_stats()
 		return context
+
+	def block_bonus_stats(self, context, nodes):
+		context = get_context_dict(context)
+		stats = context['report'].get('stats')
+		if stats is None:
+			return
+		asset = context['item']['asset']
+		bonus = asset.events.get('bonus')
+		if bonus is None:
+			return
+		stats.bonus = event = Event("Total recebido")
+		for bonus in bonus:
+			bonus_event = bonus['event']
+			# soma todas as bonificações recebidas no período
+			event.quantity += bonus_event.quantity
+			event.value += bonus_event.value
+		return render_to_string('irpf/blocks/blocks.adminx_report_irpf_bonus_stats.html',
+		                        context=context)
 
 	def block_report(self, context, nodes):
 		context = get_context_dict(context)

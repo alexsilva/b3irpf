@@ -40,9 +40,7 @@
       {% endif %}
 
       {% if item.asset.events.bonus %}
-        {% for bonus in item.asset.events.bonus %}
           {% include "irpf/adminx_report_irpf_bonus_item.html" with card_title_class="text-info" %}
-        {% endfor %}
       {% endif %}
 
       {% if item.enterprise and item.enterprise.bookkeeping %}

@@ -110,7 +110,8 @@ class NegotiationReport:
 			bonus_value = int(bonus_quantity) * bonus.base_value
 			bonus_event.append({
 				'spec': bonus,
-				'asset': history_asset,
+				'asset': asset,
+				'history_asset': history_asset,
 				'event': Event("Valor da bonificação",
 			              quantity=bonus_quantity,
 			              value=bonus_value)

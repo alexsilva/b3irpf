@@ -1,5 +1,7 @@
 {% load irpf_tags %}
 <div class="card mt-1 mb-2 unsort" style="max-width: 50rem;">
+  {% block card_header %}{% endblock %}
+  {% block card_body %}
   <div class="card-body">
     <h5 class="card-title {{ card_title_class }}">
       {% block card_title %}{{ card_title }}{% endblock %}
@@ -11,4 +13,6 @@
       {% block card_list_group %}{% endblock %}
     </ul>
   </div>
+  {% endblock %}
+  {% block card_footer %}{% endblock %}
 </div>

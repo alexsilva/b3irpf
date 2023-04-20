@@ -33,6 +33,21 @@ class Event:
 		return self.title
 
 
+class Stats:
+	def __init__(self, buy: Decimal = Decimal(0),
+	             sell: Decimal = Decimal(0),
+	             capital: Decimal = Decimal(0),
+	             patrimony: Decimal = Decimal(0),
+	             tax: Decimal = Decimal(0),
+	             bonus: Event = None):
+		self.buy = buy
+		self.capital = capital
+		self.patrimony = patrimony
+		self.tax = tax
+		self.sell = sell
+		self.bonus = bonus
+
+
 class Credit(OrderedDict):
 	"""credito"""
 
