@@ -325,10 +325,10 @@ class NegotiationReport:
 					              institution=institution,
 					              enterprise=enterprise)
 					assets[instance.code] = asset
-				asset.items.append(instance)
 				# ignora os registros que já foram contabilizados na posição
 				if asset.is_position_interval(instance.date):
 					continue
+				asset.items.append(instance)
 				self.consolidate(instance, asset)
 
 			# histórico das posições no dia
