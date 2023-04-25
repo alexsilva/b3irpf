@@ -10,3 +10,9 @@ def range_dates(start_of_range: date, end_of_range: date) -> Sequence[date]:
 	else:
 		for x in range(0, (start_of_range - end_of_range).days + 1):
 			yield start_of_range - timedelta(days=x)
+
+
+def ticker_validator(ticker: str):
+	"""Faz a validação ticker (formato e tamanho)"""
+	from irpf.fields import CharCodeField
+	return CharCodeField().to_python(ticker)
