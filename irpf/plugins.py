@@ -191,8 +191,13 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 
 	@atomic
 	def save_position(self, date, results):
-		for item in results:
-			self._save(date, item['asset'])
+		try:
+			for item in results:
+				self._save(date, item['asset'])
+		except Exception as exc:
+			self.message_user(f"Falha ao salvar posições: {exc}", level="error")
+		else:
+			self.message_user("Posições salvas com sucesso!", level="info")
 
 	@cached_property
 	def is_save_position(self):
