@@ -81,6 +81,16 @@ class Buy:
 			avg_price = Decimal(0)
 		return avg_price
 
+	@property
+	def avg_tax(self):
+		"""Taxa média por ativo"""
+		quantity = int(self.quantity)
+		if quantity > 0:
+			avg_tax = self.tax / quantity
+		else:
+			avg_tax = Decimal(0)
+		return avg_tax
+
 
 class Sell:
 	"""Vendas"""
