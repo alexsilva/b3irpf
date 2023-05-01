@@ -179,8 +179,8 @@ class NegotiationReport:
 			asset.sell.capital += (instance.quantity * (sell_avg_price - buy_avg_price))
 
 			# ajustando compras
-			asset_buy_quantity = int(asset.buy.quantity)
 			asset.buy.quantity -= instance.quantity
+			asset_buy_quantity = int(asset.buy.quantity)
 			asset.buy.tax = asset_buy_quantity * asset.buy.avg_tax
 			asset.buy.total = asset_buy_quantity * buy_avg_price
 		return asset
