@@ -112,7 +112,7 @@ class Sell:
 		"""Preço médio de venda"""
 		quantity = int(self.quantity)
 		if quantity > 0:
-			avg_price = self.total / quantity
+			avg_price = (self.total - self.tax) / quantity
 		else:
 			avg_price = Decimal(0)
 		return avg_price
