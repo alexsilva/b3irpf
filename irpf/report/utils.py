@@ -74,6 +74,7 @@ class Buy:
 
 	@property
 	def avg_price(self):
+		"""Preço médio de compra"""
 		quantity = int(self.quantity)
 		if quantity > 0:
 			avg_price = self.total / quantity
@@ -108,6 +109,7 @@ class Sell:
 
 	@property
 	def avg_price(self):
+		"""Preço médio de venda"""
 		quantity = int(self.quantity)
 		if quantity > 0:
 			avg_price = self.total / quantity
