@@ -1,8 +1,7 @@
-import decimal
+import calendar
 
 import copy
 import datetime
-from decimal import Decimal
 from django.utils.text import slugify
 
 from irpf.models import Enterprise, Earnings, Bonus, Position, AssetEvent
@@ -241,7 +240,9 @@ class NegotiationReport:
 
 	def get_position_queryset(self, date: datetime.date, **options):
 		"""Mota e retorna a queryset de posição"""
-		qs_options = {}
+		qs_options = {
+			'user': self.user
+		}
 		related_fields = []
 		institution = options.get('institution')
 		if institution:
@@ -255,24 +256,18 @@ class NegotiationReport:
 		if categories:
 			qs_options['enterprise__category__in'] = categories
 		consolidation = options['consolidation']
+		# a data de posição é sempre o último dia do mês ou ano.
 		if consolidation == self.YEARLY:
-			startdate = datetime.date.min.replace(year=date.year - 1)
-			enddate = datetime.date.max.replace(year=date.year - 1)
+			qs_options['date'] = datetime.date.max.replace(year=date.year - 1)
 		elif consolidation == self.MONTHLY:
 			if date.month - 1 > 0:
-				startdate = datetime.date(year=date.year, month=date.month - 1, day=1)
-				enddate = date - datetime.timedelta(days=1)
+				max_day = calendar.monthrange(date.year, date.month - 1)[1]
+				qs_options['date'] = datetime.date(date.year, date.month - 1, max_day)
 			else:
-				enddate = datetime.date.max.replace(year=date.year - 1)
-				startdate = datetime.date(year=enddate.year, month=enddate.month, day=1)
+				qs_options['date'] = datetime.date.max.replace(year=date.year - 1)
 		else:
-			startdate = enddate = date
-		qs_options.setdefault(options.get('startdate_lookup', 'date__gte'), startdate)
-		qs_options.setdefault(options.get('enddate_lookup', 'date__lte'), enddate)
-		queryset = self.position_model.objects.filter(
-			user=self.user,
-			**qs_options
-		)
+			qs_options['date'] = date
+		queryset = self.position_model.objects.filter(**qs_options)
 		if related_fields:
 			queryset = queryset.select_related(*related_fields)
 		return queryset.order_by('date')
