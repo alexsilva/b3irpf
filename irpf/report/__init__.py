@@ -270,6 +270,7 @@ class NegotiationReport:
 		else:
 			qs_options['date'] = date
 		queryset = self.position_model.objects.filter(**qs_options)
+		queryset = queryset.exclude(quantity=0)
 		if related_fields:
 			queryset = queryset.select_related(*related_fields)
 		return queryset.order_by('date')
