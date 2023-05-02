@@ -1,7 +1,7 @@
 from django import template
 from django.utils.formats import number_format
 
-from irpf.report.utils import smart_desc as irpf_smart_desc
+from irpf.report.utils import smart_desc as irpf_smart_desc, as_int_desc as irpf_as_int_desc
 
 register = template.Library()
 
@@ -15,6 +15,11 @@ def moneyformat(value):
 @register.filter
 def smart_desc(value):
 	return irpf_smart_desc(value)
+
+
+@register.filter
+def as_int_desc(value):
+	return irpf_as_int_desc(value)
 
 
 @register.simple_tag

@@ -9,7 +9,7 @@
     <button type="button" class="btn btn-link" data-toggle="popover"
             data-content="
         {% if item.enterprise %}
-          {{ asset_period.quantity|smart_desc }}
+          {{ asset_period.quantity|as_int_desc }}
           {% if item.enterprise.is_fii %}cota{{ asset_period.quantity|pluralize:"s" }}
           {% elif item.enterprise.is_stock %}ações
           {% elif item.enterprise.is_bdr %}bdr{{ asset_period.quantity|pluralize:"s" }}

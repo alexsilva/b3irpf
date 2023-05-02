@@ -7,6 +7,14 @@ from collections import OrderedDict
 import math
 
 
+def as_int_desc(value) -> Decimal:
+	try:
+		value = Decimal(math.modf(value)[1])
+	except decimal.InvalidOperation:
+		...
+	return value
+
+
 def smart_desc(value) -> Decimal:
 	"""Converte 'value' para decimal quanto a parte fracionária for zero"""
 	try:
