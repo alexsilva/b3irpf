@@ -18,7 +18,7 @@ from b3irpf.utils import SecretKey
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env(
+ENV = env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False)
 )
@@ -52,8 +52,11 @@ INSTALLED_APPS = [
     'crispy_forms',
     'xadmin',
     'irpf',
-    'guardian'
+    'guardian',
+    'assetprice'
 ]
+
+TICKER_VALIDATOR = "irpf.utils.ticker_validator"
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend', # this is default
