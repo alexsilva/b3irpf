@@ -88,7 +88,7 @@ class DecimalBRField(models.DecimalField):
 		if isinstance(value, str):
 			try:
 				value = Decimal(value.replace(',', '.'))
-			except (decimal.ConversionSyntax, ValueError):
+			except (decimal.InvalidOperation, ValueError):
 				value = Decimal(0)
 		return value
 
@@ -121,7 +121,7 @@ class DecimalZeroField(models.DecimalField):
 		if isinstance(value, str):
 			try:
 				value = Decimal(value)
-			except (decimal.ConversionSyntax, ValueError):
+			except (decimal.InvalidOperation, ValueError):
 				value = Decimal(0)
 		return value
 
