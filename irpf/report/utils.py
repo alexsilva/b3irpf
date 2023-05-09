@@ -1,15 +1,13 @@
-import decimal
-
 import copy
 import datetime
-from decimal import Decimal
+import decimal
 from collections import OrderedDict
-import math
+from decimal import Decimal
 
 
 def as_int_desc(value) -> Decimal:
 	try:
-		value = Decimal(math.modf(value)[1])
+		value = Decimal(int(value))
 	except decimal.InvalidOperation:
 		...
 	return value
@@ -17,14 +15,10 @@ def as_int_desc(value) -> Decimal:
 
 def smart_desc(value) -> Decimal:
 	"""Converte 'value' para decimal quanto a parte fracionária for zero"""
-	try:
-		# 5.0 % 5 == 0, 5.5 % 5 = 0.5
-		parts = math.modf(value)
-		if parts[0] == 0:
-			# converte para inteiro porque o valor não tem fração relevante
-			value = Decimal(parts[1])
-	except decimal.InvalidOperation:
-		...
+	# 5.0 % 5 == 0, 5.5 % 5 = 0.5
+	if value % 1 == 0:
+		# converte para inteiro porque o valor não tem fração relevante
+		value = as_int_desc(value)
 	return value
 
 
