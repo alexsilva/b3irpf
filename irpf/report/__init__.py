@@ -242,8 +242,10 @@ class NegotiationReport:
 				...
 		elif instance.is_debit:
 			if kind_slug == instance.FRACAO_EM_ATIVOS:
-				asset.sell.quantity += instance.quantity
-				asset.buy.quantity -= instance.quantity
+				# debito do frações
+				# asset.sell.quantity += instance.quantity
+				# asset.buy.quantity -= instance.quantity
+				...
 
 	def apply_earnings(self, date, assets, **options):
 		queryset = self.get_earnings_queryset(date, **options)
