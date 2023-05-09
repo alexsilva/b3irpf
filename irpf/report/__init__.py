@@ -106,7 +106,8 @@ class NegotiationReport:
 
 			# valor quantidade e valores recebidos de bonificação
 			bonus_quantity = history_asset.buy.quantity * (bonus.proportion / 100)
-			bonus_value = int(bonus_quantity) * bonus.base_value
+			bonus_base_quantity = int(bonus_quantity)
+			bonus_value = bonus_base_quantity * bonus.base_value
 			bonus_event.append({
 				'spec': bonus,
 				'asset': asset,
@@ -116,7 +117,7 @@ class NegotiationReport:
 			              value=bonus_value)
 			})
 			# rebalanceando a carteira
-			asset.buy.quantity += bonus_quantity
+			asset.buy.quantity += bonus_base_quantity
 			asset.buy.total += bonus_value
 
 	def apply_events(self, date, assets, **options):
