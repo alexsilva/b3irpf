@@ -65,9 +65,9 @@ class Enterprise(models.Model):
 	                                on_delete=models.SET_NULL,
 	                                null=True, blank=False)
 
-	adminstrator = models.ForeignKey(FoundsAdministrator,
-	                                 verbose_name="Adminstrador",
-	                                 help_text="Aquele que adminstra esse ativo.",
+	administrator = models.ForeignKey(FoundsAdministrator,
+	                                 verbose_name="Administrador",
+	                                 help_text="Aquele que administra esse ativo.",
 	                                 on_delete=models.SET_NULL,
 	                                 null=True, blank=True)
 

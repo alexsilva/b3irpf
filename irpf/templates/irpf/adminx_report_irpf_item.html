@@ -15,7 +15,7 @@
           {% elif item.enterprise.is_bdr %}bdr{{ asset_period.quantity|pluralize:"s" }}
           {% endif %}
           {{ item.code }} // {{ item.enterprise.name }} - {{ item.enterprise.cnpj }}
-          {% if item.enterprise.adminstrator %} // Adminstrador: {{ item.enterprise.adminstrator.name }} - {{ item.enterprise.adminstrator.cnpj }}{% endif %}
+          {% if item.enterprise.administrator %} // Administrador: {{ item.enterprise.administrator.name }} - {{ item.enterprise.administrator.cnpj }}{% endif %}
         {% else %}
           {{ item.code }}
         {% endif %}">

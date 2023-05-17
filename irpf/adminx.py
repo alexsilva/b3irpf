@@ -81,13 +81,13 @@ class BaseIRPFAdmin:
 class EnterpriseAdmin:
 	model_icon = "fa fa-coffee"
 	list_filter = ("category", "bookkeeping")
-	search_fields = ("code", "name", "cnpj", "adminstrator__name")
+	search_fields = ("code", "name", "cnpj", "administrator__name")
 	list_display = (
 		'code',
 		'category',
 		'name',
 		'cnpj',
-		'adminstrator',
+		'administrator',
 		'bookkeeping_name'
 	)
 
