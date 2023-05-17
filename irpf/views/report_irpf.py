@@ -5,7 +5,7 @@ from django.apps import apps
 from django.http import Http404
 from django.utils import timezone
 
-from irpf.models import Instituition, Asset
+from irpf.models import Institution, Asset
 from irpf.report import NegotiationReport
 from irpf.views.base import AdminFormView
 from xadmin.views import filter_hook
@@ -47,8 +47,8 @@ class ReportIRPFForm(django_forms.Form):
 	                                              widget=AdminSelectMultiple,
 	                                              label="Categorias",
 	                                              required=False)
-	institution = django_forms.ModelChoiceField(Instituition.objects.all(),
-	                                            label=Instituition._meta.verbose_name,
+	institution = django_forms.ModelChoiceField(Institution.objects.all(),
+	                                            label=Institution._meta.verbose_name,
 	                                            widget=AdminSelectWidget,
 	                                            required=False)
 

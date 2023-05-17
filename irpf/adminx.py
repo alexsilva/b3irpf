@@ -5,7 +5,7 @@ from django.core.management import call_command
 from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView
 
-from irpf.models import Asset, Negotiation, Earnings, Position, Instituition, Bonus, Bookkeeping, \
+from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin
@@ -47,8 +47,8 @@ class FoundsAdministratorAdmin:
 	)
 
 
-@sites.register(Instituition)
-class InstituitionAdmin:
+@sites.register(Institution)
+class InstitutionAdmin:
 	model_icon = "fa fa-university"
 	list_display = (
 		"name",

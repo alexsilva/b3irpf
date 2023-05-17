@@ -96,7 +96,7 @@ class Asset(models.Model):
 		verbose_name_plural = "Ativos"
 
 
-class Instituition(models.Model):
+class Institution(models.Model):
 	"""Corretora de valores"""
 	name = models.CharField(verbose_name="Instituição", max_length=512)
 	cnpj = models.CharField(verbose_name="CNPJ", max_length=32)
@@ -321,7 +321,7 @@ class BrokerageNote(BaseIRPFModel):
 	note = models.FileField(verbose_name='Nota de corretagem (PDF)',
 	                        upload_to='notes',
 	                        storage=FileSystemOverwriteStorage())
-	institution = models.ForeignKey(Instituition,
+	institution = models.ForeignKey(Institution,
 	                                on_delete=models.CASCADE,
 	                                verbose_name="Corretora",
 	                                help_text="A corretora que gerou essa nota.")
@@ -419,7 +419,7 @@ class Position(BaseIRPFModel):
 	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
 	                          null=True, blank=False)
-	institution = models.ForeignKey(Instituition,
+	institution = models.ForeignKey(Institution,
 	                                on_delete=models.SET_NULL,
 	                                verbose_name="Instituição",
 	                                blank=True, null=True)
