@@ -36,8 +36,8 @@ class FoundsAdministrator(models.Model):
 		return f"{self.name} / {self.cnpj}"
 
 	class Meta:
-		verbose_name = "Adminstrador de fundo"
-		verbose_name_plural = "Adminstradores de fundos"
+		verbose_name = "Administrador de fundo"
+		verbose_name_plural = "Administradores de fundos"
 
 
 class Asset(models.Model):
@@ -324,7 +324,7 @@ class BrokerageNote(BaseIRPFModel):
 	institution = models.ForeignKey(Instituition,
 	                                on_delete=models.CASCADE,
 	                                verbose_name="Corretora",
-	                                help_text="A corretora que gerou esssa nota.")
+	                                help_text="A corretora que gerou essa nota.")
 	reference_date = models.DateField(verbose_name="Data do pregão", null=True)
 	settlement_fee = models.DecimalField(verbose_name="Taxa de liquidação",
 	                                     max_digits=DECIMAL_MAX_DIGITS,
