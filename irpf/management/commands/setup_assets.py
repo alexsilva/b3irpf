@@ -1,12 +1,12 @@
 from django.core.management.base import BaseCommand
 
-from irpf.models import Earnings, Negotiation, Enterprise
+from irpf.models import Earnings, Negotiation, Asset
 
 
 class Command(BaseCommand):
 	"""Configura os ativos ao modelo cujo valor é Null
 	"""
-	asset_model = Enterprise
+	asset_model = Asset
 	update_models = [Earnings, Negotiation]
 
 	def get_db_asset(self, ticker: str):

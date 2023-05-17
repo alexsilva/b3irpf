@@ -4,8 +4,8 @@ import copy
 import datetime
 from django.utils.text import slugify
 
-from irpf.models import Enterprise, Earnings, Bonus, Position, AssetEvent
-from irpf.report.utils import Event, Asset, Buy
+from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent
+from irpf.report.utils import Event, Assets, Buy
 from irpf.utils import range_dates
 
 
@@ -51,8 +51,8 @@ class EaningsReport:
 
 
 class NegotiationReport:
+	asset_model = Asset
 	earnings_model = Earnings
-	enterprise_model = Enterprise
 	position_model = Position
 	event_model = AssetEvent
 	bonus_model = Bonus
@@ -65,13 +65,13 @@ class NegotiationReport:
 		self.options = options
 		self._caches = {}
 
-	def get_enterprise(self, code):
+	def get_asset(self, code):
 		"""A empresa"""
 		try:
-			enterprise = self.enterprise_model.objects.get(code__iexact=code)
-		except self.enterprise_model.DoesNotExist:
-			enterprise = None
-		return enterprise
+			asset = self.asset_model.objects.get(code__iexact=code)
+		except self.asset_model.DoesNotExist:
+			asset = None
+		return asset
 
 	def get_queryset(self, *args, **kwargs):
 		return self.model.objects.filter(*args, **kwargs)
@@ -79,17 +79,17 @@ class NegotiationReport:
 	def add_bonus(self, date, history, assets, **options):
 		"""Adiciona ações bonificadas na data com base no histórico"""
 		qs_options = {}
-		enterprise = options.get('enterprise')
-		if enterprise:
-			qs_options['enterprise'] = enterprise
+		asset_instance = options.get('asset')
+		if asset_instance:
+			qs_options['asset'] = asset_instance
 		categories = options['categories']
 		if categories:
-			qs_options['enterprise__category__in'] = categories
+			qs_options['asset__category__in'] = categories
 		queryset = self.bonus_model.objects.filter(date=date, user=self.user,
 		                                           **qs_options)
 		for bonus in queryset:
 			try:
-				asset = assets[bonus.enterprise.code]
+				asset = assets[bonus.asset.code]
 			except KeyError:
 				continue
 			# ignora os registros que já foram contabilizados na posição
@@ -102,7 +102,7 @@ class NegotiationReport:
 
 			# total de ativos na data ex
 			history_data_com = history[bonus.data_com]
-			history_asset = history_data_com[bonus.enterprise.code]
+			history_asset = history_data_com[bonus.asset.code]
 
 			# valor quantidade e valores recebidos de bonificação
 			bonus_quantity = history_asset.buy.quantity * (bonus.proportion / 100)
@@ -124,20 +124,20 @@ class NegotiationReport:
 		"""Eventos de desdobramento/grupamento"""
 		qs_options = {}
 		related_fields = []
-		enterprise = options.get('enterprise')
-		if enterprise:
-			qs_options['enterprise'] = enterprise
-			related_fields.append('enterprise')
+		asset_instance = options.get('asset')
+		if asset_instance:
+			qs_options['asset'] = asset_instance
+			related_fields.append('asset')
 		categories = options['categories']
 		if categories:
-			qs_options['enterprise__category__in'] = categories
+			qs_options['asset__category__in'] = categories
 		event_model = self.event_model
 		queryset = event_model.objects.filter(date_com=date, user=self.user, **qs_options)
 		if related_fields:
 			queryset = queryset.select_related(*related_fields)
 		for instance in queryset:
 			try:
-				asset = assets[instance.enterprise.code]
+				asset = assets[instance.asset.code]
 			except KeyError:
 				continue
 			# posição na data
@@ -167,7 +167,7 @@ class NegotiationReport:
 				asset.buy.total -= fractional * avg_price
 				asset.buy.quantity = quantity * instance.factor_to  # correção
 
-	def consolidate(self, instance, asset: Asset):
+	def consolidate(self, instance, asset: Assets):
 		if instance.is_buy:
 			# valores de compras
 			asset.buy.tax += instance.tax
@@ -206,16 +206,16 @@ class NegotiationReport:
 		institution = options.get('institution')
 		if institution:
 			qs_options['institution'] = institution.name
-		enterprise = options.get('enterprise')
-		if enterprise:
-			qs_options['code'] = enterprise.code
+		asset_instance = options.get('asset')
+		if asset_instance:
+			qs_options['code'] = asset_instance.code
 		categories = options['categories']
 		if categories:
 			qs_options['asset__category__in'] = categories
 		queryset = self.earnings_model.objects.filter(**qs_options)
 		return queryset
 
-	def calc_earnings(self, instance: Earnings, asset: Asset):
+	def calc_earnings(self, instance: Earnings, asset: Assets):
 		kind_slug = instance.kind_slug
 		obj = getattr(asset, "credit" if instance.is_credit else "debit")
 		try:
@@ -265,13 +265,13 @@ class NegotiationReport:
 		if institution:
 			qs_options['institution'] = institution
 			related_fields.append('institution')
-		enterprise = options.get('enterprise')
-		if enterprise:
-			qs_options['enterprise'] = enterprise
-			related_fields.append('enterprise')
+		asset_instance = options.get('asset')
+		if asset_instance:
+			qs_options['asset'] = asset_instance
+			related_fields.append('asset')
 		categories = options['categories']
 		if categories:
-			qs_options['enterprise__category__in'] = categories
+			qs_options['asset__category__in'] = categories
 		consolidation = options['consolidation']
 		# a data de posição é sempre o último dia do mês ou ano.
 		if consolidation == self.YEARLY:
@@ -296,17 +296,18 @@ class NegotiationReport:
 		if queryset is None:
 			queryset = self.get_position_queryset(date, **options)
 		for position in queryset:
-			ticker = position.enterprise.code
-			asset = Asset(ticker=ticker,
-			              institution=position.institution,
-			              enterprise=position.enterprise,
-			              position=position,
-			              buy=Buy(
-				              quantity=position.quantity,
-				              total=position.total,
-				              tax=position.tax,
-				              date=position.date
-			              ))
+			ticker = position.asset.code
+			asset = Assets(
+				ticker=ticker,
+				institution=position.institution,
+				instance=position.asset,
+				position=position,
+				buy=Buy(
+					quantity=position.quantity,
+					total=position.total,
+					tax=position.tax,
+					date=position.date
+				))
 			assets[ticker] = asset
 		return assets
 
@@ -317,9 +318,9 @@ class NegotiationReport:
 		institution = options.get('institution')
 		if institution:
 			qs_options['institution'] = institution.name
-		enterprise = options.get('enterprise')
-		if enterprise:  # Permite filtrar por empresa (ativo)
-			qs_options['code'] = enterprise.code
+		asset_instance = options.get('asset')
+		if asset_instance:  # Permite filtrar por empresa (ativo)
+			qs_options['code'] = asset_instance.code
 		if categories:
 			qs_options['asset__category__in'] = categories
 		# cache
@@ -334,9 +335,11 @@ class NegotiationReport:
 				try:
 					asset = assets[instance.code]
 				except KeyError:
-					asset = Asset(ticker=instance.code,
-					              institution=institution,
-					              enterprise=enterprise)
+					asset = Assets(ticker=instance.code,
+					               institution=institution,
+					               instance=(instance.asset or
+					                         asset_instance or
+					                         self.get_asset(instance.code)))
 					assets[instance.code] = asset
 				# ignora os registros que já foram contabilizados na posição
 				if asset.is_position_interval(instance.date):
@@ -355,18 +358,17 @@ class NegotiationReport:
 		results = []
 		for code in assets:
 			asset = assets[code]
-			asset.enterprise = asset.enterprise or self.get_enterprise(code)
 			results.append({
 				'code': code,
 				'institution': institution,
-				'enterprise': asset.enterprise,
+				'instance': asset.instance,
 				'asset': asset
 			})
 
 		def results_sort_category(item):
-			_enterprise = item['enterprise']
-			return (_enterprise.category_choices[_enterprise.category]
-			        if _enterprise and _enterprise.category else item['code'])
+			_instance = item['instance']
+			return (_instance.category_choices[_instance.category]
+			        if _instance and _instance.category else item['code'])
 
 		def results_sort_code(item):
 			return item['code']

@@ -1,7 +1,7 @@
 from django.utils.timezone import now
 
 from assetprice.management.commands import paid_history
-from irpf.models import Enterprise
+from irpf.models import Asset
 
 
 class Command(paid_history.Command):
@@ -10,7 +10,7 @@ class Command(paid_history.Command):
 	def handle(self, *args, **options):
 		interval = 5
 		date_now = now()
-		for instance in Enterprise.objects.all():
+		for instance in Asset.objects.all():
 			queryset = self.get_from_history(instance.code, date_now.year - interval, date_now.year)
 			if queryset.count() < interval:
 				options['ticker'] = instance.code

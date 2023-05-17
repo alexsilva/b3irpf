@@ -4,18 +4,18 @@
   <div class="card-header">
     <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
             aria-expanded="true" aria-controls="collapsebody-{{ forloop.counter }}">
-      {{ item.code }}{% if item.enterprise %} - {{ item.enterprise.name }} ({{ item.enterprise.cnpj }}){% endif %}
+      {{ item.code }}{% if item.instance %} - {{ item.instance.name }} ({{ item.instance.cnpj }}){% endif %}
     </button>
     <button type="button" class="btn btn-link" data-toggle="popover"
             data-content="
-        {% if item.enterprise %}
+        {% if item.instance %}
           {{ asset_period.quantity|as_int_desc }}
-          {% if item.enterprise.is_fii %}cota{{ asset_period.quantity|pluralize:"s" }}
-          {% elif item.enterprise.is_stock %}ações
-          {% elif item.enterprise.is_bdr %}bdr{{ asset_period.quantity|pluralize:"s" }}
+          {% if item.instance.is_fii %}cota{{ asset_period.quantity|pluralize:"s" }}
+          {% elif item.instance.is_stock %}ações
+          {% elif item.instance.is_bdr %}bdr{{ asset_period.quantity|pluralize:"s" }}
           {% endif %}
-          {{ item.code }} // {{ item.enterprise.name }} - {{ item.enterprise.cnpj }}
-          {% if item.enterprise.administrator %} // Administrador: {{ item.enterprise.administrator.name }} - {{ item.enterprise.administrator.cnpj }}{% endif %}
+          {{ item.code }} // {{ item.instance.name }} - {{ item.instance.cnpj }}
+          {% if item.instance.administrator %} // Administrador: {{ item.instance.administrator.name }} - {{ item.instance.administrator.cnpj }}{% endif %}
         {% else %}
           {{ item.code }}
         {% endif %}">
@@ -43,10 +43,10 @@
           {% include "irpf/adminx_report_irpf_bonus_item.html" with card_title_class="text-info" %}
       {% endif %}
 
-      {% if item.enterprise and item.enterprise.bookkeeping %}
+      {% if item.instance and item.instance.bookkeeping %}
         <hr/>
         <p class="card-subtitle text-info">Escriturador:
-        <a href="{{ item.enterprise.bookkeeping.link }}" target="_blank">{{ item.enterprise.bookkeeping.name }}</a>
+        <a href="{{ item.instance.bookkeeping.link }}" target="_blank">{{ item.instance.bookkeeping.name }}</a>
         </p>
       {% endif %}
     </div>

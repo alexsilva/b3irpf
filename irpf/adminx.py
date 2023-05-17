@@ -5,7 +5,7 @@ from django.core.management import call_command
 from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView
 
-from irpf.models import Enterprise, Negotiation, Earnings, Position, Instituition, Bonus, Bookkeeping, \
+from irpf.models import Asset, Negotiation, Earnings, Position, Instituition, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin
@@ -77,8 +77,8 @@ class BaseIRPFAdmin:
 		return readonly_fields
 
 
-@sites.register(Enterprise)
-class EnterpriseAdmin:
+@sites.register(Asset)
+class AssetAdmin:
 	model_icon = "fa fa-coffee"
 	list_filter = ("category", "bookkeeping")
 	search_fields = ("code", "name", "cnpj", "administrator__name")
@@ -111,34 +111,34 @@ class EnterpriseAdmin:
 @sites.register(Position)
 class PositionAdmin(BaseIRPFAdmin):
 	collect_related_nested_objects = False
-	list_filter = ("enterprise__code", 'institution')
+	list_filter = ("asset__code", 'institution')
 	search_fields = (
-		'enterprise__code',
-		'enterprise__name',
+		'asset__code',
+		'asset__name',
 		'institution__name'
 	)
 	list_display = (
-		'enterprise_code',
-		'enterprise_name',
+		'asset_code',
+		'asset_name',
 		'institution',
 		'quantity',
 		'avg_price',
 		'date'
 	)
 
-	def enterprise_code(self, instance):
-		return instance.enterprise.code
+	def asset_code(self, instance):
+		return instance.asset.code
 
-	enterprise_code.is_column = True
-	enterprise_code.admin_order_field = "enterprise__code"
-	enterprise_code.short_description = _get_field_opts("code", Enterprise).verbose_name
+	asset_code.is_column = True
+	asset_code.admin_order_field = "asset__code"
+	asset_code.short_description = _get_field_opts("code", Asset).verbose_name
 
-	def enterprise_name(self, instance):
-		return instance.enterprise.name
+	def asset_name(self, instance):
+		return instance.asset.name
 
-	enterprise_name.is_column = True
-	enterprise_name.admin_order_field = "enterprise__name"
-	enterprise_name.short_description = _get_field_opts("name", Enterprise).verbose_name
+	asset_name.is_column = True
+	asset_name.admin_order_field = "asset__name"
+	asset_name.short_description = _get_field_opts("name", Asset).verbose_name
 
 
 class NegotiationInline:
@@ -206,7 +206,7 @@ class NegotiationAdmin(BaseIRPFAdmin):
 @sites.register(Bonus)
 class BonusAdmin(BaseIRPFAdmin):
 	list_display = (
-		'enterprise',
+		'asset',
 		'base_value',
 		'proportion'
 	)
@@ -217,19 +217,19 @@ class AssetEventAdmin(BaseIRPFAdmin):
 	model_icon = "fa fa-sticky-note-o"
 	list_display = (
 		'date',
-		'enterprise_name',
+		'asset_name',
 		'date_com',
 		'event',
 		'factor_from',
 		'factor_to'
 	)
 
-	def enterprise_name(self, instance):
-		return instance.enterprise.name
+	def asset_name(self, instance):
+		return instance.asset.name
 
-	enterprise_name.is_column = True
-	enterprise_name.admin_order_field = "enterprise__name"
-	enterprise_name.short_description = _get_field_opts("name", Enterprise).verbose_name
+	asset_name.is_column = True
+	asset_name.admin_order_field = "asset__name"
+	asset_name.short_description = _get_field_opts("name", Asset).verbose_name
 
 
 @sites.register(Earnings)

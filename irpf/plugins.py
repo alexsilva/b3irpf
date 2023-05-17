@@ -16,8 +16,8 @@ from correpy.domain.entities.security import Security
 from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import TransactionType
 from irpf.fields import CharCodeField
-from irpf.models import Negotiation, Earnings, Position, Enterprise
-from irpf.report.utils import Stats, Event
+from irpf.models import Negotiation, Earnings, Position, Asset
+from irpf.report.utils import Stats, Event, Assets
 from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
@@ -121,7 +121,7 @@ class ListActionModelPlugin(BaseAdminPlugin):
 class SaveReportPositionPlugin(BaseAdminPlugin):
 	"""Salva os dados de posição do relatório"""
 	position_model = Position
-	enterprise_model = Enterprise
+	asset_model = Asset
 	position_permission = list(auth.ACTION_NAME)
 
 	def form_valid(self, response, form):
@@ -136,22 +136,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		if self.admin_view.report:
 			return render_to_string("irpf/blocks/blocks.form.buttons.button_save_position.html")
 
-	def get_enterprise(self, asset):
-		"""A empresa"""
-		if asset.ticker in self._caches:
-			return self._caches[asset.ticker]
-		self._caches[asset.ticker] = enterprise = (
-				asset.enterprise or
-				self.enterprise_model.objects.get(code__iexact=asset.ticker)
-		)
-		return enterprise
-
-	def _save(self, date, asset):
-		try:
-			enterprise = self.get_enterprise(asset)
-		except self.enterprise_model.DoesNotExist:
-			# empresa não cadastrada
-			return
+	def _save(self, date, asset: Assets):
 		institution = asset.institution
 		# considera a posição do período que deriva da diferença entre compas e vendas
 		period = asset.period
@@ -163,14 +148,14 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		}
 		# remove registro acima da data
 		self.position_model.objects.filter(
-			enterprise=enterprise,
+			asset=asset.instance,
 			institution=institution,
 			user=self.user,
 			date__gt=date
 		).delete()
 		instance, created = self.position_model.objects.get_or_create(
 			defaults=defaults,
-			enterprise=enterprise,
+			asset=asset.instance,
 			institution=institution,
 			date=date,
 			user=self.user
@@ -193,7 +178,11 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 	def save_position(self, date, results):
 		try:
 			for item in results:
-				self._save(date, item['asset'])
+				asset = item['asset']
+				# ativo não cadastrado
+				if asset.instance is None:
+					continue
+				self._save(date, asset)
 		except Exception as exc:
 			self.message_user(f"Falha ao salvar posições: {exc}", level="error")
 		else:
@@ -216,7 +205,7 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 	brokerage_note_parsers = None
 	brokerage_note_field_update = ()
 	brokerage_note_negotiation = Negotiation
-	brokerage_note_asset_model = Enterprise
+	brokerage_note_asset_model = Asset
 
 	def init_request(self, *args, **kwargs):
 		return bool(self.brokerage_note_negotiation and
@@ -248,7 +237,7 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 				instance.save()
 				self._add_transations(note, instance)
 
-	def get_db_asset(self, ticker: str):
+	def get_asset(self, ticker: str):
 		"""O ativo"""
 		try:
 			asset = self.brokerage_note_asset_model.objects.get(code__iexact=ticker)
@@ -266,7 +255,7 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 			brokerage_note=instance,
 			irrf=transaction.source_withheld_taxes,
 			institution=instance.institution.name,
-			asset=self.get_db_asset(ticker),
+			asset=self.get_asset(ticker),
 			user=self.user
 		)
 		defaults = options.setdefault('defaults', {})

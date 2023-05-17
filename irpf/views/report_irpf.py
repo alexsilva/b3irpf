@@ -5,7 +5,7 @@ from django.apps import apps
 from django.http import Http404
 from django.utils import timezone
 
-from irpf.models import Instituition, Enterprise
+from irpf.models import Instituition, Asset
 from irpf.report import NegotiationReport
 from irpf.views.base import AdminFormView
 from xadmin.views import filter_hook
@@ -39,14 +39,14 @@ class ReportIRPFForm(django_forms.Form):
 			]),
 		initial=1
 	)
-	enterprise = django_forms.ModelChoiceField(Enterprise.objects.all(),
-	                                           label=Enterprise._meta.verbose_name,
-	                                           widget=AdminSelectWidget,
-	                                           required=False)
-	categories = django_forms.MultipleChoiceField(choices=Enterprise.CATEGORY_CHOICES,
-			                                    widget=AdminSelectMultiple,
-			                                    label="Categorias",
-			                                    required=False)
+	asset = django_forms.ModelChoiceField(Asset.objects.all(),
+	                                      label=Asset._meta.verbose_name,
+	                                      widget=AdminSelectWidget,
+	                                      required=False)
+	categories = django_forms.MultipleChoiceField(choices=Asset.CATEGORY_CHOICES,
+	                                              widget=AdminSelectMultiple,
+	                                              label="Categorias",
+	                                              required=False)
 	institution = django_forms.ModelChoiceField(Instituition.objects.all(),
 	                                            label=Instituition._meta.verbose_name,
 	                                            widget=AdminSelectWidget,
@@ -94,7 +94,7 @@ class AdminReportIrpfModelView(AdminFormView):
 
 			form_data = form.cleaned_data
 			institution = form_data['institution']
-			enterprise = form_data['enterprise']
+			asset = form_data['asset']
 			consolidation = form_data['consolidation']
 			categories = form_data['categories']
 			start = form_data['start']
@@ -102,7 +102,7 @@ class AdminReportIrpfModelView(AdminFormView):
 
 			self.results = self.report.report(start, end,
 			                                  institution=institution,
-			                                  enterprise=enterprise,
+			                                  asset=asset,
 			                                  consolidation=consolidation,
 			                                  categories=categories)
 		return self.render_to_response(self.get_context_data(form=form))

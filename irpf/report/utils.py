@@ -145,7 +145,7 @@ class Period:
 		return avg_price
 
 
-class Asset:
+class Assets:
 	"""Ativos"""
 
 	def __init__(self, ticker,
@@ -156,7 +156,7 @@ class Asset:
 	             debit: Debit = None,
 	             events: Events = None,
 	             institution=None,
-	             enterprise=None):
+	             instance=None):
 		self.items = []
 		self.ticker = ticker
 		self.buy = buy
@@ -166,7 +166,7 @@ class Asset:
 		self.debit = debit
 		self.events = events
 		self.institution = institution
-		self.enterprise = enterprise
+		self.instance = instance
 
 		if buy is None:
 			self.buy = Buy()
@@ -213,7 +213,7 @@ class Asset:
 			debit=copy.deepcopy(self.debit, memo),
 			events=copy.deepcopy(self.events, memo),
 			institution=self.institution,
-			enterprise=self.enterprise,
+			instance=self.instance,
 			position=self.position
 		)
 		return cpy

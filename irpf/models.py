@@ -40,7 +40,7 @@ class FoundsAdministrator(models.Model):
 		verbose_name_plural = "Adminstradores de fundos"
 
 
-class Enterprise(models.Model):
+class Asset(models.Model):
 	CATEGORY_STOCK = 1
 	CATEGORY_FII = 2
 	CATEGORY_BDR = 3
@@ -140,7 +140,7 @@ class Negotiation(BaseIRPFModel):
 	code = CharCodeField(verbose_name="Código de negociação",
 	                     max_length=8)
 
-	asset = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
+	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
 	                          null=True)
 
@@ -187,8 +187,8 @@ class Negotiation(BaseIRPFModel):
 		opts = cls._meta
 		try:
 			ticker = opts.get_field("code").to_python(data['code'])
-			data['asset'] = Enterprise.objects.get(code__iexact=ticker)
-		except Enterprise.DoesNotExist:
+			data['asset'] = Asset.objects.get(code__iexact=ticker)
+		except Asset.DoesNotExist:
 			pass
 		return data
 
@@ -212,8 +212,9 @@ class Negotiation(BaseIRPFModel):
 
 
 class Bonus(BaseIRPFModel):
-	enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
-	                               verbose_name="Empresa")
+	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
+	                          verbose_name="Ativo",
+	                          null=True, blank=False)
 	data_com = DateField(verbose_name="Data com")
 	date_ex = DateField(verbose_name="Data ex")
 	date = DateField(verbose_name="Data de incorporação")
@@ -234,7 +235,7 @@ class Bonus(BaseIRPFModel):
 
 	def __str__(self):
 		value = number_format(self.base_value)
-		return f"{self.enterprise} / R$ {value} {self.proportion}%"
+		return f"{self.asset} / R$ {value} {self.proportion}%"
 
 	class Meta:
 		verbose_name = "Bonificação"
@@ -259,7 +260,7 @@ class Earnings(BaseIRPFModel):
 	kind = models.CharField(verbose_name="Tipo de Movimentação", max_length=256)
 	code = CharCodeNameField(verbose_name="Código", max_length=512, is_code=True)
 	name = CharCodeNameField(verbose_name="Nome do ativo", max_length=256)
-	asset = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
+	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
 	                          null=True)
 	institution = models.CharField(verbose_name="Instituição",
@@ -287,8 +288,8 @@ class Earnings(BaseIRPFModel):
 		opts = cls._meta
 		try:
 			ticker = opts.get_field("code").to_python(data['code'])
-			data['asset'] = Enterprise.objects.get(code__iexact=ticker)
-		except Enterprise.DoesNotExist:
+			data['asset'] = Asset.objects.get(code__iexact=ticker)
+		except Asset.DoesNotExist:
 			pass
 		return data
 
@@ -381,8 +382,9 @@ class AssetEvent(BaseIRPFModel):
 		(SPLIT, "Desdobramento"),
 		(INPLIT, "Grupamento")
 	)
-	enterprise = models.ForeignKey(Enterprise, verbose_name="Empresa",
-	                               on_delete=models.CASCADE)
+	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
+	                          verbose_name="Ativo",
+	                          null=True, blank=False)
 	date = models.DateField(verbose_name="Data do anúncio")
 	date_com = models.DateField(verbose_name="Data com")
 	factor_from = models.IntegerField(verbose_name="Fator de")
@@ -398,7 +400,7 @@ class AssetEvent(BaseIRPFModel):
 	""")
 
 	def __str__(self):
-		return f"{self.enterprise.name} / {self.event_name} {self.factor_from}:{self.factor_to}"
+		return f"{self.asset.name} / {self.event_name} {self.factor_from}:{self.factor_to}"
 
 	@classproperty
 	def event_choices(cls):
@@ -414,8 +416,9 @@ class AssetEvent(BaseIRPFModel):
 
 
 class Position(BaseIRPFModel):
-	enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE,
-	                               verbose_name="Empresa")
+	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
+	                          verbose_name="Ativo",
+	                          null=True, blank=False)
 	institution = models.ForeignKey(Instituition,
 	                                on_delete=models.SET_NULL,
 	                                verbose_name="Instituição",
@@ -446,7 +449,7 @@ class Position(BaseIRPFModel):
 		return msg
 
 	class Meta:
-		unique_together = ("enterprise", "institution", "user", "date")
-		ordering = ('enterprise__code', '-date',)
+		unique_together = ("asset", "institution", "user", "date")
+		ordering = ('asset__code', '-date',)
 		verbose_name = "Posição"
 		verbose_name_plural = "Posições"
