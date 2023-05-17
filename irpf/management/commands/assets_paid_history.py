@@ -10,7 +10,7 @@ class Command(paid_history.Command):
 	def handle(self, *args, **options):
 		interval = 5
 		date_now = now()
-		for instance in Asset.objects.all():
+		for instance in Asset.objects.filter(category=Asset.CATEGORY_STOCK):
 			queryset = self.get_from_history(instance.code, date_now.year - interval, date_now.year)
 			if queryset.count() < interval:
 				options['ticker'] = instance.code

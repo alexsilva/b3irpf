@@ -72,7 +72,7 @@ class Asset(models.Model):
 	                                 null=True, blank=True)
 
 	@cached_property
-	def category_choices(self):
+	def category_choices(self) -> dict:
 		return dict(self.CATEGORY_CHOICES)
 
 	@property
