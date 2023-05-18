@@ -308,7 +308,7 @@ class Earnings(BaseIRPFModel):
 		return self.flow.lower() == self.FLOW_DEBIT.lower()
 
 	def __str__(self):
-		return f'{self.code}/{self.name} ({self.institution}) / R${self.total}'
+		return f'{self.code} - {self.name} - R${self.total}'
 
 	class Meta:
 		verbose_name = "Provento"
