@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+import sys
+
 import environ
 import os.path
 from pathlib import Path
@@ -24,6 +26,12 @@ ENV = env = environ.Env(
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, 'irpf.env'))
+
+PYTHON_IO_ENCODING = ENV.str('PYTHON_IO_ENCODING', default="utf-8")
+
+sys.stderr.reconfigure(encoding=PYTHON_IO_ENCODING)
+sys.stdout.reconfigure(encoding=PYTHON_IO_ENCODING)
+sys.stdin.reconfigure(encoding=PYTHON_IO_ENCODING)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
