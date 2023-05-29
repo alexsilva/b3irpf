@@ -67,13 +67,11 @@ class AdminXlsxViewer(AdminFormView):
 		media = super().get_media()
 		minified = '.min' if settings.DEBUG else ''
 		media += django_forms.Media(js=(
-			f"irpf/datatables-1.13.1/js/jquery.dataTables.js",
-			f"irpf/datatables-1.13.1/js/dataTables.bootstrap4{minified}.js",
+			f"irpf/datatables-1.13.1/js/datatables{minified}.js",
 			'irpf/js/irpf.xlsx.viewer.js'
 		), css={
 			'screen': (
-				f"irpf/datatables-1.13.1/css/jquery.dataTables{minified}.css",
-				f"irpf/datatables-1.13.1/css/dataTables.bootstrap4{minified}.css"
+				f"irpf/datatables-1.13.1/css/datatables{minified}.css",
 			)
 		})
 		return media
