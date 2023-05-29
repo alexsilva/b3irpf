@@ -72,6 +72,7 @@ class AdminXlsxViewer(AdminFormView):
 		), css={
 			'screen': (
 				f"irpf/datatables-1.13.1/css/datatables{minified}.css",
+				"irpf/css/irpf.xlsx.viewer.css"
 			)
 		})
 		return media
