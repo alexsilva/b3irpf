@@ -1,5 +1,5 @@
 import json
-
+from xadmin.widgets import AdminFileWidget
 import django.forms as django_forms
 from django.conf import settings
 from openpyxl.reader.excel import load_workbook
@@ -8,7 +8,8 @@ from irpf.views.base import AdminFormView
 
 
 class XlsxViewerForm(django_forms.Form):
-	filestream = django_forms.FileField(label="Arquivo de dados Excel (xlsx)")
+	filestream = django_forms.FileField(label="Arquivo de dados Excel (xlsx)",
+	                                    widget=AdminFileWidget)
 
 
 class AdminXlsxViewer(AdminFormView):
