@@ -1,14 +1,11 @@
-
-{% for sheet in sheets %}
-  <table class="xlsx_viewer table table-striped caption-top" data-items="{{ sheet.items }}">
-    <caption class="text-muted">{{ sheet.title }}</caption>
-    <thead>
-    <tr>
-      {% for header in sheet.headers %}
-        <th scope="col">{{ header }}</th>
-      {% endfor %}
-    </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-{% endfor %}
+<table class="xlsx_viewer table table-striped caption-top w-100" data-items="{{ sheet.items }}">
+  <caption class="text-muted">{{ sheet.title }}</caption>
+  <thead>
+  <tr>
+    {% for header in sheet.headers %}
+      <th scope="col">{{ header }}</th>
+    {% endfor %}
+  </tr>
+  </thead>
+  <tbody></tbody>
+</table>
