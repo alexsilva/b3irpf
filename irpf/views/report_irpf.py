@@ -17,14 +17,14 @@ startdt, enddt = datetime.date.min.replace(year=_now.year), _now
 
 class ReportIRPFForm(django_forms.Form):
 	start = django_forms.DateField(
-		label="Começando na data",
+		label="Começa",
 		initial=startdt,
 		help_text="Data inicial  do ano para consolidação dos dados da declaração.",
 		required=True,
 		widget=AdminDateWidget
 	)
 	end = django_forms.DateField(
-		label="Terminando na data",
+		label="Termina",
 		initial=enddt,
 		help_text="Data final  do ano para consolidação dos dados da declaração.",
 		required=True,
