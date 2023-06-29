@@ -3,11 +3,12 @@ import copy
 import datetime
 
 from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent
+from irpf.report.base import BaseReport
 from irpf.report.utils import Event, Assets, Buy
 from irpf.utils import range_dates
 
 
-class NegotiationReport:
+class NegotiationReport(BaseReport):
 	asset_model = Asset
 	earnings_model = Earnings
 	position_model = Position
@@ -17,9 +18,7 @@ class NegotiationReport:
 	YEARLY, MONTHLY = 1, 2
 
 	def __init__(self, model, user, **options):
-		self.model = model
-		self.user = user
-		self.options = options
+		super().__init__(model, user, **options)
 		self._caches = {}
 
 	def get_asset(self, code):
