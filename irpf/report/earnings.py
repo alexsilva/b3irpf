@@ -1,45 +1,71 @@
-from django.utils.text import slugify
+from irpf.models import Asset, Earnings
+from irpf.report.base import BaseReport
+from irpf.report.utils import Assets, Event
 
-from irpf.models import Earnings
-from irpf.report.utils import Event
 
+class EarningsReport(BaseReport):
+	asset_model = Asset
 
-class EarningsReport:
-	earnings_models = Earnings
+	def __init__(self, model, user, **options):
+		super().__init__(model, user, **options)
 
-	def __init__(self, flow, user, **options):
-		self.flow = flow
-		self.user = user
-		self.options = options
+	def consolidate(self, instance: Earnings, asset: Assets):
+		obj = getattr(asset, "credit" if instance.is_credit else "debit")
+		kind_slug = instance.kind_slug
+		try:
+			event = obj[kind_slug]
+		except KeyError:
+			obj[kind_slug] = event = Event(instance.kind)
 
-	def get_queryset(self, **options):
-		return self.earnings_models.objects.filter(**options)
+		event.items.append(instance)
+		event.quantity += instance.quantity
+		event.value += instance.total
 
-	def report(self, code, start, end=None, **options):
+	def get_queryset(self, date_start, date_end, **options):
 		qs_options = dict(
-			flow__iexact=self.flow,
 			user=self.user,
-			date__gte=start,
-			code__iexact=code
+			date__gte=date_start,
+			date__lte=date_end,
 		)
 		institution = options.get('institution')
 		if institution:
 			qs_options['institution'] = institution.name
-		if end is not None:
-			qs_options['date__lte'] = end
-		earnings = {}
-		try:
-			qs = self.get_queryset(**qs_options)
-			for instance in qs:
-				kind = slugify(instance.kind).replace('-', "_")
-				try:
-					earning = earnings[kind]
-				except KeyError:
-					earning = earnings[kind] = Event(instance.kind)
+		asset = options.get('asset')
+		if asset:
+			qs_options['code'] = asset.code
+		categories = options['categories']
+		if categories:
+			qs_options['asset__category__in'] = categories
+		queryset = self.model.objects.filter(**qs_options)
+		return queryset
 
-				earning.items.append(instance)
-				earning.quantity += instance.quantity
-				earning.value += instance.total
-		except self.earnings_models.DoesNotExist:
-			pass
-		return earnings
+	def report(self, date_start, date_end, **options):
+		results = []
+		assets = {}
+		asset = options.get('asset')
+		institution = options.get('institution')
+		if asset:
+			options['asset'] = asset
+			assets[asset.code] = Assets(ticker=asset.code,
+			                            institution=institution,
+			                            instance=asset)
+			for obj in self.get_queryset(date_start, date_end, **options):
+				self.consolidate(obj, assets[asset.code])
+		else:
+			for asset in self.asset_model.objects.all():
+				assets[asset.code] = Assets(ticker=asset.code,
+				                            institution=institution,
+				                            instance=asset)
+				options['asset'] = asset
+				for obj in self.get_queryset(date_start, date_end, **options):
+					self.consolidate(obj, assets[asset.code])
+
+		for code in assets:
+			asset = assets[code]
+			results.append({
+				'code': code,
+				'institution': institution,
+				'instance': asset.instance,
+				'asset': asset
+			})
+		return results
