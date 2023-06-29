@@ -5,7 +5,7 @@ $(function () {
         $el.DataTable({
             data: $el.data("items"),
             language: {
-                url: '/static/irpf/datatables-1.13.1/i18n/' + xadmin.language_code + '.json'
+                url: $el.data("language_url")
             }
         });
     })

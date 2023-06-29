@@ -1,4 +1,6 @@
 import json
+
+from xadmin.util import vendor, xstatic
 from xadmin.widgets import AdminFileWidget
 import django.forms as django_forms
 from django.conf import settings
@@ -64,17 +66,18 @@ class AdminXlsxViewer(AdminFormView):
 					wb.close()
 		return sheets
 
+	def get_context(self):
+		context = super().get_context()
+		context['dt_language_url'] = xstatic('datatables.lang')[0]
+		return context
+
 	def get_media(self):
 		media = super().get_media()
-		minified = '.min' if settings.DEBUG else ''
-		media += django_forms.Media(js=(
-			f"irpf/datatables-1.13.1/js/datatables{minified}.js",
+		media += vendor("datatables.js", "datatables.css")
+		media += django_forms.Media(js=[
 			'irpf/js/irpf.xlsx.viewer.js'
-		), css={
-			'screen': (
-				f"irpf/datatables-1.13.1/css/datatables{minified}.css",
-				"irpf/css/irpf.xlsx.viewer.css"
-			)
+		], css={
+			'screen': ("irpf/css/irpf.xlsx.viewer.css",)
 		})
 		return media
 
