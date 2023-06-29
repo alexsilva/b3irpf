@@ -43,7 +43,7 @@ class AdminXlsxViewer(AdminFormView):
 		for row in rows:
 			cells = []
 			for index, cell in enumerate(row):
-				cells.append(str(cell.value))
+				cells.append('-' if cell.value is None else str(cell.value))
 
 			items.append(cells)
 			if settings.DEBUG:
