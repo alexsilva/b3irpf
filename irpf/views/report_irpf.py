@@ -4,9 +4,9 @@ import django.forms as django_forms
 from django.apps import apps
 from django.http import Http404
 from django.utils import timezone
+from django.utils.module_loading import import_string
 
 from irpf.models import Institution, Asset
-from irpf.report import NegotiationReport
 from irpf.views.base import AdminFormView
 from xadmin.views import filter_hook
 from xadmin.widgets import AdminDateWidget, AdminSelectWidget, AdminSelectMultiple
@@ -65,10 +65,6 @@ class AdminReportIrpfModelView(AdminFormView):
 		self.model_app_label = self.kwargs['model_app_label']
 		self.report, self.results = None, None
 
-	def report_all(self, **options):
-		"""report from all models"""
-		return None
-
 	def get_media(self):
 		media = super().get_media()
 		media += django_forms.Media(js=(
@@ -76,35 +72,36 @@ class AdminReportIrpfModelView(AdminFormView):
 		))
 		return media
 
-	def report_model(self, model, **options):
+	def report_object(self, report_class, model, user, **options):
 		"""report to specified model"""
-		report = NegotiationReport(model, **options)
+		report = report_class(model, user, **options)
 		return report
 
 	@filter_hook
 	def form_valid(self, form):
-		if self.model_app_label == "all":
-			self.report = self.report_all()
-		else:
-			model = apps.get_model(*self.model_app_label.split('.', 1))
-			if not self.admin_site.get_registry(model, None):
-				raise Http404
+		model = apps.get_model(*self.model_app_label.split('.', 1))
+		report_class = getattr(model, "report_class", None)
 
-			self.report = self.report_model(model, user=self.user)
+		if not (self.admin_site.get_registry(model, None) and report_class):
+			raise Http404
 
-			form_data = form.cleaned_data
-			institution = form_data['institution']
-			asset = form_data['asset']
-			consolidation = form_data['consolidation']
-			categories = form_data['categories']
-			start = form_data['start']
-			end = form_data['end']
+		report_class = import_string(model.report_class)
 
-			self.results = self.report.report(start, end,
-			                                  institution=institution,
-			                                  asset=asset,
-			                                  consolidation=consolidation,
-			                                  categories=categories)
+		self.report = self.report_object(report_class, model, self.user)
+
+		form_data = form.cleaned_data
+		institution = form_data['institution']
+		asset = form_data['asset']
+		consolidation = form_data['consolidation']
+		categories = form_data['categories']
+		start = form_data['start']
+		end = form_data['end']
+
+		self.results = self.report.report(start, end,
+		                                  institution=institution,
+		                                  asset=asset,
+		                                  consolidation=consolidation,
+		                                  categories=categories)
 		return self.render_to_response(self.get_context_data(form=form))
 
 	def get_form_kwargs(self):

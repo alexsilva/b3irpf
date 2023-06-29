@@ -123,6 +123,7 @@ class BaseIRPFModel(models.Model):
 class Negotiation(BaseIRPFModel):
 	"""Data do Negócio / Tipo de Movimentação / Mercado / Prazo/Vencimento / Instituição /
 	Código de Negociação / Quantidade / Preço / Valor"""
+	report_class = "irpf.report.NegotiationReport"
 	KIND_BUY = "Compra"
 	KIND_SELL = "Venda"
 	KIND_CHOICES = (
@@ -244,6 +245,7 @@ class Bonus(BaseIRPFModel):
 
 
 class Earnings(BaseIRPFModel):
+	report_class = "irpf.report.EarningsReport"
 	BONIFICAO_EM_ATIVOS = "bonificacao_em_ativos"
 	LEILAO_DE_FRACAO = "leilao_de_fracao"
 	FRACAO_EM_ATIVOS = "fracao_em_ativos"
