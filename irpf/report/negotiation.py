@@ -78,7 +78,10 @@ class NegotiationReport(BaseReport):
 
 	def apply_events(self, date, assets, **options):
 		"""Eventos de desdobramento/grupamento"""
-		qs_options = {}
+		qs_options = dict(
+			date_com=date,
+			user=self.user
+		)
 		related_fields = []
 		asset_instance = options.get('asset')
 		if asset_instance:
@@ -88,7 +91,7 @@ class NegotiationReport(BaseReport):
 		if categories:
 			qs_options['asset__category__in'] = categories
 		event_model = self.event_model
-		queryset = event_model.objects.filter(date_com=date, user=self.user, **qs_options)
+		queryset = event_model.objects.filter(**qs_options)
 		if related_fields:
 			queryset = queryset.select_related(*related_fields)
 		for instance in queryset:
