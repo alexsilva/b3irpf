@@ -321,14 +321,5 @@ class NegotiationReport(BaseReport):
 				'asset': asset
 			})
 
-		def results_sort_category(item):
-			_instance = item['instance']
-			return (_instance.category_choices[_instance.category]
-			        if _instance and _instance.category else item['code'])
-
-		def results_sort_code(item):
-			return item['code']
-
-		results = sorted(results, key=results_sort_code)
-		results = sorted(results, key=results_sort_category)
+		results = sorted(results, key=self.results_sorted)
 		return results

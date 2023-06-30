@@ -68,4 +68,6 @@ class EarningsReport(BaseReport):
 				'instance': asset.instance,
 				'asset': asset
 			})
+
+		results = sorted(results, key=self.results_sorted)
 		return results
