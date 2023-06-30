@@ -107,24 +107,20 @@ class NegotiationReport(BaseReport):
 			elif asset.is_position_interval(instance.date_com):
 				continue
 			elif instance.event == event_model.SPLIT:  # Desdobramento
-				avg_price = asset_period.avg_price
-
 				quantity = asset_period.quantity / instance.factor_from  # correção
 				fractional, quantity = quantity % 1, int(quantity)
-
-				# reduz do total a fração que será vendida
-				asset.buy.total -= fractional * avg_price
+				# nova quantidade altera o preço médio
 				asset.buy.quantity = quantity * instance.factor_to
+				# reduz a fração valor da fração com o novo preço médio
+				asset.buy.total -= fractional * asset.buy.avg_price
 
 			elif instance.event == event_model.INPLIT:  # Grupamento
-				avg_price = asset_period.avg_price
-
 				quantity = asset_period.quantity / instance.factor_from
-				fractional = quantity % 1, int(quantity)
-
-				# reduz do total a fração que será vendida
-				asset.buy.total -= fractional * avg_price
+				fractional, quantity = quantity % 1, int(quantity)
+				# nova quantidade altera o preço médio
 				asset.buy.quantity = quantity * instance.factor_to  # correção
+				# reduz a fração valor da fração com o novo preço médio
+				asset.buy.total -= fractional * asset.buy.avg_price
 
 	def consolidate(self, instance, asset: Assets):
 		if instance.is_buy:
