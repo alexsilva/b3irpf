@@ -1,6 +1,7 @@
 import datetime
 
 import django.forms as django_forms
+from crispy_forms.helper import FormHelper
 from django.apps import apps
 from django.http import Http404
 from django.utils import timezone
@@ -66,8 +67,25 @@ class AdminReportIrpfModelView(AdminFormView):
 		media = super().get_media()
 		media += django_forms.Media(js=(
 			"irpf/js/irpf.report.js",
-		))
+		), css={
+			'screen': ('irpf/css/irpf.report.css',)
+		})
 		return media
+
+	def get_helper(self):
+		helper = FormHelper()
+		helper.form_tag = False
+		helper.form_class = 'form-horizontal'
+		helper.field_class = 'col-sm-10'
+		helper.label_class = 'col-sm-2'
+		helper.use_custom_control = False
+		helper.include_media = False
+		return helper
+
+	def get_form(self, form_class=None):
+		form = super().get_form(form_class=form_class)
+		form.helper = self.get_helper()
+		return form
 
 	def report_object(self, report_class, model, user, **options):
 		"""report to specified model"""
