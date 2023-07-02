@@ -2,8 +2,8 @@ import collections
 import io
 import itertools
 import re
-from decimal import Decimal
 import django.forms as django_forms
+from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
 from django.core.management import get_commands
@@ -350,7 +350,10 @@ class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
 		if instance and instance.pk:
 			if parts := re.findall('([0-9]+)', instance.institution.cnpj):
 				cnpj = ''.join(parts)
-				parser = self.brokerage_note_parsers[cnpj]
+				try:
+					parser = self.brokerage_note_parsers[cnpj]
+				except KeyError:
+					parser = B3Parser
 				self._parser_file(parser, instance)
 
 
