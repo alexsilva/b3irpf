@@ -9,7 +9,7 @@ import collections
 from irpf.views.base import AdminFormView
 
 
-class XlsxViewerForm(django_forms.Form):
+class XLSXViewerForm(django_forms.Form):
 	filestream = django_forms.FileField(label="Arquivo",
 	                                    help_text="formato excel (xlsx)",
 	                                    widget=AdminFileWidget)
@@ -18,7 +18,7 @@ class XlsxViewerForm(django_forms.Form):
 class AdminXlsxViewer(AdminFormView):
 	"""Visualizador de dados de um arquivo Excel (xlsx)"""
 	template_name = "irpf/adminx_report_irpf_viewer.html"
-	form_class = XlsxViewerForm
+	form_class = XLSXViewerForm
 	form_method_post = True
 
 	title = "Visualizador de arquivos Excel"
