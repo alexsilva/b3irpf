@@ -165,10 +165,9 @@ class NegotiationReport(BaseReport):
 			return
 		elif instance.is_credit:
 			if kind_slug == instance.LEILAO_DE_FRACAO:
-				# asset.sell.total += instance.total
-				# ganho de capital de todas a vendas
-				# asset.sell.capital += instance.total
-				...
+				# as frações influenciam no valor de venda para cálculo do imposto (se for o caso 20mil+)
+				asset.sell.fraction.total += instance.total
+				asset.sell.fraction += instance.quantity
 			elif kind_slug == instance.BONIFICAO_EM_ATIVOS:
 				# calculada por registro manual
 				# asset.buy.quantity += instance.quantity
@@ -177,8 +176,6 @@ class NegotiationReport(BaseReport):
 		elif instance.is_debit:
 			if kind_slug == instance.FRACAO_EM_ATIVOS:
 				# debito do frações
-				# asset.sell.quantity += instance.quantity
-				# asset.buy.quantity -= instance.quantity
 				...
 
 	def apply_earnings(self, date, assets, **options):

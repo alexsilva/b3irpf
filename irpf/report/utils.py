@@ -95,6 +95,14 @@ class Buy:
 		return avg_tax
 
 
+class SellFrac:
+	"""Frações vendidas"""
+	def __init__(self, quantity: Decimal = Decimal(0),
+	             total: Decimal = Decimal(0)):
+		self.quantity = quantity
+		self.total = total
+
+
 class Sell:
 	"""Vendas"""
 
@@ -108,6 +116,7 @@ class Sell:
 		self.total = total
 		self.tax = tax
 		self.date = date
+		self.fraction = SellFrac()
 
 	@property
 	def avg_price(self):
