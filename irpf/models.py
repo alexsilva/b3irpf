@@ -419,6 +419,12 @@ class AssetEvent(BaseIRPFModel):
 
 
 class Position(BaseIRPFModel):
+	CONSOLIDATION_YEARLY = 1
+	CONSOLIDATION_MONTHLY = 2
+	CONSOLIDATION_CHOICES = [
+		(CONSOLIDATION_YEARLY, "Anual"),
+		(CONSOLIDATION_MONTHLY, "Mensal")
+	]
 	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
 	                          null=True, blank=False)
@@ -442,6 +448,9 @@ class Position(BaseIRPFModel):
 	                          max_digits=DECIMAL_MAX_DIGITS,
 	                          decimal_places=DECMIAL_PLACES,
 	                          default=Decimal(0))
+	consolidation = models.PositiveIntegerField(verbose_name="Consolidação",
+	                                            choices=CONSOLIDATION_CHOICES,
+	                                            default=CONSOLIDATION_YEARLY)
 	date = DateField(verbose_name="Data")
 
 	def __str__(self):

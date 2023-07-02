@@ -6,7 +6,7 @@ from django.http import Http404
 from django.utils import timezone
 from django.utils.module_loading import import_string
 
-from irpf.models import Institution, Asset
+from irpf.models import Institution, Asset, Position
 from irpf.views.base import AdminFormView
 from xadmin.views import filter_hook
 from xadmin.widgets import AdminDateWidget, AdminSelectWidget, AdminSelectMultiple
@@ -33,11 +33,8 @@ class ReportIRPFForm(django_forms.Form):
 
 	consolidation = django_forms.IntegerField(
 		label="Consolidação",
-		widget=django_forms.Select(choices=[
-				(1, "Anual"),
-				(2, "Mensal")
-			]),
-		initial=1
+		widget=django_forms.Select(choices=Position.CONSOLIDATION_CHOICES),
+		initial=Position.CONSOLIDATION_YEARLY
 	)
 	asset = django_forms.ModelChoiceField(Asset.objects.all(),
 	                                      label=Asset._meta.verbose_name,
