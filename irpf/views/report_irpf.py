@@ -19,14 +19,14 @@ class ReportIRPFForm(django_forms.Form):
 	start = django_forms.DateField(
 		label="Começa",
 		initial=startdt,
-		help_text="Data inicial  do ano para consolidação dos dados da declaração.",
+		help_text="Data inicial para consolidação dos dados da declaração.",
 		required=True,
 		widget=AdminDateWidget
 	)
 	end = django_forms.DateField(
 		label="Termina",
 		initial=enddt,
-		help_text="Data final  do ano para consolidação dos dados da declaração.",
+		help_text="Data final para consolidação dos dados da declaração.",
 		required=True,
 		widget=AdminDateWidget
 	)
