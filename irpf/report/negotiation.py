@@ -15,8 +15,6 @@ class NegotiationReport(BaseReport):
 	event_model = AssetEvent
 	bonus_model = Bonus
 
-	YEARLY, MONTHLY = 1, 2
-
 	def __init__(self, model, user, **options):
 		super().__init__(model, user, **options)
 		self._caches = {}
@@ -190,16 +188,17 @@ class NegotiationReport(BaseReport):
 		"""Monta e retorna a queryset de posição"""
 		related_fields = []
 		qs_options = self.get_common_qs_options(**options)
+		if consolidation := options['consolidation']:
+			qs_options['consolidation'] = consolidation
 		if institution := options.get('institution'):
 			qs_options['institution'] = institution
 			related_fields.append('institution')
 		if (field_name := 'asset') in qs_options:
 			related_fields.append(field_name)
-		consolidation = options['consolidation']
 		# a data de posição é sempre o último dia do mês ou ano.
-		if consolidation == self.YEARLY:
+		if consolidation == self.position_model.CONSOLIDATION_YEARLY:
 			qs_options['date'] = datetime.date.max.replace(year=date.year - 1)
-		elif consolidation == self.MONTHLY:
+		elif consolidation == self.position_model.CONSOLIDATION_MONTHLY:
 			if date.month - 1 > 0:
 				max_day = calendar.monthrange(date.year, date.month - 1)[1]
 				qs_options['date'] = datetime.date(date.year, date.month - 1, max_day)
@@ -235,7 +234,7 @@ class NegotiationReport(BaseReport):
 		return assets
 
 	def report(self, date_start: datetime.date, date_end: datetime.date, **options):
-		options.setdefault('consolidation', self.YEARLY)
+		options.setdefault('consolidation', self.position_model.CONSOLIDATION_YEARLY)
 		options.setdefault('categories', ())
 		qs_options = self.get_common_qs_options(**options)
 		if asset_obj := qs_options.pop('asset', None):  # Permite filtrar por empresa (ativo)
