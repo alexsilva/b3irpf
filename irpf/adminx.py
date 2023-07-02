@@ -111,7 +111,11 @@ class AssetAdmin:
 @sites.register(Position)
 class PositionAdmin(BaseIRPFAdmin):
 	collect_related_nested_objects = False
-	list_filter = ("asset__code", 'institution')
+	list_filter = (
+		"asset__code",
+		'consolidation',
+		'institution'
+	)
 	search_fields = (
 		'asset__code',
 		'asset__name',
