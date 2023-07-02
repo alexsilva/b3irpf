@@ -10,7 +10,8 @@ from irpf.views.base import AdminFormView
 
 
 class XlsxViewerForm(django_forms.Form):
-	filestream = django_forms.FileField(label="Arquivo de dados Excel (xlsx)",
+	filestream = django_forms.FileField(label="Arquivo",
+	                                    help_text="formato excel (xlsx)",
 	                                    widget=AdminFileWidget)
 
 
