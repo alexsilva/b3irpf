@@ -126,7 +126,8 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 
 	def form_valid(self, response, form):
 		if self.is_save_position and self.admin_view.report and self.admin_view.results:
-			self.save_position(form.cleaned_data['end'], self.admin_view.results)
+			self.save_position(form.cleaned_data['end'], self.admin_view.results,
+			                   dict(form.cleaned_data))
 		return response
 
 	def setup(self, *args, **kwargs):
@@ -136,7 +137,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		if self.admin_view.report:
 			return render_to_string("irpf/blocks/blocks.form.buttons.button_save_position.html")
 
-	def _save(self, date, asset: Assets):
+	def _save(self, date, asset: Assets, data: dict):
 		institution = asset.institution
 		# considera a posição do período que deriva da diferença entre compas e vendas
 		period = asset.period
@@ -148,17 +149,19 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		}
 		# remove registro acima da data
 		self.position_model.objects.filter(
+			user=self.user,
+			date__gt=date,
 			asset=asset.instance,
 			institution=institution,
-			user=self.user,
-			date__gt=date
+			consolidation=data['consolidation']
 		).delete()
 		instance, created = self.position_model.objects.get_or_create(
 			defaults=defaults,
+			date=date,
+			user=self.user,
 			asset=asset.instance,
 			institution=institution,
-			date=date,
-			user=self.user
+			consolidation=data['consolidation']
 		)
 		if not created:
 			for field_name in defaults:
@@ -175,14 +178,14 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 				continue
 
 	@atomic
-	def save_position(self, date, results):
+	def save_position(self, date, results, data):
 		try:
 			for item in results:
 				asset = item['asset']
 				# ativo não cadastrado
 				if asset.instance is None:
 					continue
-				self._save(date, asset)
+				self._save(date, asset, data)
 		except Exception as exc:
 			self.message_user(f"Falha ao salvar posições: {exc}", level="error")
 		else:
