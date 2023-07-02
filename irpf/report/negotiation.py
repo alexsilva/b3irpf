@@ -129,28 +129,21 @@ class NegotiationReport(BaseReport):
 			asset.buy.quantity += instance.quantity
 			asset.buy.total += ((instance.quantity * instance.price) + instance.tax)
 		elif instance.is_sell:
-			# valores de venda
-			sell_total = instance.quantity * instance.price
-
+			# valores de vendas
 			asset.sell.tax += instance.tax
 			asset.sell.quantity += instance.quantity
-			asset.sell.total += sell_total
+			asset.sell.total += instance.quantity * instance.price
 
-			# preço médio de compras
-			sell_avg_price = sell_total - instance.tax
-			sell_avg_price = sell_avg_price / instance.quantity
-
-			# preço médio de compras
-			buy_avg_price = asset.buy.avg_price
+			asset_buy_avg_price = asset.buy.avg_price
 
 			# ganho de capital de todas a vendas
-			asset.sell.capital += (instance.quantity * (sell_avg_price - buy_avg_price))
+			asset.sell.capital += (instance.quantity * (asset.sell.avg_price - asset_buy_avg_price))
 
 			# ajustando compras
-			asset.buy.quantity -= instance.quantity
-			asset_buy_quantity = int(asset.buy.quantity)
-			asset.buy.tax = asset_buy_quantity * asset.buy.avg_tax
-			asset.buy.total = asset_buy_quantity * buy_avg_price
+			asset_buy_tax_avg_price = asset.buy.avg_tax
+			asset.buy.quantity -= int(instance.quantity)
+			asset.buy.tax = asset.buy.quantity * asset_buy_tax_avg_price
+			asset.buy.total = asset.buy.quantity * asset_buy_avg_price
 		return asset
 
 	def get_earnings_queryset(self, date, **options):
@@ -187,9 +180,10 @@ class NegotiationReport(BaseReport):
 			return
 		elif instance.is_credit:
 			if kind_slug == instance.LEILAO_DE_FRACAO:
-				asset.sell.total += instance.total
+				# asset.sell.total += instance.total
 				# ganho de capital de todas a vendas
-				asset.sell.capital += instance.total
+				# asset.sell.capital += instance.total
+				...
 			elif kind_slug == instance.BONIFICAO_EM_ATIVOS:
 				# calculada por registro manual
 				# asset.buy.quantity += instance.quantity
