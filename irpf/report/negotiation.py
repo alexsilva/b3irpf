@@ -32,17 +32,18 @@ class NegotiationReport(BaseReport):
 	def get_queryset(self, *args, **kwargs):
 		return self.model.objects.filter(*args, **kwargs)
 
+	def get_common_qs_options(self, **options) -> dict:
+		qs_options = {'user': self.user}
+		if asset := options.get('asset'):
+			qs_options['asset'] = asset
+		if categories := options['categories']:
+			qs_options['asset__category__in'] = categories
+		return qs_options
+
 	def add_bonus(self, date, history, assets, **options):
 		"""Adiciona ações bonificadas na data com base no histórico"""
-		qs_options = {}
-		asset_instance = options.get('asset')
-		if asset_instance:
-			qs_options['asset'] = asset_instance
-		categories = options['categories']
-		if categories:
-			qs_options['asset__category__in'] = categories
-		queryset = self.bonus_model.objects.filter(date=date, user=self.user,
-		                                           **qs_options)
+		qs_options = self.get_common_qs_options(**options)
+		queryset = self.bonus_model.objects.filter(date=date, **qs_options)
 		for bonus in queryset:
 			try:
 				asset = assets[bonus.asset.code]
@@ -78,20 +79,12 @@ class NegotiationReport(BaseReport):
 
 	def apply_events(self, date, assets, **options):
 		"""Eventos de desdobramento/grupamento"""
-		qs_options = dict(
-			date_com=date,
-			user=self.user
-		)
+		qs_options = self.get_common_qs_options(**options)
 		related_fields = []
-		asset_instance = options.get('asset')
-		if asset_instance:
-			qs_options['asset'] = asset_instance
-			related_fields.append('asset')
-		categories = options['categories']
-		if categories:
-			qs_options['asset__category__in'] = categories
+		if (field_name := 'asset') in qs_options:
+			related_fields.append(field_name)
 		event_model = self.event_model
-		queryset = event_model.objects.filter(**qs_options)
+		queryset = event_model.objects.filter(date_com=date, **qs_options)
 		if related_fields:
 			queryset = queryset.select_related(*related_fields)
 		for instance in queryset:
@@ -147,20 +140,12 @@ class NegotiationReport(BaseReport):
 		return asset
 
 	def get_earnings_queryset(self, date, **options):
-		qs_options = dict(
-			user=self.user,
-			date=date
-		)
-		institution = options.get('institution')
-		if institution:
+		qs_options = self.get_common_qs_options(**options)
+		if institution := options.get('institution'):
 			qs_options['institution'] = institution.name
-		asset_instance = options.get('asset')
-		if asset_instance:
-			qs_options['code'] = asset_instance.code
-		categories = options['categories']
-		if categories:
-			qs_options['asset__category__in'] = categories
-		queryset = self.earnings_model.objects.filter(**qs_options)
+		if asset_obj := qs_options.pop('asset', None):
+			qs_options['code__iexact'] = asset_obj.code
+		queryset = self.earnings_model.objects.filter(date=date, **qs_options)
 		return queryset
 
 	def calc_earnings(self, instance: Earnings, asset: Assets):
@@ -206,21 +191,13 @@ class NegotiationReport(BaseReport):
 
 	def get_position_queryset(self, date: datetime.date, **options):
 		"""Mota e retorna a queryset de posição"""
-		qs_options = {
-			'user': self.user
-		}
 		related_fields = []
-		institution = options.get('institution')
-		if institution:
+		qs_options = self.get_common_qs_options(**options)
+		if institution := options.get('institution'):
 			qs_options['institution'] = institution
 			related_fields.append('institution')
-		asset_instance = options.get('asset')
-		if asset_instance:
-			qs_options['asset'] = asset_instance
-			related_fields.append('asset')
-		categories = options['categories']
-		if categories:
-			qs_options['asset__category__in'] = categories
+		if (field_name := 'asset') in qs_options:
+			related_fields.append(field_name)
 		consolidation = options['consolidation']
 		# a data de posição é sempre o último dia do mês ou ano.
 		if consolidation == self.YEARLY:
@@ -262,16 +239,12 @@ class NegotiationReport(BaseReport):
 
 	def report(self, dtstart, dtend, **options):
 		options.setdefault('consolidation', self.YEARLY)
-		categories = options.setdefault('categories', ())
-		qs_options = {'user': self.user}
-		institution = options.get('institution')
-		if institution:
+		options.setdefault('categories', ())
+		qs_options = self.get_common_qs_options(**options)
+		if asset_obj := qs_options.pop('asset', None):  # Permite filtrar por empresa (ativo)
+			qs_options['code__iexact'] = asset_obj.code
+		if institution := options.get('institution'):
 			qs_options['institution'] = institution.name
-		asset_instance = options.get('asset')
-		if asset_instance:  # Permite filtrar por empresa (ativo)
-			qs_options['code'] = asset_instance.code
-		if categories:
-			qs_options['asset__category__in'] = categories
 		# cache
 		assets = self.get_assets_position(date=dtstart, **options)
 		assets_queryset = self.get_queryset(**qs_options)
@@ -287,7 +260,7 @@ class NegotiationReport(BaseReport):
 					asset = Assets(ticker=instance.code,
 					               institution=institution,
 					               instance=(instance.asset or
-					                         asset_instance or
+					                         asset_obj or
 					                         self.get_asset(instance.code)))
 					assets[instance.code] = asset
 				# ignora os registros que já foram contabilizados na posição
