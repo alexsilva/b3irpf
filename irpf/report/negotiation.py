@@ -1,7 +1,7 @@
 import calendar
 import copy
 import datetime
-
+from decimal import Decimal
 from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent
 from irpf.report.base import BaseReport
 from irpf.report.utils import Event, Assets, Buy
@@ -101,7 +101,7 @@ class NegotiationReport(BaseReport):
 				continue
 			elif instance.event == event_model.SPLIT:  # Desdobramento
 				quantity = asset_period.quantity / instance.factor_from  # correção
-				fractional, quantity = quantity % 1, int(quantity)
+				fractional, quantity = quantity % 1, Decimal(int(quantity))
 				# nova quantidade altera o preço médio
 				asset.buy.quantity = quantity * instance.factor_to
 				# reduz a fração valor da fração com o novo preço médio
@@ -109,7 +109,7 @@ class NegotiationReport(BaseReport):
 
 			elif instance.event == event_model.INPLIT:  # Grupamento
 				quantity = asset_period.quantity / instance.factor_from
-				fractional, quantity = quantity % 1, int(quantity)
+				fractional, quantity = quantity % 1, Decimal(int(quantity))
 				# nova quantidade altera o preço médio
 				asset.buy.quantity = quantity * instance.factor_to  # correção
 				# reduz a fração valor da fração com o novo preço médio
