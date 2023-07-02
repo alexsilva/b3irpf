@@ -237,7 +237,7 @@ class NegotiationReport(BaseReport):
 			assets[ticker] = asset
 		return assets
 
-	def report(self, dtstart, dtend, **options):
+	def report(self, date_start: datetime.date, date_end: datetime.date, **options):
 		options.setdefault('consolidation', self.YEARLY)
 		options.setdefault('categories', ())
 		qs_options = self.get_common_qs_options(**options)
@@ -246,11 +246,11 @@ class NegotiationReport(BaseReport):
 		if institution := options.get('institution'):
 			qs_options['institution'] = institution.name
 		# cache
-		assets = self.get_assets_position(date=dtstart, **options)
+		assets = self.get_assets_position(date=date_start, **options)
 		assets_queryset = self.get_queryset(**qs_options)
 		history = {}
 
-		for date in range_dates(dtstart, dtend):  # calcula um dia por vez
+		for date in range_dates(date_start, date_end):  # calcula um dia por vez
 			queryset = assets_queryset.filter(date=date)
 			for instance in queryset:
 				# calculo de compra, venda, boficiação, etc
