@@ -372,9 +372,9 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 			period = asset.period
 			stats.patrimony += period.total
 			stats.buy += asset.period_buy.total
-			stats.sell += asset.sell.total
-			stats.capital += asset.sell.capital
+			stats.sell += (asset.sell.total + asset.sell.fraction.total)
 			stats.tax += (asset.buy.tax + asset.sell.tax)
+			stats.capital += asset.sell.capital
 		return stats
 
 	def get_context_data(self, context, **kwargs):
