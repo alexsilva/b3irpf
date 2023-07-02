@@ -454,11 +454,14 @@ class Position(BaseIRPFModel):
 	date = DateField(verbose_name="Data")
 
 	def __str__(self):
+		msg = []
+		if self.asset:
+			msg.append(f"{self.asset.code} - ")
 		dt = date_format(self.date)
-		msg = f"Posição até {dt}"
+		msg.append(f"Posição até {dt}")
 		if self.institution:
-			msg += f" - {self.institution.name}"
-		return msg
+			msg.append(f" - {self.institution.name}")
+		return ' '.join(msg)
 
 	class Meta:
 		unique_together = ("asset", "institution", "user", "date")
