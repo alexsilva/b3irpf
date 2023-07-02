@@ -41,7 +41,7 @@ class NegotiationReport(BaseReport):
 		return qs_options
 
 	def add_bonus(self, date, history, assets, **options):
-		"""Adiciona ações bonificadas na data com base no histórico"""
+		"""Adiciona ações bonificadas na data considerando o histórico"""
 		qs_options = self.get_common_qs_options(**options)
 		queryset = self.bonus_model.objects.filter(date=date, **qs_options)
 		for bonus in queryset:
@@ -190,7 +190,7 @@ class NegotiationReport(BaseReport):
 				continue
 
 	def get_position_queryset(self, date: datetime.date, **options):
-		"""Mota e retorna a queryset de posição"""
+		"""Monta e retorna a queryset de posição"""
 		related_fields = []
 		qs_options = self.get_common_qs_options(**options)
 		if institution := options.get('institution'):
@@ -273,9 +273,9 @@ class NegotiationReport(BaseReport):
 			if assets:
 				history[date] = copy.deepcopy(assets)
 
-			# aplica a bonificiação na data do histórico
 			self.apply_earnings(date, assets, **options)
 			self.apply_events(date, assets, **options)
+			# aplica a bonificação na data do histórico
 			self.add_bonus(date, history, assets, **options)
 		results = []
 		for code in assets:
