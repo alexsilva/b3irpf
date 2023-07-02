@@ -101,19 +101,19 @@ class NegotiationReport(BaseReport):
 				continue
 			elif instance.event == event_model.SPLIT:  # Desdobramento
 				quantity = asset_period.quantity / instance.factor_from  # correção
-				fractional, quantity = quantity % 1, Decimal(int(quantity))
+				fraction, quantity = quantity % 1, Decimal(int(quantity))
 				# nova quantidade altera o preço médio
 				asset.buy.quantity = quantity * instance.factor_to
 				# reduz a fração valor da fração com o novo preço médio
-				asset.buy.total -= fractional * asset.buy.avg_price
+				asset.buy.total -= fraction * asset.buy.avg_price
 
 			elif instance.event == event_model.INPLIT:  # Grupamento
 				quantity = asset_period.quantity / instance.factor_from
-				fractional, quantity = quantity % 1, Decimal(int(quantity))
+				fraction, quantity = quantity % 1, Decimal(int(quantity))
 				# nova quantidade altera o preço médio
 				asset.buy.quantity = quantity * instance.factor_to  # correção
 				# reduz a fração valor da fração com o novo preço médio
-				asset.buy.total -= fractional * asset.buy.avg_price
+				asset.buy.total -= fraction * asset.buy.avg_price
 
 	def consolidate(self, instance, asset: Assets):
 		if instance.is_buy:
