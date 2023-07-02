@@ -133,6 +133,7 @@ class Negotiation(BaseIRPFModel):
 
 	date = DateField(verbose_name="Data do Negócio")
 	kind = models.CharField(verbose_name="Tipo de Movimentação",
+	                        choices=KIND_CHOICES,
 	                        max_length=16)
 
 	institution = models.CharField(verbose_name="Instituição",
