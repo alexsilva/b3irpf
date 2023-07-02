@@ -4,10 +4,13 @@ from django.core.management import get_commands, load_command_class
 from django.http import Http404
 
 from irpf.views.base import AdminFormView
+from xadmin.widgets import AdminFileWidget
 
 
 class ImportListForm(django_forms.Form):
-	filestream = django_forms.FileField(label="Arquivo de dados")
+	filestream = django_forms.FileField(label="Arquivo",
+	                                    help_text="formato excel (xlsx)",
+	                                    widget=AdminFileWidget)
 
 
 class AdminImportListModelView(AdminFormView):
@@ -27,6 +30,13 @@ class AdminImportListModelView(AdminFormView):
 
 	def get_success_url(self):
 		return self.get_model_url(self.import_model, "changelist")
+
+	def get_media(self):
+		media = super().get_media()
+		media += django_forms.Media(css={
+			'screen': ("irpf/css/irpf.import.css",)
+		})
+		return media
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
