@@ -124,6 +124,7 @@ class PositionAdmin(BaseIRPFAdmin):
 	list_display = (
 		'asset_code',
 		'asset_name',
+		'consolidation',
 		'institution',
 		'quantity',
 		'avg_price',
