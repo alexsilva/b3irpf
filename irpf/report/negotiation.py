@@ -167,7 +167,7 @@ class NegotiationReport(BaseReport):
 			if kind_slug == instance.LEILAO_DE_FRACAO:
 				# as frações influenciam no valor de venda para cálculo do imposto (se for o caso 20mil+)
 				asset.sell.fraction.total += instance.total
-				asset.sell.fraction += instance.quantity
+				asset.sell.fraction.quantity += instance.quantity
 			elif kind_slug == instance.BONIFICAO_EM_ATIVOS:
 				# calculada por registro manual
 				# asset.buy.quantity += instance.quantity
