@@ -453,12 +453,17 @@ class Position(BaseIRPFModel):
 	                                            default=CONSOLIDATION_YEARLY)
 	date = DateField(verbose_name="Data")
 
+	@classproperty
+	def consolidation_choices(cls):
+		return dict(cls.CONSOLIDATION_CHOICES)
+
 	def __str__(self):
 		msg = []
 		if self.asset:
 			msg.append(f"{self.asset.code} - ")
 		dt = date_format(self.date)
-		msg.append(f"Posição até {dt}")
+		label = self.consolidation_choices[self.consolidation]
+		msg.append(f"Posição ({label.lower()}) até {dt}")
 		if self.institution:
 			msg.append(f" - {self.institution.name}")
 		return ' '.join(msg)
