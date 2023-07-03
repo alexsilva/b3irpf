@@ -11,6 +11,7 @@ class AdminFormView(CommAdminView, FormView):
 
 	def get_helper(self):
 		helper = FormHelper()
+		helper.disable_csrf = not self.form_method_post
 		helper.form_tag = False
 		helper.form_class = 'form-horizontal'
 		helper.field_class = 'col-sm-10'
