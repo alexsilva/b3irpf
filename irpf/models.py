@@ -473,3 +473,33 @@ class Position(BaseIRPFModel):
 		ordering = ('asset__code', '-date',)
 		verbose_name = "Posição"
 		verbose_name_plural = "Posições"
+
+
+class Taxes(BaseIRPFModel):
+	"""Modelo usado para registro de impostos a pagar"""
+	TAX_CHOICES = [
+		(15, "15%"),
+		(20, "20%")
+	]
+	total = models.DecimalField(verbose_name="Valor bruto",
+	                            max_digits=DECIMAL_MAX_DIGITS,
+	                            decimal_places=DECMIAL_PLACES,
+	                            default=Decimal(0))
+
+	category = models.IntegerField(verbose_name="Categoria",
+	                               help_text="Categoria de ativo para cálculo do imposto.",
+	                               choices=Asset.CATEGORY_CHOICES)
+
+	tax = models.PositiveIntegerField(verbose_name="Taxa",
+	                                  choices=TAX_CHOICES,
+	                                  help_text="Taxa do imposto.")
+
+	asset = models.ForeignKey(Asset, on_delete=models.SET_NULL,
+	                          verbose_name="Ativo",
+	                          null=True, blank=True)
+
+	description = models.TextField(verbose_name="Descrição", blank=True)
+
+	class Meta:
+		verbose_name = "Imposto"
+		verbose_name_plural = verbose_name + "s"
