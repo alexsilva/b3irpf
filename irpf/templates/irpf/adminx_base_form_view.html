@@ -19,17 +19,13 @@
               {% view_block 'exform' %}
               {% block exform %}{% endblock %}
               {% crispy form %}
-              <div class="form-group float-right p-1" style="width: 100%;">
-                <div class="container-fluid">
+              <div class="form-group row">
+                <div class="col-sm align-self-center">
+                  {% view_block 'form_buttons' %}
+                </div>
+                <div class="col-sm align-self-center">
                   <div class="row justify-content-end">
-                    <div class="col-sm align-self-center">
-                      {% view_block 'form_buttons' %}
-                    </div>
-                    <div class="col-sm align-self-center">
-                      <div class="row justify-content-end">
-                        <button type="submit" class="btn btn-primary">Enviar</button>
-                      </div>
-                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
                   </div>
                 </div>
               </div>
