@@ -203,6 +203,8 @@ class NegotiationReport(BaseReport):
 				max_day = calendar.monthrange(date.year, date.month - 1)[1]
 				qs_options['date'] = datetime.date(date.year, date.month - 1, max_day)
 			else:
+				# começo de ano sempre pega o compilado anual
+				qs_options['consolidation'] = self.position_model.CONSOLIDATION_YEARLY
 				qs_options['date'] = datetime.date.max.replace(year=date.year - 1)
 		else:
 			qs_options['date'] = date
