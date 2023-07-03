@@ -6,7 +6,7 @@ from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView
 
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
-	BrokerageNote, AssetEvent, FoundsAdministrator
+	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin
 from irpf.views.import_list import AdminImportListModelView
@@ -62,6 +62,7 @@ class BaseIRPFAdmin:
 	guardian_protected = True
 	# AssignUserAdminPlugin
 	assign_current_user = True
+	horizontal_form_layout = True
 
 	def has_auth_permission(self, name: str, obj=None):
 		if isinstance(self, ModelFormAdminView) and obj is None:
