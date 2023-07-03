@@ -47,6 +47,8 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 XADMIN_TITLE = "B3 - IRPF"
 XADMIN_FOOTER_TITLE = 'irpf'
 
+XADMIN_DEFAULT_GROUP = 'investor'
+
 # Application definition
 
 INSTALLED_APPS = [
