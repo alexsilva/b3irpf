@@ -500,6 +500,9 @@ class Taxes(BaseIRPFModel):
 
 	description = models.TextField(verbose_name="Descrição", blank=True)
 
+	paid = models.BooleanField(verbose_name="Pago", default=False,
+	                           help_text="Marque quando o imposto for pago.")
+
 	class Meta:
 		verbose_name = "Imposto"
 		verbose_name_plural = verbose_name + "s"
