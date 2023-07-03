@@ -252,3 +252,8 @@ class EarningsAdmin(BaseIRPFAdmin):
 		"total",
 		"date"
 	)
+
+
+@sites.register(Taxes)
+class TaxesAdmin(BaseIRPFAdmin):
+	...
