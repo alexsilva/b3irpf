@@ -10,7 +10,7 @@ from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroFi
 from irpf.storage import FileSystemOverwriteStorage
 
 DECIMAL_MAX_DIGITS = 28
-DECMIAL_PLACES = 16
+DECIMAL_PLACES = 16
 
 
 class Bookkeeping(models.Model):
@@ -152,20 +152,20 @@ class Negotiation(BaseIRPFModel):
 
 	price = models.DecimalField(verbose_name="Preço",
 	                            max_digits=DECIMAL_MAX_DIGITS,
-	                            decimal_places=DECMIAL_PLACES,
+	                            decimal_places=DECIMAL_PLACES,
 	                            default=Decimal(0))
 	total = models.DecimalField(verbose_name="Valor (total)",
 	                            max_digits=DECIMAL_MAX_DIGITS,
-	                            decimal_places=DECMIAL_PLACES,
+	                            decimal_places=DECIMAL_PLACES,
 	                            default=Decimal(0))
 
 	tax = models.DecimalField(verbose_name="Taxas",
 	                          max_digits=DECIMAL_MAX_DIGITS,
-	                          decimal_places=DECMIAL_PLACES,
+	                          decimal_places=DECIMAL_PLACES,
 	                          default=Decimal(0))
 	irrf = models.DecimalField(verbose_name="IRRF",
 	                           max_digits=DECIMAL_MAX_DIGITS,
-	                           decimal_places=DECMIAL_PLACES,
+	                           decimal_places=DECIMAL_PLACES,
 	                           default=Decimal(0),
 	                           help_text="Imposto que pode ter sido retido na fonte")
 
@@ -222,7 +222,7 @@ class Bonus(BaseIRPFModel):
 	date = DateField(verbose_name="Data de incorporação")
 	base_value = models.DecimalField(verbose_name="Valor de base",
 	                                 max_digits=DECIMAL_MAX_DIGITS,
-	                                 decimal_places=DECMIAL_PLACES,
+	                                 decimal_places=DECIMAL_PLACES,
 	                                 default=Decimal(0))
 	proportion = models.DecimalField(verbose_name="Proporção",
 	                                 max_digits=6,
@@ -274,7 +274,7 @@ class Earnings(BaseIRPFModel):
 	                          default=Decimal(0))
 	total = DecimalZeroField(verbose_name="Valor da operação",
 	                         max_digits=DECIMAL_MAX_DIGITS,
-	                         decimal_places=DECMIAL_PLACES,
+	                         decimal_places=DECIMAL_PLACES,
 	                         default=Decimal(0))
 
 	date.sheet_header = "Data"
@@ -438,15 +438,15 @@ class Position(BaseIRPFModel):
 	                               default=Decimal(0))
 	avg_price = models.DecimalField(verbose_name="Preço médio",
 	                                max_digits=DECIMAL_MAX_DIGITS,
-	                                decimal_places=DECMIAL_PLACES,
+	                                decimal_places=DECIMAL_PLACES,
 	                                default=Decimal(0))
 	total = models.DecimalField(verbose_name="Valor total",
 	                            max_digits=DECIMAL_MAX_DIGITS,
-	                            decimal_places=DECMIAL_PLACES,
+	                            decimal_places=DECIMAL_PLACES,
 	                            default=Decimal(0))
 	tax = models.DecimalField(verbose_name="Taxas",
 	                          max_digits=DECIMAL_MAX_DIGITS,
-	                          decimal_places=DECMIAL_PLACES,
+	                          decimal_places=DECIMAL_PLACES,
 	                          default=Decimal(0))
 	consolidation = models.PositiveIntegerField(verbose_name="Consolidação",
 	                                            choices=CONSOLIDATION_CHOICES,
