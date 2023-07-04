@@ -505,6 +505,11 @@ class Taxes(BaseIRPFModel):
 
 	created = models.DateTimeField(verbose_name="Data de registro", auto_now_add=True)
 
+	def __str__(self):
+		total = number_format(self.total, 2)
+		paid = "pago" if self.paid else "devendo"
+		return f"R$ {total} - {self.tax}% - {paid}"
+
 	class Meta:
 		verbose_name = "Imposto"
 		verbose_name_plural = verbose_name + "s"
