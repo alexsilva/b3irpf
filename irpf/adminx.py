@@ -1,6 +1,7 @@
 from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from django.contrib.auth import get_permission_codename
 from django.core.management import call_command
+from django.utils.formats import number_format
 
 from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView
@@ -261,5 +262,14 @@ class TaxesAdmin(BaseIRPFAdmin):
 		"total",
 		"category",
 		"tax",
+		"taxes_to_pay",
 		"paid"
 	)
+
+	def taxes_to_pay(self, instance):
+		value = number_format(instance.taxes_to_pay, 2)
+		return f"R$ {value}"
+
+	taxes_to_pay.is_column = False
+	taxes_to_pay.short_description = "A pagar"
+

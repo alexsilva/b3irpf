@@ -1,3 +1,4 @@
+import decimal
 from decimal import Decimal
 from django.conf import settings
 from django.db import models
@@ -504,6 +505,10 @@ class Taxes(BaseIRPFModel):
 	                           help_text="Marque quando o imposto for pago.")
 
 	created = models.DateTimeField(verbose_name="Data de registro", auto_now_add=True)
+
+	@property
+	def taxes_to_pay(self):
+		return self.total * (self.tax / decimal.Decimal(100))
 
 	def __str__(self):
 		total = number_format(self.total, 2)
