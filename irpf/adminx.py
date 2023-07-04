@@ -256,4 +256,10 @@ class EarningsAdmin(BaseIRPFAdmin):
 
 @sites.register(Taxes)
 class TaxesAdmin(BaseIRPFAdmin):
-	...
+	list_display = (
+		"created",
+		"total",
+		"category",
+		"tax",
+		"paid"
+	)
