@@ -483,7 +483,7 @@ class Taxes(BaseIRPFModel):
 	]
 	total = models.DecimalField(verbose_name="Valor bruto",
 	                            max_digits=DECIMAL_MAX_DIGITS,
-	                            decimal_places=DECMIAL_PLACES,
+	                            decimal_places=2,
 	                            default=Decimal(0))
 
 	category = models.IntegerField(verbose_name="Categoria",
