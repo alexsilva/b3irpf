@@ -3,6 +3,8 @@ import calendar
 import django.forms as django_forms
 from django.forms.widgets import MultiWidget, Select, NumberInput
 
+from irpf.utils import YearMonthDates
+
 
 class YearWidget(NumberInput):
 	...
@@ -58,5 +60,5 @@ class YearMonthField(django_forms.MultiValueField):
 
 	def compress(self, data_list):
 		if data_list:
-			return data_list
+			return YearMonthDates(*data_list)
 		return None

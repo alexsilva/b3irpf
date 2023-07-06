@@ -1,5 +1,25 @@
+import calendar
 from datetime import date, timedelta
 from typing import Sequence
+
+
+class YearMonthDates:
+	def __init__(self, year, month):
+		self.year = year
+		self.month = month
+
+	@property
+	def year_interval(self):
+		start = date.min.replace(year=self.year)
+		end = date.max.replace(year=start.year)
+		return start, end
+
+	@property
+	def month_interval(self):
+		start = date.min.replace(year=self.year, month=self.month)
+		max_day = calendar.monthrange(start.year, start.month)[1]
+		end = date(year=self.year, month=self.month, day=max_day)
+		return start, end
 
 
 def range_dates(start_of_range: date, end_of_range: date) -> Sequence[date]:

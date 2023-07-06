@@ -1,20 +1,18 @@
-import datetime
-
 import django.forms as django_forms
 from django.apps import apps
 from django.http import Http404
 from django.utils import timezone
 from django.utils.module_loading import import_string
-
-from irpf.models import Institution, Asset, Position
-from irpf.views.base import AdminFormView
 from xadmin.views import filter_hook
 from xadmin.widgets import AdminDateWidget, AdminSelectWidget, AdminSelectMultiple
 
+from irpf.models import Institution, Asset, Position
+from irpf.utils import YearMonthDates
+from irpf.views.base import AdminFormView
 from irpf.widgets import YearMonthWidget, YearMonthField
 
 _now = timezone.now()
-startdt, enddt = datetime.date.min.replace(year=_now.year), _now
+startdt, enddt = YearMonthDates(_now.year, _now.month).year_interval
 
 
 class ReportIRPFForm(django_forms.Form):
@@ -39,7 +37,7 @@ class ReportIRPFForm(django_forms.Form):
 		initial=Position.CONSOLIDATION_YEARLY
 	)
 
-	yearmonth = YearMonthField(label="Apuração", widget=YearMonthWidget(attrs={
+	dates = YearMonthField(label="Apuração", widget=YearMonthWidget(attrs={
 		'class': 'form-control my-1',
 	}), initial=(_now.year, _now.month))
 
