@@ -11,6 +11,8 @@ from irpf.views.base import AdminFormView
 from xadmin.views import filter_hook
 from xadmin.widgets import AdminDateWidget, AdminSelectWidget, AdminSelectMultiple
 
+from irpf.widgets import YearMonthWidget, YearMonthField
+
 _now = timezone.now()
 startdt, enddt = datetime.date.min.replace(year=_now.year), _now
 
@@ -36,6 +38,11 @@ class ReportIRPFForm(django_forms.Form):
 		widget=django_forms.Select(choices=Position.CONSOLIDATION_CHOICES),
 		initial=Position.CONSOLIDATION_YEARLY
 	)
+
+	yearmonth = YearMonthField(label="Apuração", widget=YearMonthWidget(attrs={
+		'class': 'form-control my-1',
+	}), initial=(_now.year, _now.month))
+
 	asset = django_forms.ModelChoiceField(Asset.objects.all(),
 	                                      label=Asset._meta.verbose_name,
 	                                      widget=AdminSelectWidget,
