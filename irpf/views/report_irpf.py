@@ -2,7 +2,9 @@ import django.forms as django_forms
 from django.apps import apps
 from django.http import Http404
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.module_loading import import_string
+from django.utils.safestring import mark_safe
 from xadmin.views import filter_hook
 from xadmin.widgets import AdminDateWidget, AdminSelectWidget, AdminSelectMultiple
 
@@ -76,6 +78,12 @@ class AdminReportIrpfModelView(AdminFormView):
 			'screen': ('irpf/css/irpf.report.css',)
 		})
 		return media
+
+	def get_site_title(self):
+		title = super().get_site_title()
+		start = date_format(self.start_date)
+		end = date_format(self.end_date)
+		return mark_safe(f"{title} - {start} Até {end}")
 
 	def report_object(self, report_class, model, user, **options):
 		"""report to specified model"""
