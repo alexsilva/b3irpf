@@ -68,7 +68,8 @@ class AdminReportIrpfModelView(AdminFormView):
 	def init_request(self, *args, **kwargs):
 		super().init_request(*args, **kwargs)
 		self.model_app_label = self.kwargs['model_app_label']
-		self.report, self.results = None, None
+		self.report = self.results = None
+		self.start_date = self.end_date = None
 
 	def get_media(self):
 		media = super().get_media()
@@ -81,9 +82,11 @@ class AdminReportIrpfModelView(AdminFormView):
 
 	def get_site_title(self):
 		title = super().get_site_title()
-		start = date_format(self.start_date)
-		end = date_format(self.end_date)
-		return mark_safe(f"{title} - {start} Até {end}")
+		if self.start_date and self.end_date:
+			start = date_format(self.start_date)
+			end = date_format(self.end_date)
+			title = mark_safe(f"{title} - {start} Até {end}")
+		return title
 
 	def report_object(self, report_class, model, user, **options):
 		"""report to specified model"""
