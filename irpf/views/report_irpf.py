@@ -18,7 +18,6 @@ startdt, enddt = YearMonthDates(_now.year, _now.month).year_interval
 
 
 class ReportIRPFForm(django_forms.Form):
-	prefix = 'rp'
 	# start = django_forms.DateField(
 	# 	label="Começa",
 	# 	initial=startdt,
