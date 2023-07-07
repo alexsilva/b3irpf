@@ -15,7 +15,7 @@ class AdminFormView(CommAdminView, FormView):
 		helper.form_tag = False
 		helper.form_class = 'form-horizontal'
 		helper.field_class = 'controls col-sm-10'
-		helper.label_class = 'col-sm-2'
+		helper.label_class = 'col-sm-2 text-nowrap'
 		helper.use_custom_control = False
 		helper.include_media = False
 		return helper

@@ -13,7 +13,7 @@
       <div class="card mt-1 mb-2 unsort no_title">
         <div class="card-body p-1">
           <div class="container-fluid">
-            <form class="exform text-nowrap" method="{% if form_method_post %}post{% else %}get{% endif %}"
+            <form class="exform" method="{% if form_method_post %}post{% else %}get{% endif %}"
                   {% if form_method_post %}enctype="multipart/form-data"{% endif %}>
               {% if form_method_post %}{% csrf_token %}{% endif %}
               {% view_block 'exform' %}
