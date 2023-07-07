@@ -35,7 +35,7 @@ class ReportIRPFForm(django_forms.Form):
 	consolidation = django_forms.IntegerField(
 		label="Apuração",
 		widget=django_forms.Select(choices=Position.CONSOLIDATION_CHOICES),
-		initial=Position.CONSOLIDATION_YEARLY
+		initial=Position.CONSOLIDATION_MONTHLY
 	)
 
 	dates = YearMonthField(label="Período", widget=YearMonthWidget(attrs={
