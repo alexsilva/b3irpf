@@ -3,10 +3,10 @@ from datetime import date, timedelta
 from typing import Sequence
 
 
-class YearMonthDates:
-	def __init__(self, year, month):
-		self.year = year
+class MonthYearDates:
+	def __init__(self, month, year):
 		self.month = month
+		self.year = year
 
 	@property
 	def year_interval(self):

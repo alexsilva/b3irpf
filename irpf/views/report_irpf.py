@@ -9,12 +9,12 @@ from xadmin.views import filter_hook
 from xadmin.widgets import AdminDateWidget, AdminSelectWidget, AdminSelectMultiple
 
 from irpf.models import Institution, Asset, Position
-from irpf.utils import YearMonthDates
+from irpf.utils import MonthYearDates
 from irpf.views.base import AdminFormView
-from irpf.widgets import YearMonthWidget, YearMonthField
+from irpf.widgets import MonthYearWidget, MonthYearField
 
 _now = timezone.now()
-startdt, enddt = YearMonthDates(_now.year, _now.month).year_interval
+startdt, enddt = MonthYearDates(_now.year, _now.month).year_interval
 
 
 class ReportIRPFForm(django_forms.Form):
@@ -39,9 +39,9 @@ class ReportIRPFForm(django_forms.Form):
 		initial=Position.CONSOLIDATION_MONTHLY
 	)
 
-	dates = YearMonthField(label="Período", widget=YearMonthWidget(attrs={
+	dates = MonthYearField(label="Período", widget=MonthYearWidget(attrs={
 		'class': 'form-control my-1',
-	}), initial=(_now.year, _now.month))
+	}), initial=(_now.month, _now.year))
 
 	asset = django_forms.ModelChoiceField(Asset.objects.all(),
 	                                      label=Asset._meta.verbose_name,
@@ -105,7 +105,7 @@ class AdminReportIrpfModelView(AdminFormView):
 		self.report = self.report_object(report_class, model, self.user)
 
 		form_data = form.cleaned_data
-		dates: YearMonthDates = form_data['dates']
+		dates: MonthYearDates = form_data['dates']
 		institution = form_data['institution']
 		consolidation = form_data['consolidation']
 		categories = form_data['categories']
@@ -120,17 +120,17 @@ class AdminReportIrpfModelView(AdminFormView):
 
 		if (btn_dates := self.request.GET.get('btn_dates')) == "_dates_next":
 			if consolidation == Position.CONSOLIDATION_YEARLY:
-				dates = YearMonthDates(dates.year + 1, dates.month)
+				dates = MonthYearDates(dates.month, dates.year + 1)
 				start, end = dates.year_interval
 			elif consolidation == Position.CONSOLIDATION_MONTHLY:
-				dates = YearMonthDates(dates.year, dates.month + 1 if dates.month < 12 else 12)
+				dates = MonthYearDates(dates.month + 1 if dates.month < 12 else 12, dates.year)
 				start, end = dates.month_interval
 		elif btn_dates == "_dates_previous":
 			if consolidation == Position.CONSOLIDATION_YEARLY:
-				dates = YearMonthDates(dates.year - 1, dates.month)
+				dates = MonthYearDates(dates.month, dates.year - 1)
 				start, end = dates.year_interval
 			elif consolidation == Position.CONSOLIDATION_MONTHLY:
-				dates = YearMonthDates(dates.year, dates.month - 1 if dates.month > 1 else 1)
+				dates = MonthYearDates(dates.month - 1 if dates.month > 1 else 1, dates.year)
 				start, end = dates.month_interval
 
 		self.results = self.report.report(start, end,
@@ -147,8 +147,8 @@ class AdminReportIrpfModelView(AdminFormView):
 		data = form.data.copy()
 		dates_widget = form.fields['dates'].widget
 		prefix = f"{form.prefix}-" if form.prefix else ""
-		data[f'{prefix}dates{dates_widget.widgets_names[0]}'] = dates.year
-		data[f'{prefix}dates{dates_widget.widgets_names[1]}'] = dates.month
+		data[f'{prefix}dates{dates_widget.widgets_names[0]}'] = dates.month
+		data[f'{prefix}dates{dates_widget.widgets_names[1]}'] = dates.year
 		return data
 
 	def get_form_kwargs(self):
