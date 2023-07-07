@@ -118,14 +118,14 @@ class AdminReportIrpfModelView(AdminFormView):
 		else:
 			start, end = None, None
 
-		if (btn_dates := self.request.GET.get('btn_dates')) == "_dates_next":
+		if (_dates := self.request.GET.get('_dates')) == "next":
 			if consolidation == Position.CONSOLIDATION_YEARLY:
 				dates = MonthYearDates(dates.month, dates.year + 1)
 				start, end = dates.year_interval
 			elif consolidation == Position.CONSOLIDATION_MONTHLY:
 				dates = MonthYearDates(dates.month + 1 if dates.month < 12 else 12, dates.year)
 				start, end = dates.month_interval
-		elif btn_dates == "_dates_previous":
+		elif _dates == "prev":
 			if consolidation == Position.CONSOLIDATION_YEARLY:
 				dates = MonthYearDates(dates.month, dates.year - 1)
 				start, end = dates.year_interval
