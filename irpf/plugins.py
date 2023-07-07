@@ -126,7 +126,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 
 	def form_valid(self, response, form):
 		if self.is_save_position and self.admin_view.report and self.admin_view.results:
-			self.save_position(form.cleaned_data['end'], self.admin_view.results,
+			self.save_position(self.admin_view.end_date, self.admin_view.results,
 			                   dict(form.cleaned_data))
 		return response
 

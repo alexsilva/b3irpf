@@ -16,28 +16,29 @@ startdt, enddt = YearMonthDates(_now.year, _now.month).year_interval
 
 
 class ReportIRPFForm(django_forms.Form):
-	start = django_forms.DateField(
-		label="Começa",
-		initial=startdt,
-		help_text="Data inicial para consolidação dos dados da declaração.",
-		required=True,
-		widget=AdminDateWidget
-	)
-	end = django_forms.DateField(
-		label="Termina",
-		initial=enddt,
-		help_text="Data final para consolidação dos dados da declaração.",
-		required=True,
-		widget=AdminDateWidget
-	)
+	prefix = 'report'
+	# start = django_forms.DateField(
+	# 	label="Começa",
+	# 	initial=startdt,
+	# 	help_text="Data inicial para consolidação dos dados da declaração.",
+	# 	required=True,
+	# 	widget=AdminDateWidget
+	# )
+	# end = django_forms.DateField(
+	# 	label="Termina",
+	# 	initial=enddt,
+	# 	help_text="Data final para consolidação dos dados da declaração.",
+	# 	required=True,
+	# 	widget=AdminDateWidget
+	# )
 
 	consolidation = django_forms.IntegerField(
-		label="Consolidação",
+		label="Apuração",
 		widget=django_forms.Select(choices=Position.CONSOLIDATION_CHOICES),
 		initial=Position.CONSOLIDATION_YEARLY
 	)
 
-	dates = YearMonthField(label="Apuração", widget=YearMonthWidget(attrs={
+	dates = YearMonthField(label="Período", widget=YearMonthWidget(attrs={
 		'class': 'form-control my-1',
 	}), initial=(_now.year, _now.month))
 
@@ -94,19 +95,51 @@ class AdminReportIrpfModelView(AdminFormView):
 		self.report = self.report_object(report_class, model, self.user)
 
 		form_data = form.cleaned_data
+		dates: YearMonthDates = form_data['dates']
 		institution = form_data['institution']
-		asset = form_data['asset']
 		consolidation = form_data['consolidation']
 		categories = form_data['categories']
-		start = form_data['start']
-		end = form_data['end']
+		asset = form_data['asset']
+
+		if consolidation == Position.CONSOLIDATION_YEARLY:
+			start, end = dates.year_interval
+		elif consolidation == Position.CONSOLIDATION_MONTHLY:
+			start, end = dates.month_interval
+		else:
+			start, end = None, None
+
+		if (btn_dates := self.request.GET.get('btn_dates')) == "_dates_next":
+			if consolidation == Position.CONSOLIDATION_YEARLY:
+				dates = YearMonthDates(dates.year + 1, dates.month)
+				start, end = dates.year_interval
+			elif consolidation == Position.CONSOLIDATION_MONTHLY:
+				dates = YearMonthDates(dates.year, dates.month + 1 if dates.month < 12 else 12)
+				start, end = dates.month_interval
+		elif btn_dates == "_dates_previous":
+			if consolidation == Position.CONSOLIDATION_YEARLY:
+				dates = YearMonthDates(dates.year - 1, dates.month)
+				start, end = dates.year_interval
+			elif consolidation == Position.CONSOLIDATION_MONTHLY:
+				dates = YearMonthDates(dates.year, dates.month - 1 if dates.month > 1 else 1)
+				start, end = dates.month_interval
 
 		self.results = self.report.report(start, end,
 		                                  institution=institution,
 		                                  asset=asset,
 		                                  consolidation=consolidation,
 		                                  categories=categories)
+		self.start_date, self.end_date = start, end
+		form.data = self._get_form_data(form, dates)
 		return self.render_to_response(self.get_context_data(form=form))
+
+	@staticmethod
+	def _get_form_data(form, dates):
+		data = form.data.copy()
+		dates_widget = form.fields['dates'].widget
+		prefix = f"{form.prefix}-" if form.prefix else ""
+		data[f'{prefix}dates{dates_widget.widgets_names[0]}'] = dates.year
+		data[f'{prefix}dates{dates_widget.widgets_names[1]}'] = dates.month
+		return data
 
 	def get_form_kwargs(self):
 		kwargs = super().get_form_kwargs()
