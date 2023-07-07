@@ -4,7 +4,7 @@ from django.core.management import call_command
 from django.utils.formats import number_format
 
 from xadmin import sites, site
-from xadmin.views import ListAdminView, ModelFormAdminView
+from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
 
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes
@@ -29,6 +29,12 @@ site.register_plugin(BrokerageNoteAdminPlugin, ModelFormAdminView)
 
 def _get_field_opts(name, model):
 	return model._meta.get_field(name)
+
+
+@sites.register(BaseAdminView)
+class BaseSetting:
+	enable_themes = True
+	use_bootswatch = True
 
 
 @sites.register(Bookkeeping)
