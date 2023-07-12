@@ -50,6 +50,7 @@ XADMIN_FOOTER_TITLE = 'irpf'
 XADMIN_DEFAULT_GROUP = 'investor'
 
 # Application definition
+CRISPY_ALLOWED_TEMPLATE_PACKS = CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -60,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
+    'crispy_bootstrap4',
     'reversion',
     'xadmin',
     'irpf',
