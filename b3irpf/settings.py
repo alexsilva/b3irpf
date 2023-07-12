@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'reversion',
     'xadmin',
+    'moneyfield',
     'irpf',
     'guardian',
     'assetprice'
