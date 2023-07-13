@@ -25,7 +25,7 @@
           <div class="col-sm-4 text-center text-sm-right btn btn-link" data-toggle="popover"
                data-content="{{ bonus.event.value }}">
             <span class="text-muted">
-              {{ bonus.event.quantity|smart_desc }} ativo{{ bonus.event.quantity|pluralize }}, R$ {{ bonus.event.value|moneyformat }}
+              {{ bonus.event.quantity|smart_desc }} ativo{{ bonus.event.quantity|pluralize }}, {{ bonus.event.value }}
             </span>
           </div>
         </div>

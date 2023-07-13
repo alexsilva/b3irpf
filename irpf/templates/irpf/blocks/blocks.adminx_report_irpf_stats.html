@@ -10,7 +10,7 @@
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-primary">Compras do período</div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">R$ {{ report.stats.buy|moneyformat }}</span>
+          <span class="text-muted">{{ report.stats.buy }}</span>
         </div>
       </div>
     </li>
@@ -20,7 +20,7 @@
       <div class="row">
         <div class="col-sm-8 text-secondary text-center text-sm-left">Vendas do período</div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">R$ {{ report.stats.sell|moneyformat }}</span>
+          <span class="text-muted">{{ report.stats.sell }}</span>
         </div>
       </div>
     </li>
@@ -32,7 +32,7 @@
           Ganho de capital
         </div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">R$ {{ report.stats.capital|moneyformat }}</span>
+          <span class="text-muted">{{ report.stats.capital }}</span>
         </div>
       </div>
     </li>
@@ -42,7 +42,7 @@
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-info">Taxas</div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">R$ {{ report.stats.tax|moneyformat }}</span>
+          <span class="text-muted">{{ report.stats.tax }}</span>
         </div>
       </div>
     </li>
@@ -52,7 +52,7 @@
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-muted">Patrimônio investido</div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">R$ {{ report.stats.patrimony|moneyformat }}</span>
+          <span class="text-muted">{{ report.stats.patrimony }}</span>
         </div>
       </div>
     </li>
