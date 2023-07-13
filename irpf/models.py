@@ -284,10 +284,12 @@ class Earnings(BaseIRPFModel):
 	name.sheet_header = "Produto"
 	institution.sheet_header = "Instituição"
 	quantity.sheet_header = "Quantidade"
-	total.sheet_header = "Valor da Operação"
+	total.amount_field.sheet_header = "Valor da Operação"
 
 	@staticmethod
 	def _convert_decimal(value, *args):
+		if (value := value.strip()) == "-" and args:
+			return args[0]
 		try:
 			value = Decimal(value.replace(',', '.'))
 		except (decimal.InvalidOperation, ValueError) as exc:
@@ -300,7 +302,7 @@ class Earnings(BaseIRPFModel):
 	@classmethod
 	def import_before_save_data(cls, **data):
 		opts = cls._meta
-		total = data['total']
+		total = data.get('total')
 		if isinstance(total, str):
 			data['total'] = cls._convert_decimal(total, Decimal(0))
 		try:
