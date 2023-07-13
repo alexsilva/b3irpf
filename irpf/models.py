@@ -286,9 +286,23 @@ class Earnings(BaseIRPFModel):
 	quantity.sheet_header = "Quantidade"
 	total.sheet_header = "Valor da Operação"
 
+	@staticmethod
+	def _convert_decimal(value, *args):
+		try:
+			value = Decimal(value.replace(',', '.'))
+		except (decimal.InvalidOperation, ValueError) as exc:
+			if args:
+				value = args[0]
+			else:
+				raise exc
+		return value
+
 	@classmethod
 	def import_before_save_data(cls, **data):
 		opts = cls._meta
+		total = data['total']
+		if isinstance(total, str):
+			data['total'] = cls._convert_decimal(total, Decimal(0))
 		try:
 			ticker = opts.get_field("code").to_python(data['code'])
 			data['asset'] = Asset.objects.get(code__iexact=ticker)
