@@ -14,6 +14,7 @@ class MoneyField(moneyfield.MoneyField):
 	"""Cria um campo moneyfield sem o proxy field_amount e currency fixo"""
 	def __init__(self, *args, **kwargs):
 		kwargs.setdefault("amount_proxy", False)
+		kwargs.setdefault('amount_default', Decimal(0))
 		kwargs.setdefault('currency', 'BRL')
 		super().__init__(*args, **kwargs)
 

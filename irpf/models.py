@@ -1,5 +1,6 @@
 import decimal
 from decimal import Decimal
+
 from django.conf import settings
 from django.db import models
 from django.utils.formats import number_format, date_format
@@ -221,10 +222,9 @@ class Bonus(BaseIRPFModel):
 	data_com = DateField(verbose_name="Data com")
 	date_ex = DateField(verbose_name="Data ex")
 	date = DateField(verbose_name="Data de incorporação")
-	base_value = models.DecimalField(verbose_name="Valor de base",
-	                                 max_digits=DECIMAL_MAX_DIGITS,
-	                                 decimal_places=DECIMAL_PLACES,
-	                                 default=Decimal(0))
+	base_value = MoneyField(verbose_name="Valor de base",
+	                        max_digits=DECIMAL_MAX_DIGITS,
+	                        decimal_places=DECIMAL_PLACES)
 	proportion = models.DecimalField(verbose_name="Proporção",
 	                                 max_digits=6,
 	                                 decimal_places=2,
@@ -330,46 +330,36 @@ class BrokerageNote(BaseIRPFModel):
 	                                verbose_name="Corretora",
 	                                help_text="A corretora que gerou essa nota.")
 	reference_date = models.DateField(verbose_name="Data do pregão", null=True)
-	settlement_fee = models.DecimalField(verbose_name="Taxa de liquidação",
-	                                     max_digits=DECIMAL_MAX_DIGITS,
-	                                     decimal_places=4,
-	                                     default=Decimal(0))
-	registration_fee = models.DecimalField(verbose_name="Taxa de registro",
-	                                       max_digits=DECIMAL_MAX_DIGITS,
-	                                       decimal_places=4,
-	                                       default=Decimal(0))
-	term_fee = models.DecimalField(verbose_name="Taxa de termo/opções",
-	                               max_digits=DECIMAL_MAX_DIGITS,
-	                               decimal_places=4,
-	                               default=Decimal(0))
-	ana_fee = models.DecimalField(verbose_name="Taxa A.N.A",
-	                              max_digits=DECIMAL_MAX_DIGITS,
-	                              decimal_places=4,
-	                              default=Decimal(0))
-	emoluments = models.DecimalField(verbose_name="Emolumentos",
-	                                 max_digits=DECIMAL_MAX_DIGITS,
-	                                 decimal_places=4,
-	                                 default=Decimal(0))
-	operational_fee = models.DecimalField(verbose_name="Taxa Operacional",
-	                                      max_digits=DECIMAL_MAX_DIGITS,
-	                                      decimal_places=4,
-	                                      default=Decimal(0))
-	execution = models.DecimalField(verbose_name="Execução",
-	                                max_digits=DECIMAL_MAX_DIGITS,
-	                                decimal_places=4,
-	                                default=Decimal(0))
-	custody_fee = models.DecimalField(verbose_name="Taxa de custódia",
-	                                  max_digits=DECIMAL_MAX_DIGITS,
-	                                  decimal_places=4,
-	                                  default=Decimal(0))
-	taxes = models.DecimalField(verbose_name="Impostos",
+	settlement_fee = MoneyField(verbose_name="Taxa de liquidação",
 	                            max_digits=DECIMAL_MAX_DIGITS,
-	                            decimal_places=4,
-	                            default=Decimal(0))
-	others = models.DecimalField(verbose_name="Outros",
+	                            decimal_places=2)
+	registration_fee = MoneyField(verbose_name="Taxa de registro",
+	                              max_digits=DECIMAL_MAX_DIGITS,
+	                              decimal_places=2)
+	term_fee = MoneyField(verbose_name="Taxa de termo/opções",
+	                      max_digits=DECIMAL_MAX_DIGITS,
+	                      decimal_places=2)
+	ana_fee = MoneyField(verbose_name="Taxa A.N.A",
+	                     max_digits=DECIMAL_MAX_DIGITS,
+	                     decimal_places=2)
+	emoluments = MoneyField(verbose_name="Emolumentos",
+	                        max_digits=DECIMAL_MAX_DIGITS,
+	                        decimal_places=2)
+	operational_fee = MoneyField(verbose_name="Taxa Operacional",
 	                             max_digits=DECIMAL_MAX_DIGITS,
-	                             decimal_places=4,
-	                             default=Decimal(0))
+	                             decimal_places=2)
+	execution = MoneyField(verbose_name="Execução",
+	                       max_digits=DECIMAL_MAX_DIGITS,
+	                       decimal_places=2)
+	custody_fee = MoneyField(verbose_name="Taxa de custódia",
+	                         max_digits=DECIMAL_MAX_DIGITS,
+	                         decimal_places=2)
+	taxes = MoneyField(verbose_name="Impostos",
+	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   decimal_places=2)
+	others = MoneyField(verbose_name="Outros",
+	                    max_digits=DECIMAL_MAX_DIGITS,
+	                    decimal_places=2)
 
 	def __str__(self):
 		return f"{self.note} / {self.institution.name}"
@@ -437,18 +427,15 @@ class Position(BaseIRPFModel):
 	                               max_digits=19,
 	                               decimal_places=2,
 	                               default=Decimal(0))
-	avg_price = models.DecimalField(verbose_name="Preço médio",
-	                                max_digits=DECIMAL_MAX_DIGITS,
-	                                decimal_places=DECIMAL_PLACES,
-	                                default=Decimal(0))
-	total = models.DecimalField(verbose_name="Valor total",
-	                            max_digits=DECIMAL_MAX_DIGITS,
-	                            decimal_places=DECIMAL_PLACES,
-	                            default=Decimal(0))
-	tax = models.DecimalField(verbose_name="Taxas",
-	                          max_digits=DECIMAL_MAX_DIGITS,
-	                          decimal_places=DECIMAL_PLACES,
-	                          default=Decimal(0))
+	avg_price = MoneyField(verbose_name="Preço médio",
+	                       max_digits=DECIMAL_MAX_DIGITS,
+	                       decimal_places=DECIMAL_PLACES)
+	total = MoneyField(verbose_name="Valor total",
+	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   decimal_places=DECIMAL_PLACES)
+	tax = MoneyField(verbose_name="Taxas",
+	                 max_digits=DECIMAL_MAX_DIGITS,
+	                 decimal_places=DECIMAL_PLACES)
 	consolidation = models.PositiveIntegerField(verbose_name="Consolidação",
 	                                            choices=CONSOLIDATION_CHOICES,
 	                                            default=CONSOLIDATION_YEARLY)
@@ -482,10 +469,9 @@ class Taxes(BaseIRPFModel):
 		(15, "15%"),
 		(20, "20%")
 	]
-	total = models.DecimalField(verbose_name="Valor bruto",
-	                            max_digits=DECIMAL_MAX_DIGITS,
-	                            decimal_places=2,
-	                            default=Decimal(0))
+	total = MoneyField(verbose_name="Valor bruto",
+	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   decimal_places=2)
 
 	category = models.IntegerField(verbose_name="Categoria",
 	                               help_text="Categoria de ativo para cálculo do imposto.",
