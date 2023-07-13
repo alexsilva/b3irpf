@@ -7,7 +7,7 @@ from django.utils.formats import number_format, date_format
 from django.utils.functional import cached_property, classproperty
 from django.utils.text import slugify
 
-from irpf.fields import CharCodeField, DateField, CharCodeNameField, DecimalZeroField, DecimalBRField, MoneyField
+from irpf.fields import CharCodeField, DateField, CharCodeNameField, DecimalBRField, MoneyField
 from irpf.storage import FileSystemOverwriteStorage
 
 DECIMAL_MAX_DIGITS = 28
@@ -273,10 +273,9 @@ class Earnings(BaseIRPFModel):
 	                          max_digits=19,
 	                          decimal_places=2,
 	                          default=Decimal(0))
-	total = DecimalZeroField(verbose_name="Valor da operação",
-	                         max_digits=DECIMAL_MAX_DIGITS,
-	                         decimal_places=DECIMAL_PLACES,
-	                         default=Decimal(0))
+	total = MoneyField(verbose_name="Valor da operação",
+	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   decimal_places=DECIMAL_PLACES)
 
 	date.sheet_header = "Data"
 	flow.sheet_header = "Entrada/Saída"
@@ -312,7 +311,7 @@ class Earnings(BaseIRPFModel):
 		return self.flow.lower() == self.FLOW_DEBIT.lower()
 
 	def __str__(self):
-		return f'{self.code} - {self.name} - R${self.total}'
+		return f'{self.code} - {self.name} - {self.total}'
 
 	class Meta:
 		verbose_name = "Provento"
@@ -497,9 +496,8 @@ class Taxes(BaseIRPFModel):
 		return self.total * (self.tax / decimal.Decimal(100))
 
 	def __str__(self):
-		total = number_format(self.total, 2)
 		paid = "pago" if self.paid else "devendo"
-		return f"R$ {total} - {self.tax}% - {paid}"
+		return f"{self.total} - {self.tax}% - {paid}"
 
 	class Meta:
 		verbose_name = "Imposto"

@@ -10,7 +10,7 @@
     <div class="col-sm-4 text-center text-nowrap">{% get_obj_val event "title" %}</div>
     <div class="col-sm-4 text-center text-sm-right">
       {% get_obj_val event "value" as event_value %}
-      <span class="text-muted">R$ {{ event_value|moneyformat }}</span>
+      <span class="text-muted">{{ event_value }}</span>
     </div>
   </div>
 </li>
