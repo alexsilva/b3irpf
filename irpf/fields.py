@@ -3,10 +3,25 @@ import decimal
 import datetime
 import re
 from decimal import Decimal
-
+import moneyfield
+import moneyfield.fields
 from django.db import models
 
 from correpy.domain.entities.security import BDR_TICKER_PATTERN
+
+
+class MoneyField(moneyfield.MoneyField):
+	"""Cria um campo moneyfield sem o proxy field_amount e currency fixo"""
+	def __init__(self, *args, **kwargs):
+		kwargs.setdefault("amount_proxy", False)
+		kwargs.setdefault('currency', 'BRL')
+		super().__init__(*args, **kwargs)
+
+	def formfield(self, **kwargs):
+		field = super().formfield(**kwargs)
+		if isinstance(field.widget, moneyfield.fields.MoneyWidget):
+			field.widget.template_name = "irpf/widgets/money_widget.html"
+		return field
 
 
 class DateField(models.DateField):

@@ -1,0 +1,9 @@
+{% load irpf_tags %}
+<div class="input-group">
+  <div class="input-group-prepend">
+      {% get_index widget.subwidgets 1 as subwidget %}
+      {% spaceless %}{% include subwidget.template_name with widget=subwidget %}{% endspaceless %}
+  </div>
+  {% get_index widget.subwidgets 0 as subwidget %}
+  {% spaceless %}{% include subwidget.template_name with widget=subwidget %}{% endspaceless %}
+</div>
