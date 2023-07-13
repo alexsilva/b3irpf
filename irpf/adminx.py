@@ -157,6 +157,7 @@ class PositionAdmin(BaseIRPFAdmin):
 
 
 class NegotiationInline:
+	form = MoneyModelForm
 	model = Negotiation
 	style = "accordion"
 	extra = 0
