@@ -6,8 +6,7 @@ from django.utils.formats import number_format, date_format
 from django.utils.functional import cached_property, classproperty
 from django.utils.text import slugify
 
-from irpf.fields import CharCodeField, DateField, CharCodeNameField, FloatZeroField, FloatBRField, DateNoneField, \
-	DecimalZeroField, DecimalBRField
+from irpf.fields import CharCodeField, DateField, CharCodeNameField, DecimalZeroField, DecimalBRField, MoneyField
 from irpf.storage import FileSystemOverwriteStorage
 
 DECIMAL_MAX_DIGITS = 28
@@ -67,10 +66,10 @@ class Asset(models.Model):
 	                                null=True, blank=False)
 
 	administrator = models.ForeignKey(FoundsAdministrator,
-	                                 verbose_name="Administrador",
-	                                 help_text="Aquele que administra esse ativo.",
-	                                 on_delete=models.SET_NULL,
-	                                 null=True, blank=True)
+	                                  verbose_name="Administrador",
+	                                  help_text="Aquele que administra esse ativo.",
+	                                  on_delete=models.SET_NULL,
+	                                  null=True, blank=True)
 
 	@cached_property
 	def category_choices(self) -> dict:
@@ -151,24 +150,25 @@ class Negotiation(BaseIRPFModel):
 	                               max_digits=19,
 	                               decimal_places=2)
 
-	price = models.DecimalField(verbose_name="Preço",
-	                            max_digits=DECIMAL_MAX_DIGITS,
-	                            decimal_places=DECIMAL_PLACES,
-	                            default=Decimal(0))
-	total = models.DecimalField(verbose_name="Valor (total)",
-	                            max_digits=DECIMAL_MAX_DIGITS,
-	                            decimal_places=DECIMAL_PLACES,
-	                            default=Decimal(0))
+	price = MoneyField(verbose_name="Preço",
+	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   decimal_places=DECIMAL_PLACES,
+	                   amount_default=Decimal(0))
 
-	tax = models.DecimalField(verbose_name="Taxas",
-	                          max_digits=DECIMAL_MAX_DIGITS,
-	                          decimal_places=DECIMAL_PLACES,
-	                          default=Decimal(0))
-	irrf = models.DecimalField(verbose_name="IRRF",
-	                           max_digits=DECIMAL_MAX_DIGITS,
-	                           decimal_places=DECIMAL_PLACES,
-	                           default=Decimal(0),
-	                           help_text="Imposto que pode ter sido retido na fonte")
+	total = MoneyField(verbose_name="Valor (total)",
+	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   decimal_places=DECIMAL_PLACES,
+	                   amount_default=Decimal(0))
+
+	tax = MoneyField(verbose_name="Taxas",
+	                 max_digits=DECIMAL_MAX_DIGITS,
+	                 decimal_places=DECIMAL_PLACES,
+	                 amount_default=Decimal(0))
+	irrf = MoneyField(verbose_name="IRRF",
+	                  max_digits=DECIMAL_MAX_DIGITS,
+	                  decimal_places=DECIMAL_PLACES,
+	                  amount_default=Decimal(0),
+	                  help_text="Imposto que pode ter sido retido na fonte")
 
 	brokerage_note = models.ForeignKey("BrokerageNote",
 	                                   on_delete=models.SET_NULL,
