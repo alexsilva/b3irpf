@@ -19,7 +19,7 @@ class MonthWidget(Select):
 		# Obtenha os nomes dos meses em uma lista
 		months = list(calendar.month_name)[1:]
 		# Crie uma lista de tuplas (valor, rótulo) para usar como choices
-		choices = [(index, month) for index, month in enumerate(months, start=1)]
+		choices = [(index, month.capitalize()) for index, month in enumerate(months, start=1)]
 		return choices
 
 
