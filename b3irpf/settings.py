@@ -14,6 +14,7 @@ import sys
 import environ
 import os.path
 from pathlib import Path
+import locale
 
 from b3irpf.utils import SecretKey
 
@@ -26,6 +27,8 @@ ENV = env = environ.Env(
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, 'irpf.env'))
+
+locale.setlocale(locale.LC_ALL, "pt_BR")
 
 PYTHON_IO_ENCODING = ENV.str('PYTHON_IO_ENCODING', default="utf-8")
 
