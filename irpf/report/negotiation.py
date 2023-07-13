@@ -246,6 +246,8 @@ class NegotiationReport(BaseReport):
 		options.setdefault('consolidation', self.position_model.CONSOLIDATION_YEARLY)
 		options.setdefault('categories', ())
 		qs_options = self.get_common_qs_options(**options)
+		qs_options['date__gte'] = date_start
+		qs_options['date__lte'] = date_end
 		if asset_obj := qs_options.pop('asset', None):  # Permite filtrar por empresa (ativo)
 			qs_options['code__iexact'] = asset_obj.code
 		if institution := options.get('institution'):
