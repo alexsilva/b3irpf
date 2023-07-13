@@ -35,3 +35,9 @@ def exclude_obj_keys(obj, *keys):
 @register.simple_tag
 def get_obj_val(obj, name):
 	return getattr(obj, name)
+
+
+@register.simple_tag
+def get_index(obj, index: int):
+	"""retorna o valor apontado pelo index do objeto"""
+	return obj[index]
