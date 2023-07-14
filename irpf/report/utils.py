@@ -3,6 +3,15 @@ import datetime
 import decimal
 from collections import OrderedDict
 from decimal import Decimal
+import moneyfield.fields
+
+
+class MoneyLC(moneyfield.fields.MoneyLC):
+	"""Default BRL Currency"""
+	def __init__(self, amount, currency=None):
+		if currency is None:
+			currency = 'BRL'
+		super().__init__(amount=amount, currency=currency)
 
 
 def as_int_desc(value) -> Decimal:
@@ -25,7 +34,7 @@ def smart_desc(value) -> Decimal:
 class Event:
 	def __init__(self, title: str,
 	             quantity: Decimal = Decimal(0),
-	             value: Decimal = Decimal(0)):
+	             value: MoneyLC = MoneyLC(0)):
 		self.title = title
 		self.quantity = quantity
 		self.value = value
@@ -37,10 +46,10 @@ class Event:
 
 class Stats:
 	def __init__(self, buy: Decimal = Decimal(0),
-	             sell: Decimal = Decimal(0),
-	             capital: Decimal = Decimal(0),
-	             patrimony: Decimal = Decimal(0),
-	             tax: Decimal = Decimal(0),
+	             sell: MoneyLC = MoneyLC(0),
+	             capital: MoneyLC = MoneyLC(0),
+	             patrimony: MoneyLC = MoneyLC(0),
+	             tax: MoneyLC = MoneyLC(0),
 	             bonus: Event = None):
 		self.buy = buy
 		self.capital = capital
@@ -66,8 +75,8 @@ class Buy:
 	"""Compas"""
 
 	def __init__(self, quantity: Decimal = Decimal(0),
-	             total: Decimal = Decimal(0),
-	             tax: Decimal = Decimal(0),
+	             total: MoneyLC = MoneyLC(0),
+	             tax: MoneyLC = MoneyLC(0),
 	             date: datetime.date = None):
 		self.quantity = quantity
 		self.total = total
@@ -81,7 +90,7 @@ class Buy:
 		if quantity > 0:
 			avg_price = self.total / quantity
 		else:
-			avg_price = Decimal(0)
+			avg_price = MoneyLC(0)
 		return avg_price
 
 	@property
@@ -98,7 +107,7 @@ class Buy:
 class SellFrac:
 	"""Frações vendidas"""
 	def __init__(self, quantity: Decimal = Decimal(0),
-	             total: Decimal = Decimal(0)):
+	             total: MoneyLC = MoneyLC(0)):
 		self.quantity = quantity
 		self.total = total
 
@@ -107,9 +116,9 @@ class Sell:
 	"""Vendas"""
 
 	def __init__(self, quantity: Decimal = Decimal(0),
-	             total: Decimal = Decimal(0),
-	             capital: Decimal = Decimal(0),
-	             tax: Decimal = Decimal(0),
+	             total: MoneyLC = MoneyLC(0),
+	             capital: MoneyLC = MoneyLC(0),
+	             tax: MoneyLC = MoneyLC(0),
 	             date: datetime.date = None):
 		self.quantity = quantity
 		self.capital = capital
@@ -125,7 +134,7 @@ class Sell:
 		if quantity > 0:
 			avg_price = (self.total - self.tax) / quantity
 		else:
-			avg_price = Decimal(0)
+			avg_price = MoneyLC(0)
 		return avg_price
 
 	def __bool__(self):
@@ -136,8 +145,8 @@ class Period:
 	"""Compas menos vendas no intervalo de tempo"""
 
 	def __init__(self, quantity: Decimal = Decimal(0),
-	             total: Decimal = Decimal(0),
-	             tax: Decimal = Decimal(0),
+	             total: MoneyLC = MoneyLC(0),
+	             tax: MoneyLC = MoneyLC(0),
 	             position=None):
 		self.quantity = quantity
 		self.position = position
@@ -150,7 +159,7 @@ class Period:
 		if quantity > 0:
 			avg_price = self.total / quantity
 		else:
-			avg_price = Decimal(0)
+			avg_price = MoneyLC(0)
 		return avg_price
 
 
