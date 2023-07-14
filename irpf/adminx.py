@@ -14,6 +14,7 @@ from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from irpf.views.xlsx_viewer import AdminXlsxViewer
 from moneyfield import MoneyModelForm
+from irpf.themes import themes
 
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
 site.register_view("^irpf/report/(?P<model_app_label>.+)/$", AdminReportIrpfModelView, "reportirpf")
@@ -35,7 +36,8 @@ def _get_field_opts(name, model):
 @sites.register(BaseAdminView)
 class BaseSetting:
 	enable_themes = True
-	use_bootswatch = True
+	user_themes = themes
+	use_bootswatch = False
 
 
 @sites.register(Bookkeeping)
