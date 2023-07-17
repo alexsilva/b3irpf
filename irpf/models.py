@@ -121,7 +121,28 @@ class BaseIRPFModel(models.Model):
 		abstract = True
 
 
-class Negotiation(BaseIRPFModel):
+class ImportModelMixin:
+
+	@staticmethod
+	def _convert_decimal(value, *args):
+		if value is None:
+			return args[0] if args else value
+		if isinstance(value, (int, float)):
+			return Decimal(value)
+		elif (value := value.strip()) == "-":
+			return args[0] if args else None
+		else:
+			try:
+				value = Decimal(value.replace(',', '.'))
+			except (decimal.InvalidOperation, ValueError) as exc:
+				if args:
+					value = args[0]
+				else:
+					raise exc
+		return value
+
+
+class Negotiation(ImportModelMixin, BaseIRPFModel):
 	"""Data do Negócio / Tipo de Movimentação / Mercado / Prazo/Vencimento / Instituição /
 	Código de Negociação / Quantidade / Preço / Valor"""
 	report_class = "irpf.report.NegotiationReport"
@@ -183,12 +204,14 @@ class Negotiation(BaseIRPFModel):
 	institution.sheet_header = "Instituição"
 	code.sheet_header = "Código de Negociação"
 	quantity.sheet_header = "Quantidade"
-	price.sheet_header = "Preço"
-	total.sheet_header = "Valor"
+	price.amount_field.sheet_header = "Preço"
+	total.amount_field.sheet_header = "Valor"
 
 	@classmethod
 	def import_before_save_data(cls, **data):
 		opts = cls._meta
+		data['price'] = cls._convert_decimal(data.get('price'), Decimal(0))
+		data['total'] = cls._convert_decimal(data.get('total'), Decimal(0))
 		try:
 			ticker = opts.get_field("code").to_python(data['code'])
 			data['asset'] = Asset.objects.get(code__iexact=ticker)
@@ -246,7 +269,7 @@ class Bonus(BaseIRPFModel):
 		ordering = ("date",)
 
 
-class Earnings(BaseIRPFModel):
+class Earnings(ImportModelMixin, BaseIRPFModel):
 	report_class = "irpf.report.EarningsReport"
 	BONIFICAO_EM_ATIVOS = "bonificacao_em_ativos"
 	LEILAO_DE_FRACAO = "leilao_de_fracao"
@@ -286,25 +309,10 @@ class Earnings(BaseIRPFModel):
 	quantity.sheet_header = "Quantidade"
 	total.amount_field.sheet_header = "Valor da Operação"
 
-	@staticmethod
-	def _convert_decimal(value, *args):
-		if (value := value.strip()) == "-" and args:
-			return args[0]
-		try:
-			value = Decimal(value.replace(',', '.'))
-		except (decimal.InvalidOperation, ValueError) as exc:
-			if args:
-				value = args[0]
-			else:
-				raise exc
-		return value
-
 	@classmethod
 	def import_before_save_data(cls, **data):
 		opts = cls._meta
-		total = data.get('total')
-		if isinstance(total, str):
-			data['total'] = cls._convert_decimal(total, Decimal(0))
+		data['total'] = cls._convert_decimal(data.get('total'), Decimal(0))
 		try:
 			ticker = opts.get_field("code").to_python(data['code'])
 			data['asset'] = Asset.objects.get(code__iexact=ticker)
