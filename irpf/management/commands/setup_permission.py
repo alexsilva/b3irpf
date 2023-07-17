@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Group, Permission, ContentType
 from django.core.management.base import BaseCommand
+from assetprice.models import AssetEarningHistory
 
 from irpf.models import (
 	Bookkeeping,
@@ -24,6 +25,7 @@ class Command(BaseCommand):
 	permission_names_all = ('view', 'add', 'change', 'delete')
 
 	permissions_models = {
+		AssetEarningHistory: permission_names_all,
 		Bookkeeping: ('view', 'add'),
 		FoundsAdministrator: ('view', 'add'),
 		Asset: ('view', 'add', 'change'),
