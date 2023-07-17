@@ -165,6 +165,8 @@ class AdminReportIrpfModelView(AdminFormView):
 		context = super().get_context_data(**kwargs)
 		if self.report and self.results:
 			context['report'] = {
+				'start_date': self.start_date,
+				'end_date': self.end_date,
 				'report': self.report,
 				'results': self.results
 			}
