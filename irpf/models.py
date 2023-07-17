@@ -127,7 +127,7 @@ class ImportModelMixin:
 	def _convert_decimal(value, *args):
 		if value is None:
 			return args[0] if args else value
-		if isinstance(value, (int, float)):
+		if isinstance(value, (float, int)):
 			return Decimal(value)
 		elif (value := value.strip()) == "-":
 			return args[0] if args else None
