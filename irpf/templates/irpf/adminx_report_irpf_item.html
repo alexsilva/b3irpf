@@ -33,7 +33,7 @@
         {% include "irpf/adminx_report_irpf_asset_sell.html" with card_title="Vendas do período" card_title_class="text-danger"%}
       {% endif %}
 
-      {% include "irpf/adminx_report_irpf_asset_period.html" with card_title="Posição do período" card_title_class="text-success"%}
+      {% include "irpf/adminx_report_irpf_asset_period.html" with card_title="Posição do período" card_subtitle=report.end_date card_title_class="text-success"%}
 
       {% if item.asset.credit or item.asset.debit %}
         {% include "irpf/adminx_report_irpf_asset_movement.html" with card_title="Movimentações" card_title_class="text-info"%}
