@@ -100,7 +100,7 @@ class Buy:
 		if quantity > 0:
 			avg_tax = self.tax / quantity
 		else:
-			avg_tax = Decimal(0)
+			avg_tax = MoneyLC(0)
 		return avg_tax
 
 
