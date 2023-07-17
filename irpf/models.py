@@ -170,7 +170,7 @@ class Negotiation(ImportModelMixin, BaseIRPFModel):
 
 	quantity = models.DecimalField(verbose_name="Quantidade",
 	                               max_digits=19,
-	                               decimal_places=2)
+	                               decimal_places=0)
 
 	price = MoneyField(verbose_name="Preço",
 	                   max_digits=DECIMAL_MAX_DIGITS,
@@ -448,7 +448,7 @@ class Position(BaseIRPFModel):
 	                                blank=True, null=True)
 	quantity = models.DecimalField(verbose_name="Quantidade",
 	                               max_digits=19,
-	                               decimal_places=2,
+	                               decimal_places=0,
 	                               default=Decimal(0))
 	avg_price = MoneyField(verbose_name="Preço médio",
 	                       max_digits=DECIMAL_MAX_DIGITS,
