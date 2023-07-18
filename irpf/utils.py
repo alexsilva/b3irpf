@@ -33,7 +33,7 @@ class MonthYearDates:
 
 	def get_month_interval(self, dt: date = None):
 		"""dt: limite date"""
-		if dt and self.year > dt.year and self.month > dt.month:
+		if dt and self.year >= dt.year and self.month > dt.month:
 			start = date.min.replace(year=dt.year, month=dt.month)
 			max_day = calendar.monthrange(start.year, start.month)[1]
 			end = date(year=dt.year, month=dt.month, day=max_day)
