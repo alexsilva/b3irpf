@@ -27,9 +27,10 @@ ENV = env = environ.Env(
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, 'irpf.env'))
-
-locale.setlocale(locale.LC_ALL, "pt_BR")
-
+try:
+    locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
+except locale.Error:
+    ...
 PYTHON_IO_ENCODING = ENV.str('PYTHON_IO_ENCODING', default="utf-8")
 
 sys.stderr.reconfigure(encoding=PYTHON_IO_ENCODING)
