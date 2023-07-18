@@ -1,5 +1,5 @@
 import calendar
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 from typing import Sequence
 
 
@@ -10,13 +10,18 @@ class MonthYearDates:
 
 	@property
 	def year_interval(self):
-		now = datetime.now()
 		start = date.min.replace(year=self.year)
-		if self.year == now.year and now.month < 12:
-			max_day = calendar.monthrange(self.year, now.month)[1]
-			end = date(year=self.year, month=now.month, day=max_day)
+		end = date.max.replace(year=start.year)
+		return start, end
+
+	def get_year_interval(self, dt: date = None):
+		"""dt: limite date"""
+		if dt and self.year >= dt.year and dt.month < 12:
+			start = date.min.replace(year=dt.year)
+			max_day = calendar.monthrange(dt.year, dt.month)[1]
+			end = date(year=dt.year, month=dt.month, day=max_day)
 		else:
-			end = date.max.replace(year=start.year)
+			start, end = self.year_interval
 		return start, end
 
 	@property
@@ -24,6 +29,16 @@ class MonthYearDates:
 		start = date.min.replace(year=self.year, month=self.month)
 		max_day = calendar.monthrange(start.year, start.month)[1]
 		end = date(year=self.year, month=self.month, day=max_day)
+		return start, end
+
+	def get_month_interval(self, dt: date = None):
+		"""dt: limite date"""
+		if dt and self.year > dt.year and self.month > dt.month:
+			start = date.min.replace(year=dt.year, month=dt.month)
+			max_day = calendar.monthrange(start.year, start.month)[1]
+			end = date(year=dt.year, month=dt.month, day=max_day)
+		else:
+			start, end = self.month_interval
 		return start, end
 
 
