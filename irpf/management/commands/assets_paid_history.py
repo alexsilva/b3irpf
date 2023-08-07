@@ -8,6 +8,7 @@ class Command(paid_history.Command):
 	help = "Armazena o histórico de dividendos dos ativos cadastrados"
 
 	def add_arguments(self, parser):
+		super().add_arguments(parser)
 		parser.add_argument('-nc', '--nocache', action="store_true")
 
 	def handle(self, *args, **options):
