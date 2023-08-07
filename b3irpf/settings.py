@@ -56,6 +56,9 @@ XADMIN_DEFAULT_GROUP = 'investor'
 # Application definition
 CRISPY_ALLOWED_TEMPLATE_PACKS = CRISPY_TEMPLATE_PACK = "bootstrap4"
 
+# assetprice option
+SELENIUM_CHROME_EXECUTABLE_PATH = ENV.path("SELENIUM_CHROME_EXECUTABLE_PATH", default=None)
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
