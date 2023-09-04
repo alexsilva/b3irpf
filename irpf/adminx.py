@@ -1,13 +1,11 @@
 from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from django.contrib.auth import get_permission_codename
 from django.core.management import call_command
-from django.utils.formats import number_format
-
 from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
 
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
-	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes
+	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin
 from irpf.views.import_list import AdminImportListModelView
@@ -226,6 +224,20 @@ class BonusAdmin(BaseIRPFAdmin):
 	list_display = (
 		'asset',
 		'base_value',
+		'proportion'
+	)
+
+
+@sites.register(Subscription)
+class SubscriptionAdmin(BaseIRPFAdmin):
+	search_fields = (
+		'asset__code',
+		'asset__name'
+	)
+	list_filter = ("date", "asset")
+	list_display = (
+		'asset',
+		'price',
 		'proportion'
 	)
 
