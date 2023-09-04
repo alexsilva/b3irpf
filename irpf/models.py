@@ -103,7 +103,7 @@ class Institution(models.Model):
 	cnpj = models.CharField(verbose_name="CNPJ", max_length=32)
 
 	def __str__(self):
-		return f"{self.name} - {self.cnpj}"
+		return f"{self.name[:2].upper()} - {self.cnpj}"
 
 	class Meta:
 		verbose_name = "Corretora"
