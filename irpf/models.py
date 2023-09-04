@@ -345,7 +345,7 @@ class Earnings(ImportModelMixin, BaseIRPFModel):
 
 class BrokerageNote(BaseIRPFModel):
 	"""Modelo de notas de corretagem"""
-	note = models.FileField(verbose_name='Nota de corretagem (PDF)',
+	note = models.FileField(verbose_name='Nota de negociação (PDF)',
 	                        upload_to='notes',
 	                        storage=FileSystemOverwriteStorage())
 	institution = models.ForeignKey(Institution,
@@ -388,8 +388,8 @@ class BrokerageNote(BaseIRPFModel):
 		return f"{self.note} / {self.institution.name}"
 
 	class Meta:
-		verbose_name = "Nota de corretagem"
-		verbose_name_plural = "Notas de corretagem"
+		verbose_name = "Nota de negociação"
+		verbose_name_plural = "Notas de negociação"
 		ordering = ('-reference_date',)
 
 
