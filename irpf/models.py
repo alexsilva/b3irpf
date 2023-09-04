@@ -314,8 +314,8 @@ class Subscription(BaseIRPFModel):
 	                   decimal_places=DECIMAL_PLACES)
 
 	proportion = models.DecimalField(verbose_name="Proporção",
-	                                 max_digits=6,
-	                                 decimal_places=2,
+	                                 max_digits=15,
+	                                 decimal_places=12,
 	                                 default=Decimal(0),
 	                                 help_text="valor expresso em porcentagem.")
 	active = models.BooleanField(verbose_name="Incorporada", default=False,
