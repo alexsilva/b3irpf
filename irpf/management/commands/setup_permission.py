@@ -15,7 +15,8 @@ from irpf.models import (
 	BrokerageNote,
 	AssetEvent,
 	Position,
-	Taxes
+	Taxes,
+	Subscription
 )
 
 
@@ -32,6 +33,7 @@ class Command(BaseCommand):
 		Institution: ('view', 'add', 'change'),
 		Negotiation: permission_names_all,
 		Bonus: permission_names_all,
+		Subscription: permission_names_all,
 		Earnings: permission_names_all,
 		BrokerageNote: permission_names_all,
 		AssetEvent: permission_names_all,
