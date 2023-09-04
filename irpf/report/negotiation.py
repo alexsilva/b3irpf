@@ -2,7 +2,7 @@ import calendar
 import copy
 import datetime
 from decimal import Decimal
-from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent
+from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription
 from irpf.report.base import BaseReport
 from irpf.report.utils import Event, Assets, Buy
 from irpf.utils import range_dates
@@ -13,6 +13,7 @@ class NegotiationReport(BaseReport):
 	earnings_model = Earnings
 	position_model = Position
 	event_model = AssetEvent
+	subscription_model = Subscription
 	bonus_model = Bonus
 
 	def __init__(self, model, user, **options):
@@ -74,6 +75,40 @@ class NegotiationReport(BaseReport):
 			# rebalanceando a carteira
 			asset.buy.quantity += bonus_base_quantity
 			asset.buy.total += bonus_value
+
+	def add_subscription(self, date, assets, **options):
+		"""Adiciona subscrições ativas para compor a nova quantidade e preço"""
+		qs_options = self.get_common_qs_options(**options)
+		queryset = self.subscription_model.objects.filter(date=date, **qs_options)
+		for subscription in queryset:
+			try:
+				asset = assets[subscription.asset.code]
+			except KeyError:
+				continue
+			# ignora os registros que já foram contabilizados na posição
+			if asset.is_position_interval(subscription.date):
+				continue
+
+			# valor quantidade e valores recebidos de bonificação
+			subscription_quantity = asset.buy.quantity * (subscription.proportion / 100)
+			if (subscription_base_quantity := int(subscription_quantity)) > 0:
+				try:
+					subscription_event = asset.events['subscription']
+				except KeyError:
+					subscription_event = asset.events['subscription'] = []
+
+				subscription_value = subscription_base_quantity * subscription.price
+				subscription_event.append({
+					'asset': asset,
+					'subscription': subscription,
+					'event': Event("Valor da subscrição",
+					               quantity=subscription_base_quantity,
+					               value=subscription_value)
+				})
+				# rebalanceando a carteira
+				if subscription.active:
+					asset.buy.quantity += subscription_base_quantity
+					asset.buy.total += subscription_value
 
 	def apply_events(self, date, assets, **options):
 		"""Eventos de desdobramento/grupamento"""
@@ -284,6 +319,7 @@ class NegotiationReport(BaseReport):
 			self.apply_events(date, assets, **options)
 			# aplica a bonificação na data do histórico
 			self.add_bonus(date, history, assets, **options)
+			self.add_subscription(date, assets, **options)
 		results = []
 		for code in assets:
 			asset = assets[code]
