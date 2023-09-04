@@ -26,10 +26,14 @@ class Bookkeeping(models.Model):
 	class Meta:
 		verbose_name = "Agente escriturador"
 		verbose_name_plural = "Agentes escrituradores"
+		indexes = [
+			models.Index(fields=['name']),
+			models.Index(fields=['cnpj'])
+		]
 
 
 class FoundsAdministrator(models.Model):
-	"""Geramente quem adminstra Fiis"""
+	"""Geralmente quem administra FIIS"""
 	name = models.CharField(verbose_name="Nome", max_length=512)
 	cnpj = models.CharField(verbose_name="CNPJ", max_length=32)
 
@@ -39,6 +43,10 @@ class FoundsAdministrator(models.Model):
 	class Meta:
 		verbose_name = "Administrador de fundo"
 		verbose_name_plural = "Administradores de fundos"
+		indexes = [
+			models.Index(fields=['name']),
+			models.Index(fields=['cnpj'])
+		]
 
 
 class Asset(models.Model):
@@ -95,6 +103,11 @@ class Asset(models.Model):
 		ordering = ("name", "code")
 		verbose_name = "Ativo"
 		verbose_name_plural = "Ativos"
+		indexes = [
+			models.Index(fields=['code']),
+			models.Index(fields=['name']),
+			models.Index(fields=['cnpj'])
+		]
 
 
 class Institution(models.Model):
@@ -108,6 +121,10 @@ class Institution(models.Model):
 	class Meta:
 		verbose_name = "Corretora"
 		verbose_name_plural = verbose_name + "s"
+		indexes = [
+			models.Index(fields=['name']),
+			models.Index(fields=['cnpj'])
+		]
 
 
 class BaseIRPFModel(models.Model):
@@ -236,6 +253,13 @@ class Negotiation(ImportModelMixin, BaseIRPFModel):
 		verbose_name = "Negociação"
 		verbose_name_plural = "Negociações"
 		ordering = ("-date",)
+		indexes = [
+			models.Index(fields=['-date']),
+			models.Index(fields=['code']),
+			models.Index(fields=['kind']),
+			models.Index(fields=['institution']),
+			models.Index(fields=['-date', 'code', 'kind', 'institution'])
+		]
 
 
 class Bonus(BaseIRPFModel):
@@ -341,6 +365,13 @@ class Earnings(ImportModelMixin, BaseIRPFModel):
 		verbose_name = "Provento"
 		verbose_name_plural = "Proventos"
 		ordering = ("-date",)
+		indexes = [
+			models.Index(fields=['-date']),
+			models.Index(fields=['flow']),
+			models.Index(fields=['code']),
+			models.Index(fields=['name']),
+			models.Index(fields=['-date', 'flow', 'kind', 'code'])
+		]
 
 
 class BrokerageNote(BaseIRPFModel):
@@ -484,6 +515,9 @@ class Position(BaseIRPFModel):
 		ordering = ('asset__code', '-date',)
 		verbose_name = "Posição"
 		verbose_name_plural = "Posições"
+		indexes = [
+			models.Index(fields=['-date'])
+		]
 
 
 class Taxes(BaseIRPFModel):
