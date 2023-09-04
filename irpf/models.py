@@ -292,6 +292,49 @@ class Bonus(BaseIRPFModel):
 		ordering = ("date",)
 
 
+class Subscription(BaseIRPFModel):
+	"""
+	 Em muitas ocasiões, quando Fundos Listados (Fundos Imobiliários, FI Agro, etc.) ou empresas
+	desejam aumentar o seu capital via nova emissão de cotas/ações, elas concedem aos seus
+	cotistas/acionistas um direito de preferência na subscrição a novas cotas/ações, que é proporcional
+	aos ativos possuídos pelos cotistas/acionistas em uma data determinada, conforme o especificado
+	nas documentações da emissão.
+		Isso significa que os investidores atualmente detentores do ativo têm uma espécie prioridade
+	na compra das novas cotas/ações, que quando exercida, garante aos investidores a manutenção da
+	sua participação no ativo geralmente em uma condição de preço melhor do que a
+	observada no mercado (secundário).
+	"""
+	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
+	                          verbose_name="Ativo",
+	                          null=True, blank=False)
+
+	date = DateField(verbose_name="Data com")
+	price = MoneyField(verbose_name="Preço (unitário)",
+	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   decimal_places=DECIMAL_PLACES)
+
+	proportion = models.DecimalField(verbose_name="Proporção",
+	                                 max_digits=6,
+	                                 decimal_places=2,
+	                                 default=Decimal(0),
+	                                 help_text="valor expresso em porcentagem.")
+	active = models.BooleanField(verbose_name="Incorporada", default=False,
+	                             help_text="Geralmente leva um tempo para a subscrição ser "
+	                                       "incorporada ao pacote padrão de ações.")
+
+	notice = models.FileField(verbose_name='Arquivo de anúncio',
+	                          upload_to='subscription/notice',
+	                          storage=FileSystemOverwriteStorage(),
+	                          null=True, blank=True)
+
+	class Meta:
+		verbose_name = "Subscrição"
+		verbose_name_plural = "Subscrições"
+
+	def __str__(self):
+		return f"{self.asset} / {self.price} {self.proportion}%"
+
+
 class Earnings(ImportModelMixin, BaseIRPFModel):
 	report_class = "irpf.report.EarningsReport"
 	BONIFICAO_EM_ATIVOS = "bonificacao_em_ativos"
