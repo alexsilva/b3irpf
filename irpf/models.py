@@ -284,8 +284,7 @@ class Bonus(BaseIRPFModel):
 	                          null=True, blank=True)
 
 	def __str__(self):
-		value = number_format(self.base_value)
-		return f"{self.asset} / R$ {value} {self.proportion}%"
+		return f"{self.asset} / {self.base_value} {self.proportion}%"
 
 	class Meta:
 		verbose_name = "Bonificação"
