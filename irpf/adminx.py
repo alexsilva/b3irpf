@@ -221,6 +221,11 @@ class NegotiationAdmin(BaseIRPFAdmin):
 
 @sites.register(Bonus)
 class BonusAdmin(BaseIRPFAdmin):
+	search_fields = (
+		'asset__code',
+		'asset__name'
+	)
+	list_filter = ("date", "asset")
 	list_display = (
 		'asset',
 		'base_value',
