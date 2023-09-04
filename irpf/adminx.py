@@ -278,8 +278,7 @@ class TaxesAdmin(BaseIRPFAdmin):
 	)
 
 	def taxes_to_pay(self, instance):
-		value = number_format(instance.taxes_to_pay, 2)
-		return f"R$ {value}"
+		return str(instance.taxes_to_pay)
 
 	taxes_to_pay.is_column = False
 	taxes_to_pay.short_description = "A pagar"
