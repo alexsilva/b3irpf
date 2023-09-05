@@ -43,6 +43,10 @@
           {% include "irpf/adminx_report_irpf_bonus_item.html" with card_title_class="text-info" %}
       {% endif %}
 
+      {% if item.asset.events.subscription %}
+          {% include "irpf/adminx_report_irpf_subscription_item.html" with card_title_class="text-info" %}
+      {% endif %}
+
       {% if item.instance and item.instance.bookkeeping %}
         <hr/>
         <p class="card-subtitle text-info">Escriturador:

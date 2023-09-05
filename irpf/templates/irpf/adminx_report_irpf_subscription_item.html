@@ -1,0 +1,39 @@
+{% extends "irpf/adminx_report_irpf_asset_box.html" %}
+{% load irpf_tags xadmin_tags %}
+{% block card_header %}
+  <div class="card-header bg-transparent">
+    <h5 class="card-text text-primary">Subscrição</h5>
+  </div>
+{% endblock %}
+
+{% block card_body %}
+<div class="card-body py-1">
+  {% for subscription in item.asset.events.subscription %}
+    <h6 class="card-text mb-1">
+      Proporção <span class="text-muted">{{ subscription.instance.proportion }}%</span> de
+      <span class="text-muted">{{ subscription.history_asset.buy.quantity }}</span> ativos no dia {{ subscription.instance.date }}
+    </h6>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item py-2">
+        <div class="row">
+          <div class="col-sm-8 text-center text-sm-left">
+            {{ subscription.event.title }}
+            <span title="Se foi integrado ao preço">
+              {{ subscription.instance.active|boolean_icon }}
+            </span>
+          </div>
+          <div class="col-sm-4 text-center text-sm-right btn btn-link" data-toggle="popover"
+               data-content="{{ subscription.event.value }}">
+            <span class="text-muted">
+              {{ subscription.event.quantity|smart_desc }} ativo{{ subscription.event.quantity|pluralize }}, {{ subscription.event.value }}
+            </span>
+          </div>
+        </div>
+      </li>
+    </ul>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block card_footer %}
+{% endblock %}
