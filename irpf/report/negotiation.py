@@ -18,6 +18,7 @@ class NegotiationReport(BaseReport):
 
 	def __init__(self, model, user, **options):
 		super().__init__(model, user, **options)
+		self.date_start = self.date_end = None
 		self._caches = {}
 
 	def get_asset(self, code):
@@ -39,11 +40,24 @@ class NegotiationReport(BaseReport):
 			qs_options['asset__category__in'] = categories
 		return qs_options
 
+	def get_bonus_group_by_date(self, **options) -> dict:
+		"""Agrupamento de todos os registros de bônus no intervalo pela data"""
+		try:
+			return self._caches['bonus_group_by_date']
+		except KeyError:
+			by_date = {}
+		qs_options = self.get_common_qs_options(**options)
+		qs_options['date__gte'] = self.date_start
+		qs_options['date__lte'] = self.date_end
+		for instance in self.bonus_model.objects.filter(**qs_options):
+			by_date.setdefault(instance.date, []).append(instance)
+		self._caches['bonus_group_by_date'] = by_date
+		return by_date
+
 	def add_bonus(self, date, history, assets, **options):
 		"""Adiciona ações bonificadas na data considerando o histórico"""
-		qs_options = self.get_common_qs_options(**options)
-		queryset = self.bonus_model.objects.filter(date=date, **qs_options)
-		for bonus in queryset:
+		bonus_by_date = self.get_bonus_group_by_date(**options)
+		for bonus in bonus_by_date.get(date, ()):
 			ticker = bonus.asset.code
 			try:
 				asset = assets[ticker]
@@ -281,6 +295,7 @@ class NegotiationReport(BaseReport):
 	def report(self, date_start: datetime.date, date_end: datetime.date, **options):
 		options.setdefault('consolidation', self.position_model.CONSOLIDATION_YEARLY)
 		options.setdefault('categories', ())
+		self.date_start, self.date_end = date_start, date_end
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date__gte'] = date_start
 		qs_options['date__lte'] = date_end
