@@ -371,7 +371,7 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 		for item in results:
 			asset = item['asset']
 			stats.patrimony += asset.buy.total
-			stats.buy += asset.period_buy.total
+			stats.buy += asset.period.buy.total
 			stats.sell += (asset.sell.total + asset.sell.fraction.total)
 			stats.tax += (asset.buy.tax + asset.sell.tax)
 			stats.capital += asset.sell.capital

@@ -142,25 +142,11 @@ class Sell:
 
 
 class Period:
-	"""Compas menos vendas no intervalo de tempo"""
+	"""Compras e vendas do intervalo (sem posição)"""
 
-	def __init__(self, quantity: Decimal = Decimal(0),
-	             total: MoneyLC = MoneyLC(0),
-	             tax: MoneyLC = MoneyLC(0),
-	             position=None):
-		self.quantity = quantity
-		self.position = position
-		self.total = total
-		self.tax = tax
-
-	@property
-	def avg_price(self):
-		quantity = int(self.quantity)
-		if quantity > 0:
-			avg_price = self.total / quantity
-		else:
-			avg_price = MoneyLC(0)
-		return avg_price
+	def __init__(self, buy: Buy = None, sell: Sell = None):
+		self.buy = Buy() if buy is None else buy
+		self.sell = Sell() if sell is None else sell
 
 
 class Assets:
@@ -202,24 +188,15 @@ class Assets:
 		return bool(self.position and date <= self.position.date)
 
 	@property
-	def period_buy(self) -> Buy:
-		"""Compras do período (sem posição)"""
-		buy = Buy()
+	def period(self) -> Period:
+		"""Compras e vendas do intervalo (sem posição)"""
+		period = Period(sell=self.sell)
 		for instance in self.items:
 			if not instance.is_buy:
 				continue
-			buy.quantity += instance.quantity
-			buy.total += instance.total
-			buy.tax += instance.tax
-		return buy
-
-	@property
-	def period(self) -> Period:
-		"""Compras menos vendas no intervalo de tempo"""
-		period = Period(quantity=self.buy.quantity,
-		                total=self.buy.total,
-		                tax=self.buy.tax,
-		                position=self.position)
+			period.buy.quantity += instance.quantity
+			period.buy.total += instance.total
+			period.buy.tax += instance.tax
 		return period
 
 	def __deepcopy__(self, memo):
