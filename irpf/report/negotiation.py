@@ -306,11 +306,10 @@ class NegotiationReport(BaseReport):
 			queryset = queryset.select_related(*related_fields)
 		return queryset.order_by('date')
 
-	def get_assets_position(self, date=None, queryset=None, **options):
+	def get_assets_position(self, date, **options) -> dict:
 		"""Retorna dados de posição para caculo do período"""
 		assets = {}
-		if queryset is None:
-			queryset = self.get_position_queryset(date, **options)
+		queryset = self.get_position_queryset(date, **options)
 		for position in queryset:
 			ticker = position.asset.code
 			asset = Assets(
@@ -346,7 +345,7 @@ class NegotiationReport(BaseReport):
 		for date in range_dates(date_start, date_end):  # calcula um dia por vez
 			queryset = assets_queryset.filter(date=date)
 			for instance in queryset:
-				# calculo de compra, venda, boficiação, etc
+				# cálculo de compra e venda
 				try:
 					asset = assets[instance.code]
 				except KeyError:
