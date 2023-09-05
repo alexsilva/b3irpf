@@ -150,7 +150,7 @@ class Period:
 class Assets:
 	"""Ativos"""
 
-	def __init__(self, ticker,
+	def __init__(self, ticker: str,
 	             buy: Buy = None,
 	             sell: Sell = None,
 	             position=None,
