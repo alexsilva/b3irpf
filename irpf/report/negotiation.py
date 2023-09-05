@@ -138,17 +138,30 @@ class NegotiationReport(BaseReport):
 					asset.buy.quantity += subscription_base_quantity
 					asset.buy.total += subscription_value
 
-	def apply_events(self, date, assets, **options):
-		"""Eventos de desdobramento/grupamento"""
+	def get_events_group_by_date(self, **options) -> dict:
+		"""Agrupamento de todos os registros de eventos no intervalo pela data"""
+		try:
+			return self._caches['events_group_by_date']
+		except KeyError:
+			by_date = {}
 		qs_options = self.get_common_qs_options(**options)
+		qs_options['date_com__gte'] = self.date_start
+		qs_options['date_com__lte'] = self.date_end
 		related_fields = []
 		if (field_name := 'asset') in qs_options:
 			related_fields.append(field_name)
-		event_model = self.event_model
-		queryset = event_model.objects.filter(date_com=date, **qs_options)
+		queryset = self.event_model.objects.filter(**qs_options)
 		if related_fields:
 			queryset = queryset.select_related(*related_fields)
 		for instance in queryset:
+			by_date.setdefault(instance.date, []).append(instance)
+		self._caches['events_group_by_date'] = by_date
+		return by_date
+
+	def apply_events(self, date, assets, **options):
+		"""Eventos de desdobramento/grupamento"""
+		events_group_by_date = self.get_events_group_by_date(**options)
+		for instance in events_group_by_date.get(date, ()):
 			try:
 				asset = assets[instance.asset.code]
 			except KeyError:
@@ -160,7 +173,7 @@ class NegotiationReport(BaseReport):
 			# ignora os registros que já foram contabilizados na posição
 			elif asset.is_position_interval(instance.date_com):
 				continue
-			elif instance.event == event_model.SPLIT:  # Desdobramento
+			elif instance.event == self.event_model.SPLIT:  # Desdobramento
 				quantity = asset_period.quantity / instance.factor_from  # correção
 				fraction, quantity = quantity % 1, Decimal(int(quantity))
 				# nova quantidade altera o preço médio
@@ -168,7 +181,7 @@ class NegotiationReport(BaseReport):
 				# reduz a fração valor da fração com o novo preço médio
 				asset.buy.total -= fraction * asset.buy.avg_price
 
-			elif instance.event == event_model.INPLIT:  # Grupamento
+			elif instance.event == self.event_model.INPLIT:  # Grupamento
 				quantity = asset_period.quantity / instance.factor_from
 				fraction, quantity = quantity % 1, Decimal(int(quantity))
 				# nova quantidade altera o preço médio
