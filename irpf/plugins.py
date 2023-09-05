@@ -394,12 +394,12 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 		bonus = asset.events.get('bonus')
 		if bonus is None:
 			return
-		stats.bonus = event = Event("Total recebido")
-		for bonus in bonus:
-			bonus_event = bonus['event']
+		stats.bonus = Event("Total recebido")
+		for item in bonus:
+			event = item['event']
 			# soma todas as bonificações recebidas no período
-			event.quantity += bonus_event.quantity
-			event.value += bonus_event.value
+			stats.bonus.quantity += event.quantity
+			stats.bonus.value += event.value
 		return render_to_string('irpf/blocks/blocks.adminx_report_irpf_bonus_stats.html',
 		                        context=context)
 
