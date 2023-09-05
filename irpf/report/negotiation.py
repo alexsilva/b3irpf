@@ -319,8 +319,7 @@ class NegotiationReport(BaseReport):
 				buy=Buy(
 					quantity=position.quantity,
 					total=position.total,
-					tax=position.tax,
-					date=position.date
+					tax=position.tax
 				))
 			assets[ticker] = asset
 		return assets

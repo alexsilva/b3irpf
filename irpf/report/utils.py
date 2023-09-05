@@ -76,12 +76,10 @@ class Buy:
 
 	def __init__(self, quantity: Decimal = Decimal(0),
 	             total: MoneyLC = MoneyLC(0),
-	             tax: MoneyLC = MoneyLC(0),
-	             date: datetime.date = None):
+	             tax: MoneyLC = MoneyLC(0)):
 		self.quantity = quantity
 		self.total = total
 		self.tax = tax
-		self.date = date
 
 	@property
 	def avg_price(self):
