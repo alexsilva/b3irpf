@@ -43,7 +43,7 @@ class NegotiationReport(BaseReport):
 	def get_bonus_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de bônus no intervalo pela data"""
 		try:
-			return self._caches['bonus_group_by_date']
+			return self._caches['bonus_by_date']
 		except KeyError:
 			by_date = {}
 		qs_options = self.get_common_qs_options(**options)
@@ -51,7 +51,7 @@ class NegotiationReport(BaseReport):
 		qs_options['date__lte'] = self.date_end
 		for instance in self.bonus_model.objects.filter(**qs_options):
 			by_date.setdefault(instance.date, []).append(instance)
-		self._caches['bonus_group_by_date'] = by_date
+		self._caches['bonus_by_date'] = by_date
 		return by_date
 
 	def add_bonus(self, date, history, assets, **options):
@@ -93,7 +93,7 @@ class NegotiationReport(BaseReport):
 	def get_subscription_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de subscrição no intervalo pela data"""
 		try:
-			return self._caches['subscription_group_by_date']
+			return self._caches['subscription_by_date']
 		except KeyError:
 			by_date = {}
 		qs_options = self.get_common_qs_options(**options)
@@ -101,7 +101,7 @@ class NegotiationReport(BaseReport):
 		qs_options['date__lte'] = self.date_end
 		for instance in self.subscription_model.objects.filter(**qs_options):
 			by_date.setdefault(instance.date, []).append(instance)
-		self._caches['subscription_group_by_date'] = by_date
+		self._caches['subscription_by_date'] = by_date
 		return by_date
 
 	def add_subscription(self, date, assets, history, **options):
@@ -141,7 +141,7 @@ class NegotiationReport(BaseReport):
 	def get_events_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de eventos no intervalo pela data"""
 		try:
-			return self._caches['events_group_by_date']
+			return self._caches['events_by_date']
 		except KeyError:
 			by_date = {}
 		qs_options = self.get_common_qs_options(**options)
@@ -155,7 +155,7 @@ class NegotiationReport(BaseReport):
 			queryset = queryset.select_related(*related_fields)
 		for instance in queryset:
 			by_date.setdefault(instance.date, []).append(instance)
-		self._caches['events_group_by_date'] = by_date
+		self._caches['events_by_date'] = by_date
 		return by_date
 
 	def apply_events(self, date, assets, **options):
@@ -222,7 +222,7 @@ class NegotiationReport(BaseReport):
 
 	def get_earnings_group_by_date(self, **options):
 		try:
-			return self._caches['earnings_group_by_date']
+			return self._caches['earnings_by_date']
 		except KeyError:
 			by_date = {}
 		qs_options = self.get_common_qs_options(**options)
@@ -235,7 +235,7 @@ class NegotiationReport(BaseReport):
 		queryset = self.earnings_model.objects.filter(**qs_options)
 		for instance in queryset:
 			by_date.setdefault(instance.date, []).append(instance)
-		self._caches['earnings_group_by_date'] = by_date
+		self._caches['earnings_by_date'] = by_date
 		return by_date
 
 	def calc_earnings(self, instance: Earnings, asset: Assets):
