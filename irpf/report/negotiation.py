@@ -344,15 +344,15 @@ class NegotiationReport(BaseReport):
 			queryset = assets_queryset.filter(date=date)
 			for instance in queryset:
 				# cálculo de compra e venda
+				ticker = instance.code
 				try:
-					asset = assets[instance.code]
+					asset = assets[ticker]
 				except KeyError:
-					asset = Assets(ticker=instance.code,
+					asset = Assets(ticker=ticker,
 					               institution=institution,
-					               instance=(instance.asset or
-					                         asset_obj or
-					                         self.get_asset(instance.code)))
-					assets[instance.code] = asset
+					               instance=(instance.asset or asset_obj or
+					                         self.get_asset(ticker)))
+					assets[ticker] = asset
 				# ignora os registros que já foram contabilizados na posição
 				if asset.is_position_interval(instance.date):
 					continue
