@@ -34,8 +34,8 @@ class NegotiationReport(BaseReport):
 
 	def get_common_qs_options(self, **options) -> dict:
 		qs_options = {'user': self.user}
-		if asset := options.get('asset'):
-			qs_options['asset'] = asset
+		if assetft := options.get('asset'):
+			qs_options['asset'] = assetft
 		if categories := options['categories']:
 			qs_options['asset__category__in'] = categories
 		return qs_options
@@ -229,8 +229,8 @@ class NegotiationReport(BaseReport):
 		qs_options['date__lte'] = self.date_end
 		if institution := options.get('institution'):
 			qs_options['institution'] = institution.name
-		if asset_obj := qs_options.pop('asset', None):
-			qs_options['code__iexact'] = asset_obj.code
+		if assetft := qs_options.pop('asset', None):
+			qs_options['code__iexact'] = assetft.code
 		queryset = self.earnings_model.objects.filter(**qs_options)
 		for instance in queryset:
 			by_date.setdefault(instance.date, []).append(instance)
@@ -331,8 +331,8 @@ class NegotiationReport(BaseReport):
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date__gte'] = date_start
 		qs_options['date__lte'] = date_end
-		if asset_obj := qs_options.pop('asset', None):  # Permite filtrar por empresa (ativo)
-			qs_options['code__iexact'] = asset_obj.code
+		if assetft := qs_options.pop('asset', None):  # Permite filtrar por empresa (ativo)
+			qs_options['code__iexact'] = assetft.code
 		if institution := options.get('institution'):
 			qs_options['institution'] = institution.name
 		# cache
@@ -350,7 +350,7 @@ class NegotiationReport(BaseReport):
 				except KeyError:
 					asset = Assets(ticker=ticker,
 					               institution=institution,
-					               instance=(instance.asset or asset_obj or
+					               instance=(instance.asset or assetft or
 					                         self.get_asset(ticker)))
 					assets[ticker] = asset
 				# ignora os registros que já foram contabilizados na posição
