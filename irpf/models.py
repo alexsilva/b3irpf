@@ -266,7 +266,7 @@ class Bonus(BaseIRPFModel):
 	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
 	                          null=True, blank=False)
-	data_com = DateField(verbose_name="Data com")
+	date_com = DateField(verbose_name="Data com")
 	date_ex = DateField(verbose_name="Data ex")
 	date = DateField(verbose_name="Data de incorporação")
 	base_value = MoneyField(verbose_name="Valor de base",
