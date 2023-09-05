@@ -373,4 +373,7 @@ class NegotiationReport(BaseReport):
 			})
 
 		results = sorted(results, key=self.results_sorted)
+
+		# reset cache
+		self._caches = {}
 		return results
