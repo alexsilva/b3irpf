@@ -243,7 +243,8 @@ class SubscriptionAdmin(BaseIRPFAdmin):
 	list_display = (
 		'asset',
 		'price',
-		'proportion'
+		'proportion',
+		'active'
 	)
 
 
