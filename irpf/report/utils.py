@@ -203,7 +203,7 @@ class Assets:
 
 	@property
 	def period_buy(self) -> Buy:
-		"""Compras do perído (sem posição)"""
+		"""Compras do período (sem posição)"""
 		buy = Buy()
 		for instance in self.items:
 			if not instance.is_buy:

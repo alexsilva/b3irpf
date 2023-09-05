@@ -203,7 +203,7 @@ class NegotiationReport(BaseReport):
 			asset.sell.quantity += instance.quantity
 			asset.sell.total += sell_total
 
-			# preço médio de compras
+			# preço médio de venda
 			sell_avg_price = (sell_total - instance.tax) / instance.quantity
 
 			# preço médio de compras
