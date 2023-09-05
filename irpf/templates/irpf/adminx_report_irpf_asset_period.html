@@ -6,7 +6,7 @@
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left">Quantidade</div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ asset_period.quantity|smart_desc }}</span>
+        <span class="text-muted">{{ asset_buy.quantity|smart_desc }}</span>
       </div>
     </div>
   </li>
@@ -14,17 +14,17 @@
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left">Preço médio</div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ asset_period.avg_price }}</span>
+        <span class="text-muted">{{ asset_buy.avg_price }}</span>
       </div>
     </div>
   </li>
   <li class="list-group-item py-2">
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left">Valor total
-        <span class="badge badge-light badge-pill" title="Taxas">{{ asset_period.tax }}</span>
+        <span class="badge badge-light badge-pill" title="Taxas">{{ asset_buy.tax }}</span>
       </div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ asset_period.total }}</span>
+        <span class="text-muted">{{ asset_buy.total }}</span>
       </div>
     </div>
   </li>

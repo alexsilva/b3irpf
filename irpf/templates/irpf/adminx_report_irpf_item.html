@@ -1,5 +1,5 @@
 {% load irpf_tags %}
-{% with asset_period=item.asset.period %}
+{% with asset_buy=item.asset.buy %}
 <div class="card mt-1 mb-2 unsort irpfreport">
   <div class="card-header">
     <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
@@ -9,10 +9,10 @@
     <button type="button" class="btn btn-link" data-toggle="popover"
             data-content="
         {% if item.instance %}
-          {{ asset_period.quantity|as_int_desc }}
-          {% if item.instance.is_fii %}cota{{ asset_period.quantity|pluralize:"s" }}
+          {{ asset_buy.quantity|as_int_desc }}
+          {% if item.instance.is_fii %}cota{{ asset_buy.quantity|pluralize:"s" }}
           {% elif item.instance.is_stock %}ações
-          {% elif item.instance.is_bdr %}bdr{{ asset_period.quantity|pluralize:"s" }}
+          {% elif item.instance.is_bdr %}bdr{{ asset_buy.quantity|pluralize:"s" }}
           {% endif %}
           {{ item.code }} // {{ item.instance.name }} - {{ item.instance.cnpj }}
           {% if item.instance.administrator %} // Administrador: {{ item.instance.administrator.name }} - {{ item.instance.administrator.cnpj }}{% endif %}

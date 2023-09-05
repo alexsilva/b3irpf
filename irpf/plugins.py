@@ -139,13 +139,11 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 
 	def _save(self, date, asset: Assets, data: dict):
 		institution = asset.institution
-		# considera a posição do período que deriva da diferença entre compas e vendas
-		period = asset.period
 		defaults = {
-			'quantity': period.quantity,
-			'avg_price': period.avg_price,
-			'total': period.total,
-			'tax': period.tax
+			'quantity': asset.buy.quantity,
+			'avg_price': asset.buy.avg_price,
+			'total': asset.buy.total,
+			'tax': asset.buy.tax
 		}
 		# remove registro acima da data
 		self.position_model.objects.filter(
@@ -372,8 +370,7 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 		stats = Stats()
 		for item in results:
 			asset = item['asset']
-			period = asset.period
-			stats.patrimony += period.total
+			stats.patrimony += asset.buy.total
 			stats.buy += asset.period_buy.total
 			stats.sell += (asset.sell.total + asset.sell.fraction.total)
 			stats.tax += (asset.buy.tax + asset.sell.tax)

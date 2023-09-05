@@ -167,14 +167,13 @@ class NegotiationReport(BaseReport):
 			except KeyError:
 				continue
 			# posição na data
-			asset_period = asset.period
-			if asset_period.quantity == 0:
+			if asset.buy.quantity == 0:
 				continue
 			# ignora os registros que já foram contabilizados na posição
 			elif asset.is_position_interval(instance.date_com):
 				continue
 			elif instance.event == self.event_model.SPLIT:  # Desdobramento
-				quantity = asset_period.quantity / instance.factor_from  # correção
+				quantity = asset.buy.quantity / instance.factor_from  # correção
 				fraction, quantity = quantity % 1, Decimal(int(quantity))
 				# nova quantidade altera o preço médio
 				asset.buy.quantity = quantity * instance.factor_to
@@ -182,7 +181,7 @@ class NegotiationReport(BaseReport):
 				asset.buy.total -= fraction * asset.buy.avg_price
 
 			elif instance.event == self.event_model.INPLIT:  # Grupamento
-				quantity = asset_period.quantity / instance.factor_from
+				quantity = asset.buy.quantity / instance.factor_from
 				fraction, quantity = quantity % 1, Decimal(int(quantity))
 				# nova quantidade altera o preço médio
 				asset.buy.quantity = quantity * instance.factor_to  # correção
