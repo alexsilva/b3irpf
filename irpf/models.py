@@ -330,6 +330,9 @@ class Subscription(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Subscrição"
 		verbose_name_plural = "Subscrições"
+		indexes = [
+			models.Index(fields=['-date'])
+		]
 
 	def __str__(self):
 		return f"{self.asset} / {self.price} {self.proportion}%"
