@@ -220,14 +220,23 @@ class NegotiationReport(BaseReport):
 			asset.buy.total = asset.buy.quantity * buy_avg_price
 		return asset
 
-	def get_earnings_queryset(self, date, **options):
+	def get_earnings_group_by_date(self, **options):
+		try:
+			return self._caches['earnings_group_by_date']
+		except KeyError:
+			by_date = {}
 		qs_options = self.get_common_qs_options(**options)
+		qs_options['date__gte'] = self.date_start
+		qs_options['date__lte'] = self.date_end
 		if institution := options.get('institution'):
 			qs_options['institution'] = institution.name
 		if asset_obj := qs_options.pop('asset', None):
 			qs_options['code__iexact'] = asset_obj.code
-		queryset = self.earnings_model.objects.filter(date=date, **qs_options)
-		return queryset
+		queryset = self.earnings_model.objects.filter(**qs_options)
+		for instance in queryset:
+			by_date.setdefault(instance.date, []).append(instance)
+		self._caches['earnings_group_by_date'] = by_date
+		return by_date
 
 	def calc_earnings(self, instance: Earnings, asset: Assets):
 		kind_slug = instance.kind_slug
@@ -260,8 +269,8 @@ class NegotiationReport(BaseReport):
 				...
 
 	def apply_earnings(self, date, assets, **options):
-		queryset = self.get_earnings_queryset(date, **options)
-		for instance in queryset:
+		earnings_group_by_date = self.get_earnings_group_by_date(**options)
+		for instance in earnings_group_by_date.get(date, ()):
 			try:
 				self.calc_earnings(instance, assets[instance.code])
 			except KeyError:
