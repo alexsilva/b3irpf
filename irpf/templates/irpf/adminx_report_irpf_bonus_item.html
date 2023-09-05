@@ -7,11 +7,11 @@
 {% endblock %}
 
 {% block card_body %}
-<div class="card-body">
+<div class="card-body py-2">
   {% for bonus in item.asset.events.bonus %}
     <h6 class="card-text mb-1">
-      Proporção <span class="text-muted">{{ bonus.spec.proportion }}%</span> de
-      <span class="text-muted">{{ bonus.history_asset.buy.quantity }}</span> ativos no dia {{ bonus.spec.data_com }}
+      Proporção <span class="text-muted">{{ bonus.instance.proportion }}%</span> de
+      <span class="text-muted">{{ bonus.history_asset.buy.quantity }}</span> ativos no dia {{ bonus.instance.date_com }}
     </h6>
     <ul class="list-group list-group-flush">
       <li class="list-group-item py-2">

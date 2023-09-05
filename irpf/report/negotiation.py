@@ -44,8 +44,9 @@ class NegotiationReport(BaseReport):
 		qs_options = self.get_common_qs_options(**options)
 		queryset = self.bonus_model.objects.filter(date=date, **qs_options)
 		for bonus in queryset:
+			ticker = bonus.asset.code
 			try:
-				asset = assets[bonus.asset.code]
+				asset = assets[ticker]
 			except KeyError:
 				continue
 			# ignora os registros que já foram contabilizados na posição
@@ -56,17 +57,16 @@ class NegotiationReport(BaseReport):
 			except KeyError:
 				bonus_event = asset.events['bonus'] = []
 
-			# total de ativos na data ex
-			history_data_com = history[bonus.data_com]
-			history_asset = history_data_com[bonus.asset.code]
+			# total de ativos na data com
+			history_assets = history[bonus.date_com]
+			history_asset = history_assets[ticker]
 
 			# valor quantidade e valores recebidos de bonificação
 			bonus_quantity = history_asset.buy.quantity * (bonus.proportion / 100)
 			bonus_base_quantity = int(bonus_quantity)
 			bonus_value = bonus_base_quantity * bonus.base_value
 			bonus_event.append({
-				'spec': bonus,
-				'asset': asset,
+				'instance': bonus,
 				'history_asset': history_asset,
 				'event': Event("Valor da bonificação",
 				               quantity=bonus_quantity,
