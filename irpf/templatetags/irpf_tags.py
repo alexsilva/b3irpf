@@ -1,6 +1,6 @@
 from django import template
 from django.utils.formats import number_format
-
+from xadmin.util import boolean_icon as xadmin_boolean_icon
 from irpf.report.utils import smart_desc as irpf_smart_desc, as_int_desc as irpf_as_int_desc
 
 register = template.Library()
@@ -35,6 +35,11 @@ def exclude_obj_keys(obj, *keys):
 @register.simple_tag
 def get_obj_val(obj, name):
 	return getattr(obj, name)
+
+
+@register.filter
+def boolean_icon(value):
+	return xadmin_boolean_icon(value)
 
 
 @register.simple_tag
