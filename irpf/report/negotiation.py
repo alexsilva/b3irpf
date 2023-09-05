@@ -90,11 +90,24 @@ class NegotiationReport(BaseReport):
 			asset.buy.quantity += bonus_base_quantity
 			asset.buy.total += bonus_value
 
+	def get_subscription_group_by_date(self, **options) -> dict:
+		"""Agrupamento de todos os registros de subscrição no intervalo pela data"""
+		try:
+			return self._caches['subscription_group_by_date']
+		except KeyError:
+			by_date = {}
+		qs_options = self.get_common_qs_options(**options)
+		qs_options['date__gte'] = self.date_start
+		qs_options['date__lte'] = self.date_end
+		for instance in self.subscription_model.objects.filter(**qs_options):
+			by_date.setdefault(instance.date, []).append(instance)
+		self._caches['subscription_group_by_date'] = by_date
+		return by_date
+
 	def add_subscription(self, date, assets, history, **options):
 		"""Adiciona subscrições ativas para compor a nova quantidade e preço"""
-		qs_options = self.get_common_qs_options(**options)
-		queryset = self.subscription_model.objects.filter(date=date, **qs_options)
-		for subscription in queryset:
+		subscription_group_by_date = self.get_subscription_group_by_date(**options)
+		for subscription in subscription_group_by_date.get(date, ()):
 			ticker = subscription.asset.code
 			try:
 				asset = assets[ticker]
