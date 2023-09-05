@@ -76,13 +76,14 @@ class NegotiationReport(BaseReport):
 			asset.buy.quantity += bonus_base_quantity
 			asset.buy.total += bonus_value
 
-	def add_subscription(self, date, assets, **options):
+	def add_subscription(self, date, assets, history, **options):
 		"""Adiciona subscrições ativas para compor a nova quantidade e preço"""
 		qs_options = self.get_common_qs_options(**options)
 		queryset = self.subscription_model.objects.filter(date=date, **qs_options)
 		for subscription in queryset:
+			ticker = subscription.asset.code
 			try:
-				asset = assets[subscription.asset.code]
+				asset = assets[ticker]
 			except KeyError:
 				continue
 			# ignora os registros que já foram contabilizados na posição
@@ -99,8 +100,8 @@ class NegotiationReport(BaseReport):
 
 				subscription_value = subscription_base_quantity * subscription.price
 				subscription_event.append({
-					'asset': asset,
-					'subscription': subscription,
+					'history_asset': history[date][ticker],
+					'instance': subscription,
 					'event': Event("Valor da subscrição",
 					               quantity=subscription_base_quantity,
 					               value=subscription_value)
@@ -319,7 +320,7 @@ class NegotiationReport(BaseReport):
 			self.apply_events(date, assets, **options)
 			# aplica a bonificação na data do histórico
 			self.add_bonus(date, history, assets, **options)
-			self.add_subscription(date, assets, **options)
+			self.add_subscription(date, assets, history, **options)
 		results = []
 		for code in assets:
 			asset = assets[code]
