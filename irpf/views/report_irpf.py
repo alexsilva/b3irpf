@@ -1,3 +1,4 @@
+import time
 from datetime import date
 
 import django.forms as django_forms
@@ -21,21 +22,6 @@ startdt, enddt = MonthYearDates(_now.year, _now.month).get_year_interval(_now)
 
 
 class ReportIRPFForm(django_forms.Form):
-	# start = django_forms.DateField(
-	# 	label="Começa",
-	# 	initial=startdt,
-	# 	help_text="Data inicial para consolidação dos dados da declaração.",
-	# 	required=True,
-	# 	widget=AdminDateWidget
-	# )
-	# end = django_forms.DateField(
-	# 	label="Termina",
-	# 	initial=enddt,
-	# 	help_text="Data final para consolidação dos dados da declaração.",
-	# 	required=True,
-	# 	widget=AdminDateWidget
-	# )
-
 	consolidation = django_forms.IntegerField(
 		label="Apuração",
 		widget=django_forms.Select(choices=Position.CONSOLIDATION_CHOICES),
@@ -58,6 +44,10 @@ class ReportIRPFForm(django_forms.Form):
 	                                            label=Institution._meta.verbose_name,
 	                                            widget=AdminSelectWidget,
 	                                            required=False)
+	# para debug
+	ts = django_forms.BooleanField(widget=django_forms.HiddenInput,
+	                               initial=False,
+	                               required=False)
 
 
 class AdminReportIrpfModelView(AdminFormView):
@@ -71,7 +61,7 @@ class AdminReportIrpfModelView(AdminFormView):
 		super().init_request(*args, **kwargs)
 		self.model_app_label = self.kwargs['model_app_label']
 		self.report = self.results = None
-		self.start_date = self.end_date = None
+		self.start_date = self.ts = self.end_date = None
 
 	def get_media(self):
 		media = super().get_media()
@@ -87,7 +77,10 @@ class AdminReportIrpfModelView(AdminFormView):
 		if self.start_date and self.end_date:
 			start = date_format(self.start_date)
 			end = date_format(self.end_date)
-			title = mark_safe(f"{title} - {start} Até {end}")
+			title = f"{title} - {start} Até {end}"
+			if self.ts:
+				title += f" - TS({self.ts})"
+			title = mark_safe(title)
 		return title
 
 	def report_object(self, report_class, model, user, **options):
@@ -138,11 +131,15 @@ class AdminReportIrpfModelView(AdminFormView):
 				dates = MonthYearDates(dates.month - 1 if dates.month > 1 else 1, dates.year)
 				start, end = dates.get_month_interval(now)
 
+		ts = time.time()
 		self.results = self.report.report(start, end,
 		                                  institution=institution,
 		                                  asset=asset,
 		                                  consolidation=consolidation,
 		                                  categories=categories)
+		# tempo da operação
+		if form_data['ts']:
+			self.ts = time.time() - ts
 		self.start_date, self.end_date = start, end
 		form.data = self._get_form_data(form, start, end)
 		return self.render_to_response(self.get_context_data(form=form))
@@ -172,6 +169,7 @@ class AdminReportIrpfModelView(AdminFormView):
 			context['report'] = {
 				'start_date': self.start_date,
 				'end_date': self.end_date,
+				'ts': self.ts,
 				'report': self.report,
 				'results': self.results
 			}
