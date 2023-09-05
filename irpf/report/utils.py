@@ -161,25 +161,14 @@ class Assets:
 	             instance=None):
 		self.items = []
 		self.ticker = ticker
-		self.buy = buy
-		self.sell = sell
+		self.buy = Buy() if buy is None else buy
+		self.sell = Sell() if sell is None else sell
+		self.credit = Credit() if credit is None else credit
+		self.debit = Debit() if debit is None else debit
+		self.events = Events() if events is None else events
 		self.position = position
-		self.credit = credit
-		self.debit = debit
-		self.events = events
 		self.institution = institution
 		self.instance = instance
-
-		if buy is None:
-			self.buy = Buy()
-		if sell is None:
-			self.sell = Sell()
-		if credit is None:
-			self.credit = Credit()
-		if debit is None:
-			self.debit = Debit()
-		if events is None:
-			self.events = Events()
 
 	def is_position_interval(self, date: datetime.date):
 		"""Se a data presenta uma posição já calculada"""
