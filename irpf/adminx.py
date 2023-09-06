@@ -5,7 +5,7 @@ from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
 
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
-	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo
+	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, SubscriptionInfo
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin
 from irpf.themes import themes
@@ -240,8 +240,16 @@ class BonusAdmin(BaseIRPFAdmin):
 	)
 
 
+class SubscriptionInfoInline:
+	"""Inline dos modelos [Subscription]"""
+	form = MoneyModelForm
+	model = SubscriptionInfo
+	style = "one"
+
+
 @sites.register(Subscription)
 class SubscriptionAdmin(BaseIRPFAdmin):
+	inlines = [SubscriptionInfoInline]
 	search_fields = (
 		'asset__code',
 		'asset__name'
@@ -250,8 +258,7 @@ class SubscriptionAdmin(BaseIRPFAdmin):
 	list_display = (
 		'asset',
 		'price',
-		'proportion',
-		'active'
+		'proportion'
 	)
 
 
