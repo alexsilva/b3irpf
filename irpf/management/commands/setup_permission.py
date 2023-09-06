@@ -17,7 +17,8 @@ from irpf.models import (
 	Position,
 	Taxes,
 	Subscription,
-	BonusInfo
+	BonusInfo,
+	SubscriptionInfo
 )
 
 
@@ -36,6 +37,7 @@ class Command(BaseCommand):
 		Bonus: permission_names_all,
 		BonusInfo: permission_names_all,
 		Subscription: permission_names_all,
+		SubscriptionInfo: permission_names_all,
 		Earnings: permission_names_all,
 		BrokerageNote: permission_names_all,
 		AssetEvent: permission_names_all,
