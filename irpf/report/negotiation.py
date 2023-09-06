@@ -78,8 +78,9 @@ class NegotiationReport(BaseReport):
 				continue
 
 			# rebalanceando a carteira
-			asset.buy.quantity += bonus_info.quantity
-			asset.buy.total += bonus_info.total
+			if active := bonus_info.quantity > 0:
+				asset.buy.quantity += bonus_info.quantity
+				asset.buy.total += bonus_info.total
 
 			try:
 				events = asset.events['bonus']
@@ -89,7 +90,7 @@ class NegotiationReport(BaseReport):
 			_events = []
 			for event in events:
 				if event['bonus_info'] == bonus_info:
-					event['active'] = True
+					event['active'] = active
 					_events.append(event)
 					break
 
@@ -100,11 +101,10 @@ class NegotiationReport(BaseReport):
 				              value=bonus_info.total)
 				events.append({
 					'instance': bonus,
-					'active': True,
+					'active': active,
 					'bonus_info': bonus_info,
 					'event': event
 				})
-
 
 	@staticmethod
 	def _update_defaults(instance, defaults):
@@ -201,8 +201,9 @@ class NegotiationReport(BaseReport):
 				continue
 
 			# rebalanceando a carteira
-			asset.buy.quantity += subscription_info.quantity
-			asset.buy.total += subscription_info.total
+			if active := subscription_info.quantity > 0:
+				asset.buy.quantity += subscription_info.quantity
+				asset.buy.total += subscription_info.total
 
 			try:
 				events = asset.events['subscription']
@@ -212,7 +213,7 @@ class NegotiationReport(BaseReport):
 			_events = []
 			for event in events:
 				if event['subscription_info'] == subscription_info:
-					event['active'] = True
+					event['active'] = active
 					_events.append(event)
 					break
 
@@ -224,7 +225,7 @@ class NegotiationReport(BaseReport):
 				events.append({
 					'instance': subscription,
 					'subscription_info': subscription_info,
-					'active': True,
+					'active': active,
 					'event': event
 				})
 
