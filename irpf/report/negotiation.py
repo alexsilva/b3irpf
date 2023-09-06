@@ -49,8 +49,8 @@ class NegotiationReport(BaseReport):
 		except KeyError:
 			by_date = {}
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date__gte'] = self.date_start
-		qs_options['date__lte'] = self.date_end
+		qs_options['date_com__gte'] = self.date_start
+		qs_options['date_com__lte'] = self.date_end
 		for instance in self.bonus_model.objects.filter(**qs_options):
 			by_date.setdefault(instance.date_com, []).append(instance)
 		self._caches['bonus_by_date'] = by_date
