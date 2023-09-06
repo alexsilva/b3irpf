@@ -11,7 +11,7 @@
   {% for bonus in item.asset.events.bonus %}
     <h6 class="card-text mb-1">
       Proporção <span class="text-muted">{{ bonus.instance.proportion }}%</span> de
-      <span class="text-muted">{{ bonus.history_asset.buy.quantity }}</span> ativos no dia {{ bonus.instance.date_com }}
+      <span class="text-muted">{{ bonus.bonus_info.from_quantity }}</span> ativos no dia {{ bonus.instance.date_com }}
     </h6>
     <ul class="list-group list-group-flush">
       <li class="list-group-item py-2">

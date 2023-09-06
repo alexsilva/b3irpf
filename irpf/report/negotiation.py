@@ -2,7 +2,7 @@ import calendar
 import copy
 import datetime
 from decimal import Decimal
-from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription
+from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo
 from irpf.report.base import BaseReport
 from irpf.report.utils import Event, Assets, Buy
 from irpf.utils import range_dates
@@ -15,6 +15,7 @@ class NegotiationReport(BaseReport):
 	event_model = AssetEvent
 	subscription_model = Subscription
 	bonus_model = Bonus
+	bonus_info_model = BonusInfo
 
 	def __init__(self, model, user, **options):
 		super().__init__(model, user, **options)
@@ -50,11 +51,49 @@ class NegotiationReport(BaseReport):
 		qs_options['date__gte'] = self.date_start
 		qs_options['date__lte'] = self.date_end
 		for instance in self.bonus_model.objects.filter(**qs_options):
-			by_date.setdefault(instance.date, []).append(instance)
+			by_date.setdefault(instance.date_com, []).append(instance)
 		self._caches['bonus_by_date'] = by_date
 		return by_date
 
-	def add_bonus(self, date, history, assets, **options):
+	def add_bonus(self, date, assets, **options):
+		"""Adiciona ações bonificadas na data considerando o histórico"""
+		qs_options = self.get_common_qs_options(**options)
+		qs_options['bonus__date'] = date
+		if assetft := qs_options.pop('asset', None):
+			qs_options['bonus__asset'] = assetft
+		queryset = self.bonus_info_model.objects.filter(**qs_options)
+		queryset = queryset.select_related("bonus")
+		for bonus_info in queryset:
+			bonus = bonus_info.bonus
+			ticker = bonus.asset.code
+			try:
+				asset = assets[ticker]
+			except KeyError:
+				continue
+			# ignora os registros que já foram contabilizados na posição
+			if asset.is_position_interval(bonus.date):
+				continue
+
+			try:
+				events = asset.events['bonus']
+			except KeyError:
+				events = asset.events['bonus'] = []
+
+			# um evento proveniente do registro já existe
+			if not [o for o in events if o['bonus_info'] == bonus_info]:
+				event = Event("Valor da bonificação",
+				              quantity=bonus_info.quantity,
+				              value=bonus_info.total)
+				events.append({
+					'instance': bonus,
+					'bonus_info': bonus_info,
+					'event': event
+				})
+			# rebalanceando a carteira
+			asset.buy.quantity += bonus_info.quantity
+			asset.buy.total += bonus_info.total
+
+	def registry_bonus(self, date, assets, **options):
 		"""Adiciona ações bonificadas na data considerando o histórico"""
 		bonus_by_date = self.get_bonus_group_by_date(**options)
 		for bonus in bonus_by_date.get(date, ()):
@@ -67,28 +106,43 @@ class NegotiationReport(BaseReport):
 			if asset.is_position_interval(bonus.date):
 				continue
 			try:
-				bonus_event = asset.events['bonus']
+				events = asset.events['bonus']
 			except KeyError:
-				bonus_event = asset.events['bonus'] = []
-
-			# total de ativos na data com
-			history_assets = history[bonus.date_com]
-			history_asset = history_assets[ticker]
+				events = asset.events['bonus'] = []
 
 			# valor quantidade e valores recebidos de bonificação
-			bonus_quantity = history_asset.buy.quantity * (bonus.proportion / 100)
-			bonus_base_quantity = int(bonus_quantity)
-			bonus_value = bonus_base_quantity * bonus.base_value
-			bonus_event.append({
+			quantity = asset.buy.quantity * (bonus.proportion / 100)
+			bonus_quantity = int(quantity)
+			bonus_value = bonus_quantity * bonus.base_value
+			defaults = {
+				'from_quantity': asset.buy.quantity,
+				'from_total': asset.buy.total,
+				'quantity': bonus_quantity,
+				'total': bonus_value,
+				'user': self.user
+			}
+			bonus_info, created = self.bonus_info_model.objects.get_or_create(
+				bonus=bonus,
+				defaults=defaults
+			)
+			if not created:
+				updated = False
+				for key in defaults:
+					value = defaults[key]
+					if not updated and getattr(bonus_info, key) != value:
+						updated = True
+					setattr(bonus_info, key, value)
+				if updated:
+					bonus_info.save(update_fields=list(defaults))
+
+			event = Event("Valor da bonificação",
+			              quantity=quantity,
+			              value=bonus_value)
+			events.append({
 				'instance': bonus,
-				'history_asset': history_asset,
-				'event': Event("Valor da bonificação",
-				               quantity=bonus_quantity,
-				               value=bonus_value)
+				'bonus_info': bonus_info,
+				'event': event
 			})
-			# rebalanceando a carteira
-			asset.buy.quantity += bonus_base_quantity
-			asset.buy.total += bonus_value
 
 	def get_subscription_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de subscrição no intervalo pela data"""
@@ -365,8 +419,10 @@ class NegotiationReport(BaseReport):
 
 			self.apply_earnings(date, assets, **options)
 			self.apply_events(date, assets, **options)
-			# aplica a bonificação na data do histórico
-			self.add_bonus(date, history, assets, **options)
+			# cria um registro de bônus para os ativos do dia
+			self.registry_bonus(date, assets, **options)
+			# inclusão de bônus considera a data da incorporação
+			self.add_bonus(date, assets, **options)
 			self.add_subscription(date, assets, history, **options)
 		results = []
 		for code in assets:
