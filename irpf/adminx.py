@@ -220,6 +220,7 @@ class NegotiationAdmin(BaseIRPFAdmin):
 
 
 class BonusInfoInline:
+	form = MoneyModelForm
 	model = BonusInfo
 	style = "one"
 
