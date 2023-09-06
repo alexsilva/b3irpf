@@ -336,7 +336,10 @@ class Subscription(BaseIRPFModel):
 	                          verbose_name="Ativo",
 	                          null=True, blank=False)
 
-	date = DateField(verbose_name="Data com")
+	date_com = DateField(verbose_name="Data com", null=True, blank=False)
+	date_ex = DateField(verbose_name="Data ex", null=True, blank=False)
+	date = DateField(verbose_name="Data de incorporação", blank=True, null=True)
+
 	price = MoneyField(verbose_name="Preço (unitário)",
 	                   max_digits=DECIMAL_MAX_DIGITS,
 	                   decimal_places=DECIMAL_PLACES)
@@ -346,9 +349,6 @@ class Subscription(BaseIRPFModel):
 	                                 decimal_places=12,
 	                                 default=Decimal(0),
 	                                 help_text="valor expresso em porcentagem.")
-	active = models.BooleanField(verbose_name="Incorporada", default=False,
-	                             help_text="Geralmente leva um tempo para a subscrição ser "
-	                                       "incorporada ao pacote padrão de ações.")
 
 	notice = models.FileField(verbose_name='Arquivo de anúncio',
 	                          upload_to='subscription/notice',
@@ -364,6 +364,34 @@ class Subscription(BaseIRPFModel):
 
 	def __str__(self):
 		return f"{self.asset} / {self.price} {self.proportion}%"
+
+
+class SubscriptionInfo(BaseIRPFModel):
+	"""Modelo usado para guardar a posição histórica do ativo e rebalancear a
+	carteira quando a data de incorporação for calculada no relatório.
+	"""
+	subscription = models.OneToOneField(Subscription, on_delete=models.CASCADE)
+	from_quantity = models.DecimalField(verbose_name="Ativos",
+	                                    max_digits=19,
+	                                    decimal_places=0)
+	from_total = MoneyField(verbose_name="Valor dos ativos",
+							max_digits=DECIMAL_MAX_DIGITS,
+							decimal_places=DECIMAL_PLACES,
+							amount_default=Decimal(0))
+	quantity = models.DecimalField(verbose_name="Quantidade subscritas",
+	                               max_digits=DECIMAL_MAX_DIGITS,
+	                               decimal_places=DECIMAL_PLACES)
+	total = MoneyField(verbose_name="Valor da subscrição",
+	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   decimal_places=DECIMAL_PLACES,
+	                   amount_default=Decimal(0))
+
+	def __str__(self):
+		return str(self.subscription)
+
+	class Meta:
+		verbose_name = "Resultado da subscrição"
+		verbose_name_plural = verbose_name
 
 
 class Earnings(ImportModelMixin, BaseIRPFModel):
