@@ -5,14 +5,14 @@ from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
 
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
-	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription
+	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin
+from irpf.themes import themes
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from irpf.views.xlsx_viewer import AdminXlsxViewer
 from moneyfield import MoneyModelForm
-from irpf.themes import themes
 
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
 site.register_view("^irpf/report/(?P<model_app_label>.+)/$", AdminReportIrpfModelView, "reportirpf")
@@ -219,8 +219,14 @@ class NegotiationAdmin(BaseIRPFAdmin):
 	)
 
 
+class BonusInfoInline:
+	model = BonusInfo
+	style = "one"
+
+
 @sites.register(Bonus)
 class BonusAdmin(BaseIRPFAdmin):
+	inlines = [BonusInfoInline]
 	search_fields = (
 		'asset__code',
 		'asset__name'
@@ -300,4 +306,3 @@ class TaxesAdmin(BaseIRPFAdmin):
 
 	taxes_to_pay.is_column = False
 	taxes_to_pay.short_description = "A pagar"
-
