@@ -223,7 +223,7 @@ class NegotiationReport(BaseReport):
 				              value=subscription_info.total)
 				events.append({
 					'instance': subscription,
-					'bonus_info': subscription_info,
+					'subscription_info': subscription_info,
 					'active': True,
 					'event': event
 				})
