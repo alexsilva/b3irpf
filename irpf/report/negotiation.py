@@ -140,14 +140,8 @@ class NegotiationReport(BaseReport):
 				defaults=defaults
 			)
 			if not created:
-				updated = False
-				for key in defaults:
-					value = defaults[key]
-					if not updated and getattr(bonus_info, key) != value:
-						updated = True
-					setattr(bonus_info, key, value)
-				if updated:
-					bonus_info.save(update_fields=list(defaults))
+				# atualiza os dados sempre que necessário
+				self._update_defaults(bonus_info, defaults)
 
 			event = Event("Valor da bonificação",
 			              quantity=quantity,
