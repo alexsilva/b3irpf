@@ -62,6 +62,8 @@ class NegotiationReport(BaseReport):
 		qs_options['bonus__date'] = date
 		if assetft := qs_options.pop('asset', None):
 			qs_options['bonus__asset'] = assetft
+		if categories := qs_options.pop('asset__category__in', None):
+			qs_options['bonus__asset__category__in'] = categories
 		queryset = self.bonus_info_model.objects.filter(**qs_options)
 		queryset = queryset.select_related("bonus")
 		for bonus_info in queryset:
@@ -183,6 +185,8 @@ class NegotiationReport(BaseReport):
 		qs_options['subscription__date'] = date
 		if assetft := qs_options.pop('asset', None):
 			qs_options['subscription__asset'] = assetft
+		if categories := qs_options.pop('asset__category__in', None):
+			qs_options['subscription__asset__category__in'] = categories
 		queryset = self.subscription_info_model.objects.filter(**qs_options)
 		queryset = queryset.select_related("subscription")
 		for subscription_info in queryset:
