@@ -227,7 +227,7 @@ class BonusInfoInline:
 
 @sites.register(Bonus)
 class BonusAdmin(BaseIRPFAdmin):
-	inlines = [BonusInfoInline]
+	inlines_options = []
 	search_fields = (
 		'asset__code',
 		'asset__name'
@@ -239,6 +239,23 @@ class BonusAdmin(BaseIRPFAdmin):
 		'proportion'
 	)
 
+	@property
+	def inlines(self):
+		view = getattr(self, "admin_view", self)
+		inlines = list(view.inlines_options)
+		bonus_info_inline = BonusInfoInline
+		try:
+			if view.org_obj and view.org_obj.bonusinfo:
+				inlines.append(bonus_info_inline)
+		except bonus_info_inline.model.DoesNotExist:
+			...
+		return inlines
+
+	@inlines.setter
+	def inlines(self, value):
+		view = getattr(self, "admin_view", self)
+		view.inlines_options = value
+
 
 class SubscriptionInfoInline:
 	"""Inline dos modelos [Subscription]"""
@@ -249,7 +266,7 @@ class SubscriptionInfoInline:
 
 @sites.register(Subscription)
 class SubscriptionAdmin(BaseIRPFAdmin):
-	inlines = [SubscriptionInfoInline]
+	inlines_options = []
 	search_fields = (
 		'asset__code',
 		'asset__name'
@@ -260,6 +277,23 @@ class SubscriptionAdmin(BaseIRPFAdmin):
 		'price',
 		'proportion'
 	)
+
+	@property
+	def inlines(self):
+		view = getattr(self, "admin_view", self)
+		inlines = list(view.inlines_options)
+		subscription_info_inline = SubscriptionInfoInline
+		try:
+			if view.org_obj and view.org_obj.subscriptioninfo:
+				inlines.append(subscription_info_inline)
+		except subscription_info_inline.model.DoesNotExist:
+			...
+		return inlines
+
+	@inlines.setter
+	def inlines(self, value):
+		view = getattr(self, "admin_view", self)
+		view.inlines_options = value
 
 
 @sites.register(AssetEvent)
