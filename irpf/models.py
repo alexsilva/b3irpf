@@ -292,6 +292,34 @@ class Bonus(BaseIRPFModel):
 		ordering = ("date",)
 
 
+class BonusInfo(BaseIRPFModel):
+	"""Modelo usado para guardar a posição histórica do ativo e rebalancear a
+	carteira quando a data de incorporação for calculada no relatório.
+	"""
+	bonus = models.OneToOneField(Bonus, on_delete=models.CASCADE)
+	from_quantity = models.DecimalField(verbose_name="Quantidade",
+	                                    max_digits=19,
+	                                    decimal_places=0)
+	from_total = MoneyField(verbose_name="Valor (total)",
+							max_digits=DECIMAL_MAX_DIGITS,
+							decimal_places=DECIMAL_PLACES,
+							amount_default=Decimal(0))
+	quantity = models.DecimalField(verbose_name="Quantidade",
+	                               max_digits=DECIMAL_MAX_DIGITS,
+	                               decimal_places=DECIMAL_PLACES)
+	total = MoneyField(verbose_name="Valor (total)",
+	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   decimal_places=DECIMAL_PLACES,
+	                   amount_default=Decimal(0))
+
+	def __str__(self):
+		return str(self.bonus)
+
+	class Meta:
+		verbose_name = "Resultado da bonificação"
+		verbose_name_plural = "Resultados das bonificações"
+
+
 class Subscription(BaseIRPFModel):
 	"""
 	 Em muitas ocasiões, quando Fundos Listados (Fundos Imobiliários, FI Agro, etc.) ou empresas
