@@ -75,24 +75,34 @@ class NegotiationReport(BaseReport):
 			if asset.is_position_interval(bonus.date):
 				continue
 
+			# rebalanceando a carteira
+			asset.buy.quantity += bonus_info.quantity
+			asset.buy.total += bonus_info.total
+
 			try:
 				events = asset.events['bonus']
 			except KeyError:
 				events = asset.events['bonus'] = []
 
+			_events = []
+			for event in events:
+				if event['bonus_info'] == bonus_info:
+					event['active'] = True
+					_events.append(event)
+					break
+
 			# um evento proveniente do registro já existe
-			if not [o for o in events if o['bonus_info'] == bonus_info]:
+			if not _events:
 				event = Event("Valor da bonificação",
 				              quantity=bonus_info.quantity,
 				              value=bonus_info.total)
 				events.append({
 					'instance': bonus,
+					'active': True,
 					'bonus_info': bonus_info,
 					'event': event
 				})
-			# rebalanceando a carteira
-			asset.buy.quantity += bonus_info.quantity
-			asset.buy.total += bonus_info.total
+
 
 	@staticmethod
 	def _update_defaults(instance, defaults):
@@ -149,6 +159,7 @@ class NegotiationReport(BaseReport):
 			events.append({
 				'instance': bonus,
 				'bonus_info': bonus_info,
+				'active': False,
 				'event': event
 			})
 
@@ -185,20 +196,21 @@ class NegotiationReport(BaseReport):
 			if asset.is_position_interval(subscription.date):
 				continue
 
+			# rebalanceando a carteira
+			asset.buy.quantity += subscription_info.quantity
+			asset.buy.total += subscription_info.total
+
 			try:
 				events = asset.events['subscription']
 			except KeyError:
 				events = asset.events['subscription'] = []
-
-			# rebalanceando a carteira
-			asset.buy.quantity += subscription_info.quantity
-			asset.buy.total += subscription_info.total
 
 			_events = []
 			for event in events:
 				if event['subscription_info'] == subscription_info:
 					event['active'] = True
 					_events.append(event)
+					break
 
 			# um evento proveniente do registro já existe
 			if not _events:

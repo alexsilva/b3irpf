@@ -16,8 +16,12 @@
     <ul class="list-group list-group-flush">
       <li class="list-group-item py-2">
         <div class="row">
-          <div class="col-sm-8 text-center text-sm-left">{{ bonus.event.title }}
-            <button type="button" class="btn btn-link btn-sm" data-toggle="popover"
+          <div class="col-sm-8 text-center text-sm-left">
+            {{ bonus.event.title }}
+            <span title="Se foi incorporada à carteira">
+              {{ bonus.active|boolean_icon }}
+            </span>
+            <button type="button" class="btn btn-link" data-toggle="popover"
                     data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações.">
               <i class="fa fa-info-circle"></i>
             </button>
