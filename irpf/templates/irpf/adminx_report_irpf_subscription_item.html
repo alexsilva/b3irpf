@@ -11,7 +11,7 @@
   {% for subscription in item.asset.events.subscription %}
     <h6 class="card-text mb-1">
       Proporção <span class="text-muted">{{ subscription.instance.proportion }}%</span> de
-      <span class="text-muted">{{ subscription.history_asset.buy.quantity }}</span> ativos no dia {{ subscription.instance.date }}
+      <span class="text-muted">{{ subscription.subscription_info.from_quantity }}</span> ativos no dia {{ subscription.instance.date }}
     </h6>
     <ul class="list-group list-group-flush">
       <li class="list-group-item py-2">
@@ -19,7 +19,7 @@
           <div class="col-sm-8 text-center text-sm-left">
             {{ subscription.event.title }}
             <span title="Se foi incorporada à carteira">
-              {{ subscription.instance.active|boolean_icon }}
+              {{ subscription.active|boolean_icon }}
             </span>
           </div>
           <div class="col-sm-4 text-center text-sm-right btn btn-link" data-toggle="popover"

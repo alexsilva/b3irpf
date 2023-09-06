@@ -2,7 +2,7 @@ import calendar
 import copy
 import datetime
 from decimal import Decimal
-from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo
+from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, SubscriptionInfo
 from irpf.report.base import BaseReport
 from irpf.report.utils import Event, Assets, Buy
 from irpf.utils import range_dates
@@ -14,6 +14,7 @@ class NegotiationReport(BaseReport):
 	position_model = Position
 	event_model = AssetEvent
 	subscription_model = Subscription
+	subscription_info_model = SubscriptionInfo
 	bonus_model = Bonus
 	bonus_info_model = BonusInfo
 
@@ -93,6 +94,19 @@ class NegotiationReport(BaseReport):
 			asset.buy.quantity += bonus_info.quantity
 			asset.buy.total += bonus_info.total
 
+	@staticmethod
+	def _update_defaults(instance, defaults):
+		"""Atualiza, se necessário a instância com valores padrão"""
+		updated = False
+		for key in defaults:
+			value = defaults[key]
+			if not updated and getattr(instance, key) != value:
+				updated = True
+			setattr(instance, key, value)
+		if updated:
+			instance.save(update_fields=list(defaults))
+		return updated
+
 	def registry_bonus(self, date, assets, **options):
 		"""Adiciona ações bonificadas na data considerando o histórico"""
 		bonus_by_date = self.get_bonus_group_by_date(**options)
@@ -145,23 +159,69 @@ class NegotiationReport(BaseReport):
 			})
 
 	def get_subscription_group_by_date(self, **options) -> dict:
-		"""Agrupamento de todos os registros de subscrição no intervalo pela data"""
+		"""Agrupamento de todos os registros de subscrição pela 'data com'"""
 		try:
 			return self._caches['subscription_by_date']
 		except KeyError:
 			by_date = {}
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date__gte'] = self.date_start
-		qs_options['date__lte'] = self.date_end
+		qs_options['date_com__gte'] = self.date_start
+		qs_options['date_com__lte'] = self.date_end
 		for instance in self.subscription_model.objects.filter(**qs_options):
-			by_date.setdefault(instance.date, []).append(instance)
+			by_date.setdefault(instance.date_com, []).append(instance)
 		self._caches['subscription_by_date'] = by_date
 		return by_date
 
-	def add_subscription(self, date, assets, history, **options):
-		"""Adiciona subscrições ativas para compor a nova quantidade e preço"""
-		subscription_group_by_date = self.get_subscription_group_by_date(**options)
-		for subscription in subscription_group_by_date.get(date, ()):
+	def add_subscription(self, date, assets, **options):
+		"""Adiciona ativos da subscrição na data da incorporação (composição do preço médio)"""
+		qs_options = self.get_common_qs_options(**options)
+		qs_options['subscription__date'] = date
+		if assetft := qs_options.pop('asset', None):
+			qs_options['subscription__asset'] = assetft
+		queryset = self.subscription_info_model.objects.filter(**qs_options)
+		queryset = queryset.select_related("subscription")
+		for subscription_info in queryset:
+			subscription = subscription_info.subscription
+			ticker = subscription.asset.code
+			try:
+				asset = assets[ticker]
+			except KeyError:
+				continue
+			# ignora os registros que já foram contabilizados na posição
+			if asset.is_position_interval(subscription.date):
+				continue
+
+			try:
+				events = asset.events['subscription']
+			except KeyError:
+				events = asset.events['subscription'] = []
+
+			# rebalanceando a carteira
+			asset.buy.quantity += subscription_info.quantity
+			asset.buy.total += subscription_info.total
+
+			_events = []
+			for event in events:
+				if event['subscription_info'] == subscription_info:
+					event['active'] = True
+					_events.append(event)
+
+			# um evento proveniente do registro já existe
+			if not _events:
+				event = Event("Valor da subscrição",
+				              quantity=subscription_info.quantity,
+				              value=subscription_info.total)
+				events.append({
+					'instance': subscription,
+					'bonus_info': subscription_info,
+					'active': True,
+					'event': event
+				})
+
+	def registry_subscription(self, date, assets, **options):
+		"""Registra subscrições na 'data com'"""
+		get_subscription_group_by_date = self.get_subscription_group_by_date(**options)
+		for subscription in get_subscription_group_by_date.get(date, ()):
 			ticker = subscription.asset.code
 			try:
 				asset = assets[ticker]
@@ -172,25 +232,38 @@ class NegotiationReport(BaseReport):
 				continue
 
 			# valor quantidade e valores recebidos de bonificação
-			subscription_quantity = asset.buy.quantity * (subscription.proportion / 100)
-			if (subscription_base_quantity := int(subscription_quantity)) > 0:
+			quantity = asset.buy.quantity * (subscription.proportion / 100)
+			subscription_quantity = int(quantity)
+			subscription_total = subscription_quantity * subscription.price
+			defaults = {
+				'from_quantity': asset.buy.quantity,
+				'from_total': asset.buy.total,
+				'quantity': subscription_quantity,
+				'total': subscription_total,
+				'user': self.user
+			}
+			subscription_info, created = self.subscription_info_model.objects.get_or_create(
+				subscription=subscription,
+				defaults=defaults
+			)
+			if not created:
+				# atualiza os dados sempre que necessário
+				self._update_defaults(subscription_info, defaults)
+			if subscription_quantity > 0:
 				try:
-					subscription_event = asset.events['subscription']
+					events = asset.events['subscription']
 				except KeyError:
-					subscription_event = asset.events['subscription'] = []
+					events = asset.events['subscription'] = []
 
-				subscription_value = subscription_base_quantity * subscription.price
-				subscription_event.append({
-					'history_asset': history[date][ticker],
+				event = Event("Valor da subscrição",
+				              quantity=subscription_quantity,
+				              value=subscription_total)
+				events.append({
+					'subscription_info': subscription_info,
 					'instance': subscription,
-					'event': Event("Valor da subscrição",
-					               quantity=subscription_base_quantity,
-					               value=subscription_value)
+					'active': False,
+					'event': event
 				})
-				# rebalanceando a carteira
-				if subscription.active:
-					asset.buy.quantity += subscription_base_quantity
-					asset.buy.total += subscription_value
 
 	def get_events_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de eventos no intervalo pela data"""
@@ -423,7 +496,10 @@ class NegotiationReport(BaseReport):
 			self.registry_bonus(date, assets, **options)
 			# inclusão de bônus considera a data da incorporação
 			self.add_bonus(date, assets, **options)
-			self.add_subscription(date, assets, history, **options)
+			# cria um registro de subscrição para os ativos do dia
+			self.registry_subscription(date, assets, **options)
+			# inclusão de subscrições na data de incorporação
+			self.add_subscription(date, assets, **options)
 		results = []
 		for code in assets:
 			asset = assets[code]
