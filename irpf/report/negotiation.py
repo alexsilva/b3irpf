@@ -8,6 +8,10 @@ from irpf.report.utils import Event, Assets, Buy
 from irpf.utils import range_dates
 
 
+class EmptyError(KeyError):
+	...
+
+
 class NegotiationReport(BaseReport):
 	asset_model = Asset
 	earnings_model = Earnings
@@ -42,18 +46,27 @@ class NegotiationReport(BaseReport):
 			qs_options['asset__category__in'] = categories
 		return qs_options
 
+	def get_cache(self, key: str):
+		try:
+			return self._caches[key]
+		except KeyError as exc:
+			raise EmptyError(exc)
+
+	def set_cache(self, key: str, value):
+		self._caches[key] = value
+		return value
+
 	def get_bonus_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de bônus no intervalo pela data"""
 		try:
-			return self._caches['bonus_by_date']
-		except KeyError:
-			by_date = {}
+			return self.get_cache('bonus_by_date')
+		except EmptyError:
+			by_date = self.set_cache('bonus_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date_com__gte'] = self.date_start
 		qs_options['date_com__lte'] = self.date_end
 		for instance in self.bonus_model.objects.filter(**qs_options):
 			by_date.setdefault(instance.date_com, []).append(instance)
-		self._caches['bonus_by_date'] = by_date
 		return by_date
 
 	def add_bonus(self, date, assets, **options):
@@ -168,15 +181,14 @@ class NegotiationReport(BaseReport):
 	def get_subscription_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de subscrição pela 'data com'"""
 		try:
-			return self._caches['subscription_by_date']
-		except KeyError:
-			by_date = {}
+			return self.get_cache('subscription_by_date')
+		except EmptyError:
+			by_date = self.set_cache('subscription_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date_com__gte'] = self.date_start
 		qs_options['date_com__lte'] = self.date_end
 		for instance in self.subscription_model.objects.filter(**qs_options):
 			by_date.setdefault(instance.date_com, []).append(instance)
-		self._caches['subscription_by_date'] = by_date
 		return by_date
 
 	def add_subscription(self, date, assets, **options):
@@ -279,9 +291,9 @@ class NegotiationReport(BaseReport):
 	def get_events_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de eventos no intervalo pela data"""
 		try:
-			return self._caches['events_by_date']
-		except KeyError:
-			by_date = {}
+			return self.get_cache('events_by_date')
+		except EmptyError:
+			by_date = self.set_cache('events_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date_com__gte'] = self.date_start
 		qs_options['date_com__lte'] = self.date_end
@@ -293,7 +305,6 @@ class NegotiationReport(BaseReport):
 			queryset = queryset.select_related(*related_fields)
 		for instance in queryset:
 			by_date.setdefault(instance.date, []).append(instance)
-		self._caches['events_by_date'] = by_date
 		return by_date
 
 	def apply_events(self, date, assets, **options):
@@ -359,9 +370,9 @@ class NegotiationReport(BaseReport):
 
 	def get_earnings_group_by_date(self, **options):
 		try:
-			return self._caches['earnings_by_date']
-		except KeyError:
-			by_date = {}
+			return self.get_cache('earnings_by_date')
+		except EmptyError:
+			by_date = self.set_cache('earnings_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date__gte'] = self.date_start
 		qs_options['date__lte'] = self.date_end
@@ -372,7 +383,6 @@ class NegotiationReport(BaseReport):
 		queryset = self.earnings_model.objects.filter(**qs_options)
 		for instance in queryset:
 			by_date.setdefault(instance.date, []).append(instance)
-		self._caches['earnings_by_date'] = by_date
 		return by_date
 
 	def calc_earnings(self, instance: Earnings, asset: Assets):
