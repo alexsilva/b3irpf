@@ -3,7 +3,7 @@ from django.contrib.auth import get_permission_codename
 from django.core.management import call_command
 from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
-
+from django.forms import ModelForm
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, SubscriptionInfo
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
@@ -298,6 +298,7 @@ class SubscriptionAdmin(BaseIRPFAdmin):
 
 @sites.register(AssetEvent)
 class AssetEventAdmin(BaseIRPFAdmin):
+	form = ModelForm
 	model_icon = "fa fa-sticky-note-o"
 	list_display = (
 		'date',
