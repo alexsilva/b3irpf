@@ -11,7 +11,7 @@
   {% for subscription in item.asset.events.subscription %}
     <h6 class="card-text mb-1">
       Proporção <span class="text-muted">{{ subscription.instance.proportion }}%</span> de
-      <span class="text-muted">{{ subscription.subscription_info.from_quantity }}</span> ativos no dia {{ subscription.instance.date }}
+      <span class="text-muted">{{ subscription.subscription_info.from_quantity }}</span> ativos no dia {{ subscription.instance.date_com }}
     </h6>
     <ul class="list-group list-group-flush">
       <li class="list-group-item py-2">
