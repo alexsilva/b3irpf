@@ -486,7 +486,6 @@ class NegotiationReport(BaseReport):
 		# cache
 		assets = self.get_assets_position(date=date_start, **options)
 		assets_queryset = self.get_queryset(**qs_options)
-		history = {}
 
 		for date in range_dates(date_start, date_end):  # calcula um dia por vez
 			queryset = assets_queryset.filter(date=date)
@@ -506,10 +505,6 @@ class NegotiationReport(BaseReport):
 					continue
 				asset.items.append(instance)
 				self.consolidate(instance, asset)
-
-			# histórico das posições no dia
-			if assets:
-				history[date] = copy.deepcopy(assets)
 
 			self.apply_earnings(date, assets, **options)
 			self.apply_events(date, assets, **options)
