@@ -56,6 +56,10 @@ class NegotiationReport(BaseReport):
 		self._caches[key] = value
 		return value
 
+	def reset_cache(self):
+		"""Limpa valores de cache"""
+		self._caches.clear()
+
 	def get_bonus_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de bônus no intervalo pela data"""
 		try:
@@ -529,5 +533,5 @@ class NegotiationReport(BaseReport):
 		results = sorted(results, key=self.results_sorted)
 
 		# reset cache
-		self._caches = {}
+		self.reset_cache()
 		return results
