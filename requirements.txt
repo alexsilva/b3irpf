@@ -1,4 +1,4 @@
-git+https://github.com/alexsilva/django-xadmin@python3-dj32
+git+https://github.com/alexsilva/django-xadmin@idle
 git+https://github.com/alexsilva/correpy@main
 git+https://github.com/alexsilva/django-assetprice.git@main
 git+https://github.com/alexsilva/django-moneyfield.git@master
