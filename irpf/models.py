@@ -340,6 +340,11 @@ class Subscription(BaseIRPFModel):
 	date_ex = DateField(verbose_name="Data ex", null=True, blank=False)
 	date = DateField(verbose_name="Data de incorporação", blank=True, null=True)
 
+	quantity = models.DecimalField(verbose_name="Ativos", max_digits=19, decimal_places=0,
+	                               help_text="Quantidade efetivamente subscrita "
+	                                         "(deixe vazio para incluir todos os direitos)",
+	                               null=True, blank=True)
+
 	price = MoneyField(verbose_name="Preço (unitário)",
 	                   max_digits=DECIMAL_MAX_DIGITS,
 	                   decimal_places=DECIMAL_PLACES)
