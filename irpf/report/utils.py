@@ -101,6 +101,9 @@ class Buy:
 			avg_tax = MoneyLC(0)
 		return avg_tax
 
+	def __bool__(self):
+		return bool(self.quantity)
+
 
 class SellFrac:
 	"""Frações vendidas"""
