@@ -344,11 +344,13 @@ class Subscription(BaseIRPFModel):
 	                               help_text="Quantidade efetivamente subscrita "
 	                                         "(deixe vazio para incluir todos os direitos)",
 	                               null=True, blank=True)
-
 	price = MoneyField(verbose_name="Preço (unitário)",
 	                   max_digits=DECIMAL_MAX_DIGITS,
 	                   decimal_places=DECIMAL_PLACES)
-
+	tax = MoneyField(verbose_name="Taxas",
+	                 max_digits=DECIMAL_MAX_DIGITS,
+	                 decimal_places=DECIMAL_PLACES,
+	                 amount_default=Decimal(0))
 	proportion = models.DecimalField(verbose_name="Proporção",
 	                                 max_digits=15,
 	                                 decimal_places=12,
