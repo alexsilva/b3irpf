@@ -340,17 +340,13 @@ class Subscription(BaseIRPFModel):
 	date_ex = DateField(verbose_name="Data ex", null=True, blank=False)
 	date = DateField(verbose_name="Data de incorporação", blank=True, null=True)
 
-	quantity = models.DecimalField(verbose_name="Ativos", max_digits=19, decimal_places=0,
+	quantity = models.DecimalField(verbose_name="Quantidade", max_digits=19, decimal_places=0,
 	                               help_text="Quantidade efetivamente subscrita "
 	                                         "(deixe vazio para incluir todos os direitos)",
 	                               null=True, blank=True)
 	price = MoneyField(verbose_name="Preço (unitário)",
 	                   max_digits=DECIMAL_MAX_DIGITS,
 	                   decimal_places=DECIMAL_PLACES)
-	tax = MoneyField(verbose_name="Taxas",
-	                 max_digits=DECIMAL_MAX_DIGITS,
-	                 decimal_places=DECIMAL_PLACES,
-	                 amount_default=Decimal(0))
 	proportion = models.DecimalField(verbose_name="Proporção",
 	                                 max_digits=15,
 	                                 decimal_places=12,
@@ -385,9 +381,13 @@ class SubscriptionInfo(BaseIRPFModel):
 							max_digits=DECIMAL_MAX_DIGITS,
 							decimal_places=DECIMAL_PLACES,
 							amount_default=Decimal(0))
-	quantity = models.DecimalField(verbose_name="Quantidade subscritas",
+	quantity = models.DecimalField(verbose_name="Quantidade (subscritas)",
 	                               max_digits=DECIMAL_MAX_DIGITS,
 	                               decimal_places=DECIMAL_PLACES)
+	quantity_proportional = models.DecimalField(verbose_name="Quantidade (direitos)",
+				                                max_digits=DECIMAL_MAX_DIGITS,
+				                                decimal_places=DECIMAL_PLACES,
+	                                            default=Decimal(0))
 	total = MoneyField(verbose_name="Valor da subscrição",
 	                   max_digits=DECIMAL_MAX_DIGITS,
 	                   decimal_places=DECIMAL_PLACES,

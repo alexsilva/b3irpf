@@ -260,11 +260,14 @@ class NegotiationReport(BaseReport):
 
 			# valor quantidade e valores recebidos de bonificação
 			quantity = asset.buy.quantity * (subscription.proportion / 100)
-			subscription_quantity = int(quantity)
+			quantity_proportional = int(quantity)
+			subscription_quantity = subscription.quantity or quantity_proportional
+			# o preço médio considera as taxas aplicadas.
 			subscription_total = subscription_quantity * subscription.price
 			defaults = {
 				'from_quantity': asset.buy.quantity,
 				'from_total': asset.buy.total,
+				'quantity_proportional': quantity_proportional,
 				'quantity': subscription_quantity,
 				'total': subscription_total,
 				'user': self.user
