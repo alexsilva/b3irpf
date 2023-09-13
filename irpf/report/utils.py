@@ -25,7 +25,9 @@ def as_int_desc(value) -> Decimal:
 def smart_desc(value) -> Decimal:
 	"""Converte 'value' para decimal quanto a parte fracionária for zero"""
 	# 5.0 % 5 == 0, 5.5 % 5 = 0.5
-	if value % 1 == 0:
+	if not value:
+		value = Decimal(0)
+	elif value % 1 == 0:
 		# converte para inteiro porque o valor não tem fração relevante
 		value = as_int_desc(value)
 	return value
