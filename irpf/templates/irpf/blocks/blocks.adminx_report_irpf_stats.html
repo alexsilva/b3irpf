@@ -25,14 +25,26 @@
       </div>
     </li>
   {% endif %}
-  {% if report.stats.capital %}
+  {% if report.stats.profits %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-{% if report.stats.capital > 0 %}success{% else %}danger{% endif %}">
-          Ganho de capital
+        <div class="col-sm-8 text-center text-sm-left text-success">
+          Lucros
         </div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">{{ report.stats.capital }}</span>
+          <span class="text-muted">{{ report.stats.profits }}</span>
+        </div>
+      </div>
+    </li>
+  {% endif %}
+  {% if report.stats.losses %}
+    <li class="list-group-item py-2">
+      <div class="row">
+        <div class="col-sm-8 text-center text-sm-left text-danger">
+          Prejuízos
+        </div>
+        <div class="col-sm-4 text-center text-sm-right">
+          <span class="text-muted">{{ report.stats.losses }}</span>
         </div>
       </div>
     </li>

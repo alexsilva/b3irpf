@@ -3,7 +3,7 @@ import datetime
 from decimal import Decimal
 from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, SubscriptionInfo
 from irpf.report.base import BaseReport
-from irpf.report.utils import Event, Assets, Buy
+from irpf.report.utils import Event, Assets, Buy, MoneyLC
 from irpf.utils import range_dates
 
 
@@ -369,7 +369,7 @@ class NegotiationReport(BaseReport):
 			capital = instance.quantity * (sell_avg_price - buy_avg_price)
 
 			# registra lucros e prejuízos
-			if capital > 0:
+			if capital > MoneyLC(0):
 				asset.sell.profits += capital
 			else:
 				asset.sell.losses += capital
