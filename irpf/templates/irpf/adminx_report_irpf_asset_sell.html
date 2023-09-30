@@ -28,12 +28,24 @@
       </div>
     </div>
   </li>
+  {% if item.asset.sell.profits %}
   <li class="list-group-item py-2">
     <div class="row">
-      <div class="col-sm-8 text-center text-sm-left">Ganho de capital</div>
+      <div class="col-sm-8 text-center text-sm-left text-success">Lucros</div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ item.asset.sell.capital }}</span>
+        <span class="text-muted">{{ item.asset.sell.profits }}</span>
       </div>
     </div>
   </li>
+  {% endif %}
+  {% if item.asset.sell.losses %}
+  <li class="list-group-item py-2">
+    <div class="row">
+      <div class="col-sm-8 text-center text-sm-left text-danger">Prejuízos</div>
+      <div class="col-sm-4 text-center text-sm-right">
+        <span class="text-muted">{{ item.asset.sell.losses }}</span>
+      </div>
+    </div>
+  </li>
+  {% endif %}
 {% endblock %}
