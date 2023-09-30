@@ -23,7 +23,7 @@ from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
 
-class GuadianAdminPluginMixin(BaseAdminPlugin):
+class GuardianAdminPluginMixin(BaseAdminPlugin):
 
 	def add_permission_for_object(self, obj, opts=None):
 		model_perms = self.admin_view.get_model_perms()
@@ -36,7 +36,7 @@ class GuadianAdminPluginMixin(BaseAdminPlugin):
 				assign_perm(permission_codename, self.user, obj)
 
 
-class GuardianAdminPlugin(GuadianAdminPluginMixin):
+class GuardianAdminPlugin(GuardianAdminPluginMixin):
 	"""Protege a view permitindo acesso somente a objetos para os quais o usuário tem permissão"""
 	guardian_protected = False
 
@@ -199,7 +199,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		return value
 
 
-class BrokerageNoteAdminPlugin(GuadianAdminPluginMixin):
+class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 	"""Plugin que faz o registro da nota de corretagem
 	Distribui os valores proporcionais de taxas e registra negociações
 	"""
