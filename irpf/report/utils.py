@@ -49,14 +49,12 @@ class Event:
 class Stats:
 	def __init__(self, buy: Decimal = Decimal(0),
 	             sell: MoneyLC = MoneyLC(0),
-	             capital: MoneyLC = MoneyLC(0),
 	             profits: MoneyLC = MoneyLC(0),
 	             losses: MoneyLC = MoneyLC(0),
 	             patrimony: MoneyLC = MoneyLC(0),
 	             tax: MoneyLC = MoneyLC(0),
 	             bonus: Event = None):
 		self.buy = buy
-		self.capital = capital
 		self.profits = profits  # lucros
 		self.losses = losses  # prejuízos
 		self.patrimony = patrimony
@@ -124,12 +122,10 @@ class Sell:
 
 	def __init__(self, quantity: Decimal = Decimal(0),
 	             total: MoneyLC = MoneyLC(0),
-	             capital: MoneyLC = MoneyLC(0),
 	             profits: MoneyLC = MoneyLC(0),
 	             losses: MoneyLC = MoneyLC(0),
 	             tax: MoneyLC = MoneyLC(0)):
 		self.quantity = quantity
-		self.capital = capital
 		self.profits = profits  # lucros
 		self.losses = losses  # prejuízos
 		self.total = total  # total vendas
