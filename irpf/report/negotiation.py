@@ -1,5 +1,4 @@
 import calendar
-import copy
 import datetime
 from decimal import Decimal
 from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, SubscriptionInfo
@@ -367,7 +366,13 @@ class NegotiationReport(BaseReport):
 			buy_tax_avg_price = asset.buy.avg_tax
 
 			# ganho de capital de todas a vendas
-			asset.sell.capital += (instance.quantity * (sell_avg_price - buy_avg_price))
+			capital = instance.quantity * (sell_avg_price - buy_avg_price)
+
+			# registra lucros e prejuízos
+			if capital > 0:
+				asset.sell.profits += capital
+			else:
+				asset.sell.losses += capital
 
 			# ajustando compras
 			asset.buy.quantity -= int(instance.quantity)
