@@ -50,11 +50,15 @@ class Stats:
 	def __init__(self, buy: Decimal = Decimal(0),
 	             sell: MoneyLC = MoneyLC(0),
 	             capital: MoneyLC = MoneyLC(0),
+	             profits: MoneyLC = MoneyLC(0),
+	             losses: MoneyLC = MoneyLC(0),
 	             patrimony: MoneyLC = MoneyLC(0),
 	             tax: MoneyLC = MoneyLC(0),
 	             bonus: Event = None):
 		self.buy = buy
 		self.capital = capital
+		self.profits = profits  # lucros
+		self.losses = losses  # prejuízos
 		self.patrimony = patrimony
 		self.tax = tax
 		self.sell = sell
