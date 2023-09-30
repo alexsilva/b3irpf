@@ -121,11 +121,15 @@ class Sell:
 	def __init__(self, quantity: Decimal = Decimal(0),
 	             total: MoneyLC = MoneyLC(0),
 	             capital: MoneyLC = MoneyLC(0),
+	             profits: MoneyLC = MoneyLC(0),
+	             losses: MoneyLC = MoneyLC(0),
 	             tax: MoneyLC = MoneyLC(0)):
 		self.quantity = quantity
 		self.capital = capital
-		self.total = total
-		self.tax = tax
+		self.profits = profits  # lucros
+		self.losses = losses  # prejuízos
+		self.total = total  # total vendas
+		self.tax = tax  # taxas
 		self.fraction = SellFrac()
 
 	@property
