@@ -200,12 +200,12 @@ class NegotiationReport(BaseReport):
 				'event': event
 			})
 
-	def get_subscription_group_by_date(self, **options) -> dict:
+	def get_subscription_registry_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de subscrição pela 'data com'"""
 		try:
-			return self.get_cache('subscription_by_date')
+			return self.get_cache('subscription_registry_by_date')
 		except EmptyError:
-			by_date = self.set_cache('subscription_by_date', {})
+			by_date = self.set_cache('subscription_registry_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date_com__gte'] = self.date_start
 		qs_options['date_com__lte'] = self.date_end
@@ -265,8 +265,8 @@ class NegotiationReport(BaseReport):
 
 	def registry_subscription(self, date, assets, **options):
 		"""Registra subscrições na 'data com'"""
-		get_subscription_group_by_date = self.get_subscription_group_by_date(**options)
-		for subscription in get_subscription_group_by_date.get(date, ()):
+		get_subscription_by_date = self.get_subscription_registry_by_date(**options)
+		for subscription in get_subscription_by_date.get(date, ()):
 			ticker = subscription.asset.code
 			try:
 				asset = assets[ticker]
