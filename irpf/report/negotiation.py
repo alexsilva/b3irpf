@@ -500,6 +500,11 @@ class NegotiationReport(BaseReport):
 		assets_queryset = self.get_queryset(**qs_options)
 
 		for date in range_dates(date_start, date_end):  # calcula um dia por vez
+			# inclusão de bônus considera a data da incorporação
+			self.add_bonus(date, assets, **options)
+			# inclusão de subscrições na data de incorporação
+			self.add_subscription(date, assets, **options)
+
 			queryset = assets_queryset.filter(date=date)
 			for instance in queryset:
 				# cálculo de compra e venda
@@ -522,12 +527,8 @@ class NegotiationReport(BaseReport):
 			self.apply_events(date, assets, **options)
 			# cria um registro de bônus para os ativos do dia
 			self.registry_bonus(date, assets, **options)
-			# inclusão de bônus considera a data da incorporação
-			self.add_bonus(date, assets, **options)
 			# cria um registro de subscrição para os ativos do dia
 			self.registry_subscription(date, assets, **options)
-			# inclusão de subscrições na data de incorporação
-			self.add_subscription(date, assets, **options)
 		results = []
 		for code in assets:
 			asset = assets[code]
