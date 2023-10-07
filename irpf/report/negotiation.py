@@ -306,9 +306,14 @@ class NegotiationReport(BaseReport):
 				subscription=subscription,
 				defaults=defaults
 			)
-			if not created:
-				# atualiza os dados sempre que necessário
-				self._update_defaults(subscription_info, defaults)
+			if created:
+				# necessário remover o cache para incluir o novo registro
+				self.remove_cache('subscription_by_date')
+			# atualiza os dados sempre que necessário
+			elif self._update_defaults(subscription_info, defaults):
+				# necessário remover o cache para atualizar o registro existente
+				self.remove_cache('subscription_by_date')
+
 			if subscription_quantity > 0:
 				try:
 					events = asset.events['subscription']
