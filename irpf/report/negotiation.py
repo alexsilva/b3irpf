@@ -51,6 +51,9 @@ class NegotiationReport(BaseReport):
 		except KeyError as exc:
 			raise EmptyError(exc)
 
+	def remove_cache(self, key: str):
+		return self._caches.pop(key, None)
+
 	def set_cache(self, key: str, value):
 		self._caches[key] = value
 		return value
