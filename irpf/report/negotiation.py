@@ -62,9 +62,9 @@ class NegotiationReport(BaseReport):
 	def get_bonus_registry_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de bônus no intervalo pela data"""
 		try:
-			return self.get_cache('bonus_by_date')
+			return self.get_cache('bonus_registry_by_date')
 		except EmptyError:
-			by_date = self.set_cache('bonus_by_date', {})
+			by_date = self.set_cache('bonus_registry_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date_com__gte'] = self.date_start
 		qs_options['date_com__lte'] = self.date_end
@@ -72,17 +72,29 @@ class NegotiationReport(BaseReport):
 			by_date.setdefault(instance.date_com, []).append(instance)
 		return by_date
 
-	def add_bonus(self, date, assets, **options):
-		"""Adiciona ações bonificadas na data considerando o histórico"""
+	def get_bonus_by_date(self, **options) -> dict:
+		"""Cache dos bônus registrados para a data de incorporação"""
+		try:
+			return self.get_cache('bonus_by_date')
+		except EmptyError:
+			by_date = self.set_cache('bonus_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['bonus__date'] = date
+		qs_options['bonus__date__gte'] = self.date_start
+		qs_options['bonus__date__lte'] = self.date_end
 		if assetft := qs_options.pop('asset', None):
 			qs_options['bonus__asset'] = assetft
 		if categories := qs_options.pop('asset__category__in', None):
 			qs_options['bonus__asset__category__in'] = categories
 		queryset = self.bonus_info_model.objects.filter(**qs_options)
 		queryset = queryset.select_related("bonus")
-		for bonus_info in queryset:
+		for instance in queryset:
+			by_date.setdefault(instance.bonus.date, []).append(instance)
+		return by_date
+
+	def add_bonus(self, date, assets, **options):
+		"""Adiciona ações bonificadas na data considerando o histórico"""
+		bonus_by_date = self.get_bonus_by_date(**options)
+		for bonus_info in bonus_by_date.get(date, ()):
 			bonus = bonus_info.bonus
 			ticker = bonus.asset.code
 			try:
