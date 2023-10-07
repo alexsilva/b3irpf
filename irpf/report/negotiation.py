@@ -182,9 +182,13 @@ class NegotiationReport(BaseReport):
 				bonus=bonus,
 				defaults=defaults
 			)
-			if not created:
-				# atualiza os dados sempre que necessário
-				self._update_defaults(bonus_info, defaults)
+			if created:
+				# sempre é necessário limpar o cache para garantir que esse novo registro vai ser calculado no futuro
+				self.remove_cache('bonus_by_date')
+			# atualiza os dados sempre que necessário
+			elif self._update_defaults(bonus_info, defaults):
+				# sempre é necessário limpar o cache para garantir que esse novo registro vai ser calculado no futuro
+				self.remove_cache('bonus_by_date')
 
 			event = Event("Valor da bonificação",
 			              quantity=quantity,
