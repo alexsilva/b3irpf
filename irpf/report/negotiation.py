@@ -59,6 +59,19 @@ class NegotiationReport(BaseReport):
 		"""Limpa valores de cache"""
 		self._caches.clear()
 
+	@staticmethod
+	def _update_defaults(instance, defaults):
+		"""Atualiza, se necessário a instância com valores padrão"""
+		updated = False
+		for key in defaults:
+			value = defaults[key]
+			if not updated and getattr(instance, key) != value:
+				updated = True
+			setattr(instance, key, value)
+		if updated:
+			instance.save(update_fields=list(defaults))
+		return updated
+
 	def get_bonus_registry_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de bônus no intervalo pela data"""
 		try:
@@ -133,19 +146,6 @@ class NegotiationReport(BaseReport):
 					'bonus_info': bonus_info,
 					'event': event
 				})
-
-	@staticmethod
-	def _update_defaults(instance, defaults):
-		"""Atualiza, se necessário a instância com valores padrão"""
-		updated = False
-		for key in defaults:
-			value = defaults[key]
-			if not updated and getattr(instance, key) != value:
-				updated = True
-			setattr(instance, key, value)
-		if updated:
-			instance.save(update_fields=list(defaults))
-		return updated
 
 	def registry_bonus(self, date, assets, **options):
 		"""Adiciona ações bonificadas na data considerando o histórico"""
