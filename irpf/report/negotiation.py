@@ -213,17 +213,29 @@ class NegotiationReport(BaseReport):
 			by_date.setdefault(instance.date_com, []).append(instance)
 		return by_date
 
-	def add_subscription(self, date, assets, **options):
-		"""Adiciona ativos da subscrição na data da incorporação (composição do preço médio)"""
+	def get_subscription_by_date(self, **options) -> dict:
+		"""Cache dos registros de subscrição pela data da incorporação"""
+		try:
+			return self.get_cache('subscription_by_date')
+		except EmptyError:
+			by_date = self.set_cache('subscription_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['subscription__date'] = date
+		qs_options['subscription__date__gte'] = self.date_start
+		qs_options['subscription__date__lte'] = self.date_end
 		if assetft := qs_options.pop('asset', None):
 			qs_options['subscription__asset'] = assetft
 		if categories := qs_options.pop('asset__category__in', None):
 			qs_options['subscription__asset__category__in'] = categories
 		queryset = self.subscription_info_model.objects.filter(**qs_options)
 		queryset = queryset.select_related("subscription")
-		for subscription_info in queryset:
+		for instance in queryset:
+			by_date.setdefault(instance.subscription.date, []).append(instance)
+		return by_date
+
+	def add_subscription(self, date, assets, **options):
+		"""Adiciona ativos da subscrição na data da incorporação (composição do preço médio)"""
+		subscription_by_date = self.get_subscription_by_date(**options)
+		for subscription_info in subscription_by_date.get(date, ()):
 			subscription = subscription_info.subscription
 			ticker = subscription.asset.code
 			try:
