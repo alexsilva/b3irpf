@@ -59,7 +59,7 @@ class NegotiationReport(BaseReport):
 		"""Limpa valores de cache"""
 		self._caches.clear()
 
-	def get_bonus_group_by_date(self, **options) -> dict:
+	def get_bonus_registry_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de bônus no intervalo pela data"""
 		try:
 			return self.get_cache('bonus_by_date')
@@ -137,7 +137,7 @@ class NegotiationReport(BaseReport):
 
 	def registry_bonus(self, date, assets, **options):
 		"""Adiciona ações bonificadas na data considerando o histórico"""
-		bonus_by_date = self.get_bonus_group_by_date(**options)
+		bonus_by_date = self.get_bonus_registry_by_date(**options)
 		for bonus in bonus_by_date.get(date, ()):
 			ticker = bonus.asset.code
 			try:
