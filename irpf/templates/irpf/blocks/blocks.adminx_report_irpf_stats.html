@@ -2,7 +2,7 @@
 {% load irpf_tags %}
 
 {% block card_list_group %}
-  {% if report.stats.buy %}
+  {% if stats.buy %}
     <li class="list-group-item py-2 text-center">
       <span class="text-muted">{{ admin_view.start_date }} até {{ admin_view.end_date }}</span>
     </li>
@@ -10,61 +10,61 @@
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-primary">Compras do período</div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">{{ report.stats.buy }}</span>
+          <span class="text-muted">{{ stats.buy }}</span>
         </div>
       </div>
     </li>
   {% endif %}
-  {% if report.stats.sell %}
+  {% if stats.sell %}
     <li class="list-group-item py-2">
       <div class="row">
         <div class="col-sm-8 text-secondary text-center text-sm-left">Vendas do período</div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">{{ report.stats.sell }}</span>
+          <span class="text-muted">{{ stats.sell }}</span>
         </div>
       </div>
     </li>
   {% endif %}
-  {% if report.stats.profits %}
+  {% if stats.profits %}
     <li class="list-group-item py-2">
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-success">
           Lucros
         </div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">{{ report.stats.profits }}</span>
+          <span class="text-muted">{{ stats.profits }}</span>
         </div>
       </div>
     </li>
   {% endif %}
-  {% if report.stats.losses %}
+  {% if stats.losses %}
     <li class="list-group-item py-2">
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-danger">
           Prejuízos
         </div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">{{ report.stats.losses }}</span>
+          <span class="text-muted">{{ stats.losses }}</span>
         </div>
       </div>
     </li>
   {% endif %}
-  {% if report.stats.tax %}
+  {% if stats.tax %}
     <li class="list-group-item py-2">
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-info">Taxas</div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">{{ report.stats.tax }}</span>
+          <span class="text-muted">{{ stats.tax }}</span>
         </div>
       </div>
     </li>
   {% endif %}
-  {% if report.stats.patrimony %}
+  {% if stats.patrimony %}
     <li class="list-group-item py-2">
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-muted">Patrimônio investido</div>
         <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">{{ report.stats.patrimony }}</span>
+          <span class="text-muted">{{ stats.patrimony }}</span>
         </div>
       </div>
     </li>
