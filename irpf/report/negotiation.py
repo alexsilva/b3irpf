@@ -124,6 +124,9 @@ class NegotiationReport(BaseReport):
 			if active := bonus_info.quantity > 0:
 				asset.buy.quantity += bonus_info.quantity
 				asset.buy.total += bonus_info.total
+				# total recebido de bônus que precisa ser declarado
+				asset.bonus.quantity += bonus_info.quantity
+				asset.bonus.value += bonus_info.total
 
 			try:
 				events = asset.events['bonus']

@@ -385,19 +385,6 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 
 	def block_bonus_stats(self, context, nodes):
 		context = get_context_dict(context)
-		stats = context['report'].get('stats')
-		if stats is None:
-			return
-		asset = context['item']['asset']
-		bonus = asset.events.get('bonus')
-		if bonus is None:
-			return
-		stats.bonus = Event("Total recebido")
-		for item in bonus:
-			event = item['event']
-			# soma todas as bonificações recebidas no período
-			stats.bonus.quantity += event.quantity
-			stats.bonus.value += event.value
 		return render_to_string('irpf/blocks/blocks.adminx_report_irpf_bonus_stats.html',
 		                        context=context)
 

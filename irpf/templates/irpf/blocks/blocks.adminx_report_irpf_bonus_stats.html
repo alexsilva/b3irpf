@@ -1,6 +1,6 @@
 {% load irpf_tags %}
-{% if report.stats.bonus %}
+{% if item.asset.bonus %}
 <p class="card-text text-muted">
-  {{ report.stats.bonus.title }}: {{ report.stats.bonus.quantity|smart_desc }}, {{ report.stats.bonus.value }}
+  {{ item.asset.bonus.title }}: {{ item.asset.bonus.quantity|smart_desc }}, {{ item.asset.bonus.value }}
 </p>
 {% endif %}

@@ -42,6 +42,9 @@ class Event:
 		self.value = value
 		self.items = []
 
+	def __bool__(self):
+		return bool(self.quantity)
+
 	def __str__(self):
 		return self.title
 
@@ -52,15 +55,13 @@ class Stats:
 	             profits: MoneyLC = MoneyLC(0),
 	             losses: MoneyLC = MoneyLC(0),
 	             patrimony: MoneyLC = MoneyLC(0),
-	             tax: MoneyLC = MoneyLC(0),
-	             bonus: Event = None):
+	             tax: MoneyLC = MoneyLC(0)):
 		self.buy = buy
 		self.profits = profits  # lucros
 		self.losses = losses  # prejuízos
 		self.patrimony = patrimony
 		self.tax = tax
 		self.sell = sell
-		self.bonus = bonus
 
 
 class Credit(OrderedDict):
@@ -164,6 +165,7 @@ class Assets:
 	             credit: Credit = None,
 	             debit: Debit = None,
 	             events: Events = None,
+	             bonus: Event = None,
 	             institution=None,
 	             instance=None):
 		self.items = []
@@ -173,6 +175,7 @@ class Assets:
 		self.credit = Credit() if credit is None else credit
 		self.debit = Debit() if debit is None else debit
 		self.events = Events() if events is None else events
+		self.bonus = Event("Total recebido") if bonus is None else bonus
 		self.position = position
 		self.institution = institution
 		self.instance = instance
