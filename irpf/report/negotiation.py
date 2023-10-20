@@ -23,7 +23,6 @@ class NegotiationReport(BaseReport):
 
 	def __init__(self, model, user, **options):
 		super().__init__(model, user, **options)
-		self.date_start = self.date_end = None
 		self._caches = {}
 
 	def get_asset(self, code):
@@ -82,8 +81,8 @@ class NegotiationReport(BaseReport):
 		except EmptyError:
 			by_date = self.set_cache('bonus_registry_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date_com__gte'] = self.date_start
-		qs_options['date_com__lte'] = self.date_end
+		qs_options['date_com__gte'] = options['start_date']
+		qs_options['date_com__lte'] = options['end_date']
 		for instance in self.bonus_model.objects.filter(**qs_options):
 			by_date.setdefault(instance.date_com, []).append(instance)
 		return by_date
@@ -95,8 +94,8 @@ class NegotiationReport(BaseReport):
 		except EmptyError:
 			by_date = self.set_cache('bonus_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['bonus__date__gte'] = self.date_start
-		qs_options['bonus__date__lte'] = self.date_end
+		qs_options['bonus__date__gte'] = options['start_date']
+		qs_options['bonus__date__lte'] = options['end_date']
 		if assetft := qs_options.pop('asset', None):
 			qs_options['bonus__asset'] = assetft
 		if categories := qs_options.pop('asset__category__in', None):
@@ -207,8 +206,8 @@ class NegotiationReport(BaseReport):
 		except EmptyError:
 			by_date = self.set_cache('subscription_registry_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date_com__gte'] = self.date_start
-		qs_options['date_com__lte'] = self.date_end
+		qs_options['date_com__gte'] = options['start_date']
+		qs_options['date_com__lte'] = options['end_date']
 		for instance in self.subscription_model.objects.filter(**qs_options):
 			by_date.setdefault(instance.date_com, []).append(instance)
 		return by_date
@@ -220,8 +219,8 @@ class NegotiationReport(BaseReport):
 		except EmptyError:
 			by_date = self.set_cache('subscription_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['subscription__date__gte'] = self.date_start
-		qs_options['subscription__date__lte'] = self.date_end
+		qs_options['subscription__date__gte'] = options['start_date']
+		qs_options['subscription__date__lte'] = options['end_date']
 		if assetft := qs_options.pop('asset', None):
 			qs_options['subscription__asset'] = assetft
 		if categories := qs_options.pop('asset__category__in', None):
@@ -337,8 +336,8 @@ class NegotiationReport(BaseReport):
 		except EmptyError:
 			by_date = self.set_cache('events_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date_com__gte'] = self.date_start
-		qs_options['date_com__lte'] = self.date_end
+		qs_options['date_com__gte'] = options['start_date']
+		qs_options['date_com__lte'] = options['end_date']
 		related_fields = []
 		if (field_name := 'asset') in qs_options:
 			related_fields.append(field_name)
@@ -422,8 +421,8 @@ class NegotiationReport(BaseReport):
 		except EmptyError:
 			by_date = self.set_cache('earnings_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date__gte'] = self.date_start
-		qs_options['date__lte'] = self.date_end
+		qs_options['date__gte'] = options['start_date']
+		qs_options['date__lte'] = options['end_date']
 		if institution := options.get('institution'):
 			qs_options['institution'] = institution.name
 		if assetft := qs_options.pop('asset', None):
@@ -520,26 +519,29 @@ class NegotiationReport(BaseReport):
 			assets[ticker] = asset
 		return assets
 
-	def report(self, date_start: datetime.date, date_end: datetime.date, **options):
-		options.setdefault('consolidation', self.position_model.CONSOLIDATION_YEARLY)
-		options.setdefault('categories', ())
-		self.date_start, self.date_end = date_start, date_end
-		qs_options = self.get_common_qs_options(**options)
-		qs_options['date__gte'] = date_start
-		qs_options['date__lte'] = date_end
+	def report(self, start_date: datetime.date, end_date: datetime.date, **options):
+		self.options.setdefault('start_date', start_date)
+		self.options.setdefault('end_date', end_date)
+		self.options.setdefault('consolidation', self.position_model.CONSOLIDATION_YEARLY)
+		self.options.setdefault('categories', ())
+		self.options.update(options)
+
+		qs_options = self.get_common_qs_options(**self.options)
 		if assetft := qs_options.pop('asset', None):  # Permite filtrar por empresa (ativo)
 			qs_options['code__iexact'] = assetft.code
 		if institution := options.get('institution'):
 			qs_options['institution'] = institution.name
+		qs_options['date__gte'] = start_date
+		qs_options['date__lte'] = end_date
 		# cache
-		assets = self.get_assets_position(date=date_start, **options)
+		assets = self.get_assets_position(date=start_date, **self.options)
 		assets_queryset = self.get_queryset(**qs_options)
 
-		for date in range_dates(date_start, date_end):  # calcula um dia por vez
+		for date in range_dates(start_date, end_date):  # calcula um dia por vez
 			# inclusão de bônus considera a data da incorporação
-			self.add_bonus(date, assets, **options)
+			self.add_bonus(date, assets, **self.options)
 			# inclusão de subscrições na data de incorporação
-			self.add_subscription(date, assets, **options)
+			self.add_subscription(date, assets, **self.options)
 
 			queryset = assets_queryset.filter(date=date)
 			for instance in queryset:
@@ -559,12 +561,12 @@ class NegotiationReport(BaseReport):
 				asset.items.append(instance)
 				self.consolidate(instance, asset)
 
-			self.apply_earnings(date, assets, **options)
-			self.apply_events(date, assets, **options)
+			self.apply_earnings(date, assets, **self.options)
+			self.apply_events(date, assets, **self.options)
 			# cria um registro de bônus para os ativos do dia
-			self.registry_bonus(date, assets, **options)
+			self.registry_bonus(date, assets, **self.options)
 			# cria um registro de subscrição para os ativos do dia
-			self.registry_subscription(date, assets, **options)
+			self.registry_subscription(date, assets, **self.options)
 		results = []
 		for code in assets:
 			asset = assets[code]
