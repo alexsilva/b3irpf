@@ -529,7 +529,7 @@ class NegotiationReport(BaseReport):
 		qs_options = self.get_common_qs_options(**self.options)
 		if assetft := qs_options.pop('asset', None):  # Permite filtrar por empresa (ativo)
 			qs_options['code__iexact'] = assetft.code
-		if institution := options.get('institution'):
+		if institution := self.options.get('institution'):
 			qs_options['institution'] = institution.name
 		qs_options['date__gte'] = start_date
 		qs_options['date__lte'] = end_date
