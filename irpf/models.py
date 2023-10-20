@@ -84,6 +84,10 @@ class Asset(models.Model):
 	def category_choices(self) -> dict:
 		return dict(self.CATEGORY_CHOICES)
 
+	@cached_property
+	def category_name(self) -> str:
+		return self.category_choices[self.category]
+
 	@property
 	def is_stock(self):
 		return self.category == self.CATEGORY_STOCK
