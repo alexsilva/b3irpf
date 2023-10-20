@@ -17,7 +17,8 @@ from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import TransactionType
 from irpf.fields import CharCodeField
 from irpf.models import Negotiation, Earnings, Position, Asset
-from irpf.report.utils import Stats, Event, Assets
+from irpf.report.utils import Assets
+from irpf.report.stats import StatsReport
 from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
@@ -366,17 +367,9 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 
 	def get_stats(self):
 		"""Gera dados estatísticos"""
-		results = self.admin_view.results
-		stats = Stats()
-		for item in results:
-			asset = item['asset']
-			stats.patrimony += asset.buy.total
-			stats.buy += asset.period.buy.total
-			stats.sell += (asset.sell.total + asset.sell.fraction.total)
-			stats.tax += (asset.buy.tax + asset.sell.tax)
-			stats.profits += asset.sell.profits
-			stats.losses += asset.sell.losses
-		return stats
+		stats = StatsReport(self.admin_view.results)
+		consolidation = self.admin_view.report.options['consolidation']
+		return stats.report(consolidation=consolidation)
 
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.report and self.admin_view.results:
@@ -390,5 +383,5 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 
 	def block_report(self, context, nodes):
 		context = get_context_dict(context)
-		return render_to_string('irpf/blocks/blocks.adminx_report_irpf_stats.html',
+		return render_to_string('irpf/adminx_report_irpf_stats.html',
 		                        context=context)
