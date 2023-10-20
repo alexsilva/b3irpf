@@ -89,15 +89,15 @@ class Asset(models.Model):
 		return self.category_choices[self.category]
 
 	@property
-	def is_stock(self):
+	def is_stock(self) -> bool:
 		return self.category == self.CATEGORY_STOCK
 
 	@property
-	def is_fii(self):
+	def is_fii(self) -> bool:
 		return self.category == self.CATEGORY_FII
 
 	@property
-	def is_bdr(self):
+	def is_bdr(self) -> bool:
 		return self.category == self.CATEGORY_BDR
 
 	def __str__(self):
