@@ -1,6 +1,8 @@
 
+{% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=report.stats  show_interval=True %}
+
 <ul class="nav nav-pills" id="stats" role="tablist">
-  {% for category, stats in report.stats.items %}
+  {% for category, stats in report.stats_category.items %}
     {% if stats %}
     <li class="nav-item" role="presentation">
       <button class="nav-link {% if forloop.first %}active{% endif %}" id="{{ category|slugify }}-tab" data-bs-toggle="tab"
@@ -13,11 +15,11 @@
   {% endfor %}
 </ul>
 <div class="tab-content" id="stats-content">
-  {% for category, stats in report.stats.items %}
+  {% for category, stats in report.stats_category.items %}
   {% if stats %}
   <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="{{ category|slugify }}"
        role="tabpanel" aria-labelledby="pills-{{ category|slugify }}-tab">
-      {% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=stats %}
+      {% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=stats show_interval=False %}
   </div>
   {% endif %}
   {% endfor %}

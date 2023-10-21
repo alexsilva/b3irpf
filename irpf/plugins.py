@@ -373,7 +373,8 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.report and self.admin_view.results:
-			context['report']['stats'] = self.get_stats()
+			context['report']['stats_category'] = stats = self.get_stats()
+			context['report']['stats'] = StatsReport.compile(stats)
 		return context
 
 	def block_bonus_stats(self, context, nodes):
