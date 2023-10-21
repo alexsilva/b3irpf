@@ -1,4 +1,4 @@
-
+{% if report.stats %}
 {% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=report.stats  show_interval=True %}
 
 <ul class="nav nav-pills" id="stats" role="tablist">
@@ -24,3 +24,4 @@
   {% endif %}
   {% endfor %}
 </div>
+{% endif %}
