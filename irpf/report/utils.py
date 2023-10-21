@@ -66,7 +66,7 @@ class Stats:
 	def __add__(self, stats):
 		"""Acrescenta os dados de outro objeto stats"""
 		self.buy += stats.buy
-		self.sell = stats.sell
+		self.sell += stats.sell
 		self.profits += stats.profits
 		self.losses += stats.losses
 		self.patrimony += stats.patrimony
