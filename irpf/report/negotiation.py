@@ -169,7 +169,7 @@ class NegotiationReport(BaseReport):
 			except KeyError:
 				events = asset.events['bonus'] = []
 
-			# valor quantidade e valores recebidos de bonificação
+			# valor e quantidade dos valores recebidos de bonificação
 			quantity = asset.buy.quantity * (bonus.proportion / 100)
 			bonus_quantity = int(quantity)
 			bonus_value = bonus_quantity * bonus.base_value
