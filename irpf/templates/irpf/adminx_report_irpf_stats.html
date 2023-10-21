@@ -1,6 +1,7 @@
 
 <ul class="nav nav-pills" id="stats" role="tablist">
   {% for category, stats in report.stats.items %}
+    {% if stats %}
     <li class="nav-item" role="presentation">
       <button class="nav-link {% if forloop.first %}active{% endif %}" id="{{ category|slugify }}-tab" data-bs-toggle="tab"
               data-target="#{{ category|slugify }}" data-toggle="pill" type="button" role="tab"
@@ -8,13 +9,16 @@
         {{ category }}
       </button>
     </li>
+    {% endif %}
   {% endfor %}
 </ul>
 <div class="tab-content" id="stats-content">
   {% for category, stats in report.stats.items %}
+  {% if stats %}
   <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="{{ category|slugify }}"
        role="tabpanel" aria-labelledby="pills-{{ category|slugify }}-tab">
       {% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=stats %}
   </div>
+  {% endif %}
   {% endfor %}
 </div>

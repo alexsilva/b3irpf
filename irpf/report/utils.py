@@ -57,11 +57,14 @@ class Stats:
 	             patrimony: MoneyLC = MoneyLC(0),
 	             tax: MoneyLC = MoneyLC(0)):
 		self.buy = buy
+		self.sell = sell
 		self.profits = profits  # lucros
 		self.losses = losses  # prejuízos
 		self.patrimony = patrimony
 		self.tax = tax
-		self.sell = sell
+
+	def __bool__(self):
+		return bool(self.buy or self.sell)
 
 
 class Credit(OrderedDict):
