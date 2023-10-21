@@ -19,7 +19,7 @@ class StatsReport:
 	def compile(data: dict) -> Stats:
 		_stats = Stats()
 		for stats in data.values():
-			_stats.update(stats)
+			_stats += stats
 		return _stats
 
 	def report(self, consolidation=None) -> dict:
