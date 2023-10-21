@@ -49,6 +49,9 @@ class StatsReport:
 			stats.profits += asset.sell.profits
 			stats.losses += asset.sell.losses
 
+			# total de bônus recebido dos ativos
+			stats.bonus += asset.bonus
+
 			# total de todos os períodos
 			stats.patrimony += asset.buy.total
 		return data
