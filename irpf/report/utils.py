@@ -71,6 +71,7 @@ class Stats:
 		self.losses += stats.losses
 		self.patrimony += stats.patrimony
 		self.tax += stats.tax
+		return self
 
 	def __bool__(self):
 		return bool(self.buy or self.sell)
