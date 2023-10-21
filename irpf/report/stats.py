@@ -15,6 +15,13 @@ class StatsReport:
 			data[key] = stats = Stats()
 		return stats
 
+	@staticmethod
+	def compile(data: dict) -> Stats:
+		_stats = Stats()
+		for stats in data.values():
+			_stats.update(stats)
+		return _stats
+
 	def report(self, consolidation=None) -> dict:
 		data = OrderedDict()
 
