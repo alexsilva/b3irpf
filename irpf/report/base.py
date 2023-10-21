@@ -8,6 +8,10 @@ class BaseReport:
 		self.user = user
 		self.options = options
 
+	def get_opts(self, name: str):
+		"""Returns a filter option with the name"""
+		return self.options[name]
+
 	@staticmethod
 	def results_sorted(item):
 		"""Função usada para ordenar resultados do relatório"""
