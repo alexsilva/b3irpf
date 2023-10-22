@@ -1,5 +1,5 @@
-{% if report.stats %}
-{% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=report.stats  show_interval=True %}
+{% if report.stats_category %}
+{% include 'irpf/blocks/blocks.adminx_report_irpf_date_stats.html' %}
 
 <ul class="nav nav-pills" id="stats" role="tablist">
   {% for category, stats in report.stats_category.items %}
@@ -19,7 +19,7 @@
   {% if stats %}
   <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="{{ category|slugify }}"
        role="tabpanel" aria-labelledby="pills-{{ category|slugify }}-tab">
-      {% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=stats show_interval=False %}
+      {% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=stats %}
   </div>
   {% endif %}
   {% endfor %}

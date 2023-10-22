@@ -438,8 +438,11 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.report:
 			stats = self.admin_view.stats
-			context['report']['stats'] = stats.compile()
-			context['report']['stats_category'] = stats.get_results()
+			stats_category = collections.OrderedDict([
+				('TODOS', stats.compile())
+			])
+			stats_category.update(stats.get_results())
+			context['report']['stats_category'] = stats_category
 		return context
 
 	def block_bonus_stats(self, context, nodes):

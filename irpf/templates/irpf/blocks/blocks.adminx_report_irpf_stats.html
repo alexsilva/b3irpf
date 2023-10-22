@@ -3,9 +3,7 @@
 
 {% block card_list_group %}
   {% if show_interval %}
-  <li class="list-group-item py-2 text-center">
-    <span class="text-muted">{{ admin_view.start_date }} até {{ admin_view.end_date }}</span>
-  </li>
+  {% include "irpf/blocks/blocks.adminx_report_irpf_date_stats.html" %}
   {% endif %}
   {% if stats.buy %}
     <li class="list-group-item py-2">

@@ -1,0 +1,8 @@
+{% extends "irpf/adminx_report_irpf_asset_box.html" %}
+{% load irpf_tags %}
+
+{% block card_list_group %}
+  <li class="list-group-item py-2 text-center">
+    <span class="text-muted">{{ admin_view.start_date }} até {{ admin_view.end_date }}</span>
+  </li>
+{% endblock %}
