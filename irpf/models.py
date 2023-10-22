@@ -642,14 +642,20 @@ class Position(BaseIRPFModel):
 
 class Statistic(BaseIRPFModel):
 	"""Estatística de evolução da carteira"""
+	CATEGORY_CHOICES = Asset.CATEGORY_CHOICES
+
+	CONSOLIDATION_CHOICES = Position.CONSOLIDATION_CHOICES
+	CONSOLIDATION_YEARLY = Position.CONSOLIDATION_YEARLY
+	CONSOLIDATION_MONTHLY = Position.CONSOLIDATION_MONTHLY
+
 	category = models.IntegerField(verbose_name="Categoria",
 	                               help_text="Categoria de ativos.",
-	                               choices=Asset.CATEGORY_CHOICES)
+	                               choices=CATEGORY_CHOICES)
 
 	consolidation = models.PositiveIntegerField(
 		verbose_name="Consolidação",
-		choices=Position.CONSOLIDATION_CHOICES,
-		default=Position.CONSOLIDATION_YEARLY
+		choices=CONSOLIDATION_CHOICES,
+		default=CONSOLIDATION_YEARLY
 	)
 
 	institution = models.ForeignKey(Institution,
