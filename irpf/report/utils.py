@@ -60,6 +60,7 @@ class Stats:
 	             sell: MoneyLC = MoneyLC(0),
 	             profits: MoneyLC = MoneyLC(0),
 	             losses: MoneyLC = MoneyLC(0),
+	             cumulative_losses: MoneyLC = MoneyLC(0),
 	             patrimony: MoneyLC = MoneyLC(0),
 	             tax: MoneyLC = MoneyLC(0),
 	             bonus: Event = None):
@@ -67,6 +68,7 @@ class Stats:
 		self.sell = sell
 		self.profits = profits  # lucros
 		self.losses = losses  # prejuízos
+		self.cumulative_losses = cumulative_losses  # prejuízos acumulados
 		self.patrimony = patrimony
 		self.tax = tax
 		self.bonus = Event("Bonificação") if bonus is None else bonus
@@ -77,6 +79,7 @@ class Stats:
 		self.sell += stats.sell
 		self.profits += stats.profits
 		self.losses += stats.losses
+		self.cumulative_losses += stats.cumulative_losses
 		self.patrimony += stats.patrimony
 		self.tax += stats.tax
 		self.bonus += stats.bonus
