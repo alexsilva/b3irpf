@@ -407,7 +407,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 				self._parser_file(parser, instance)
 
 
-class ReportStatsAdminPlugin(BaseAdminPlugin):
+class StatsReportAdminPlugin(BaseAdminPlugin):
 	"""Gera dados estatísticos (compra, venda, etc)"""
 
 	def init_request(self, *args, **kwargs):
