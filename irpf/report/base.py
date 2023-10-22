@@ -1,5 +1,7 @@
 import datetime
 
+from irpf.report.cache import Cache
+
 
 class BaseReport:
 	"""Base report"""
@@ -7,6 +9,7 @@ class BaseReport:
 		self.model = model
 		self.user = user
 		self.options = options
+		self.cache = Cache()
 		self.results = []
 
 	def get_results(self):
