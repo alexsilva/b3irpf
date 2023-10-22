@@ -7,6 +7,10 @@ class BaseReport:
 		self.model = model
 		self.user = user
 		self.options = options
+		self.results = []
+
+	def get_results(self):
+		return self.results
 
 	def get_opts(self, name: str, *args):
 		"""Returns a filter option with the name"""
