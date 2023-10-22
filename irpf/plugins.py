@@ -427,20 +427,19 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 
 	@atomic
 	def save(self, date: datetime.date, results: list, report: BaseReport):
-		return self.save_stats(date, report, self.admin_view.stats)
+		return self.save_stats(date, report, self.admin_view.stats.get_results())
 
 	def get_stats(self, date, results):
 		"""Gera dados estatísticos"""
-		stats = self.stats_report_class(self.user, results).report(
-			date=date
-		)
+		stats = self.stats_report_class(self.user)
+		stats.report(date=date, results=results)
 		return stats
 
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.report:
 			stats = self.admin_view.stats
-			context['report']['stats'] = StatsReport.compile(stats)
-			context['report']['stats_category'] = stats
+			context['report']['stats'] = stats.compile()
+			context['report']['stats_category'] = stats.get_results()
 		return context
 
 	def block_bonus_stats(self, context, nodes):

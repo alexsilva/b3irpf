@@ -11,16 +11,14 @@ class StatsReport:
 	asset_model = Asset
 	statistic_model = Statistic
 
-	def __init__(self, user, results: list):
+	def __init__(self, user):
 		self.user = user
-		self.results = results
-		self.data = OrderedDict()
+		self.results = OrderedDict()
 
 	def _get_statistics(self, date: datetime.date, category: int, **options):
-		consolidation = Statistic.CONSOLIDATION_MONTHLY
 		query = dict(
+			consolidation=Statistic.CONSOLIDATION_MONTHLY,
 			category=category,
-			consolidation=consolidation,
 			user=self.user
 		)
 		if institution := options.get('institution'):
@@ -40,7 +38,7 @@ class StatsReport:
 		return instance
 
 	def _get_stats(self, category_name: str, date: datetime.date, **options) -> Stats:
-		if (stats := self.data.get(category_name)) is None:
+		if (stats := self.results.get(category_name)) is None:
 			# busca dados no histórico
 			statistics: Statistic = self._get_statistics(
 				date, self.asset_model.get_category_by_name(category_name),
@@ -51,19 +49,22 @@ class StatsReport:
 				stats.cumulative_losses += statistics.cumulative_losses
 				# prejuízos no mês acumulam para o mês/ano seguinte
 				stats.losses += statistics.losses
-			self.data[category_name] = stats
+			self.results[category_name] = stats
 		return stats
 
-	@staticmethod
-	def compile(data: dict) -> Stats:
+	def compile(self) -> Stats:
 		_stats = Stats()
-		for stats in data.values():
+		for stats in self.results.values():
 			_stats += stats
 		return _stats
 
-	def report(self, date: datetime.date, **options) -> dict:
+	def get_results(self):
+		return self.results
+
+	def report(self, date: datetime.date, results: list, **options) -> dict:
 		consolidation = options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_YEARLY)
-		for item in self.results:
+		self.results.clear()
+		for item in results:
 			asset = item['asset']
 			# não cadastrado
 			instance: Asset = asset.instance
@@ -89,4 +90,4 @@ class StatsReport:
 
 			# total de todos os períodos
 			stats.patrimony += asset.buy.total
-		return self.data
+		return self.results
