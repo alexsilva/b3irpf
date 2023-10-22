@@ -137,6 +137,29 @@ class ReportBaseAdminPlugin(BaseAdminPlugin):
 			instance.save(update_fields=list(defaults))
 		return updated
 
+	@cached_property
+	def is_save_position(self):
+		field = django_forms.BooleanField(initial=False)
+		try:
+			value = field.to_python(self.request.GET.get('position'))
+		except django_forms.ValidationError:
+			value = field.initial
+		return value
+
+	def report_generate(self, results, form):
+		if self.is_save_position and self.admin_view.report and results:
+			self.save(self.admin_view.end_date, results, self.admin_view.report)
+		return results
+
+	def save(self, date: datetime.date, results: list, report: BaseReport):
+		...
+
+
+class SaveReportPositionPlugin(ReportBaseAdminPlugin):
+	"""Salva os dados de posição do relatório"""
+	position_model = Position
+	position_permission = list(auth.ACTION_NAME)
+
 	def block_form_buttons(self, context, nodes):
 		if self.admin_view.report:
 			return render_to_string("irpf/blocks/blocks.form.buttons.button_save_position.html")
