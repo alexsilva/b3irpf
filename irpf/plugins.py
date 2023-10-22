@@ -18,7 +18,7 @@ from correpy.domain.enums import TransactionType
 from irpf.fields import CharCodeField
 from irpf.models import Negotiation, Earnings, Position, Asset, Statistic
 from irpf.report import BaseReport
-from irpf.report.utils import Assets, Stats
+from irpf.report.utils import Assets, Stats, MoneyLC
 from irpf.report.stats import StatsReport
 from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
@@ -214,23 +214,21 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 	def save_stats(self, date: datetime.date, report: BaseReport, stats: dict[str]):
 		"""Salva dados de estatística"""
 		institution = report.get_opts('institution', None)
-		consolidation = report.get_opts('consolidation')
 
 		for category_name in stats:
 			stats_category: Stats = stats[category_name]
 			category = Asset.get_category_by_name(category_name)
 			defaults = {}
 
-			# prejuízos acumulados em anos anteriores
-			if consolidation == Position.CONSOLIDATION_YEARLY:
-				defaults['cumulative_losses'] = stats_category.losses
-			# prejuízos no mês
-			elif consolidation == Position.CONSOLIDATION_MONTHLY:
-				defaults['losses'] = stats_category.losses
+			# perdas do ano anterior com o mês
+			cumulative_losses = stats_category.cumulative_losses
+			cumulative_losses += stats_category.losses
+			defaults['cumulative_losses'] = cumulative_losses
+			defaults['losses'] = MoneyLC(0)
 
 			instance, created = Statistic.objects.get_or_create(
 				category=category,
-				consolidation=consolidation,
+				consolidation=Statistic.CONSOLIDATION_MONTHLY,
 				institution=institution,
 				date=date,
 				user=self.user,

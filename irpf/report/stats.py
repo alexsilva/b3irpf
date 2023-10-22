@@ -17,7 +17,7 @@ class StatsReport:
 		self.data = OrderedDict()
 
 	def _get_statistics(self, date: datetime.date, category: int, **options):
-		consolidation = options['consolidation']
+		consolidation = Statistic.CONSOLIDATION_MONTHLY
 		query = dict(
 			category=category,
 			consolidation=consolidation,
@@ -27,19 +27,12 @@ class StatsReport:
 			query['institution'] = institution
 
 		# a data de posição é sempre o último dia do mês ou ano.
-		if consolidation == self.statistic_model.CONSOLIDATION_YEARLY:
-			query['date'] = datetime.date.max.replace(year=date.year - 1)
-		elif consolidation == self.statistic_model.CONSOLIDATION_MONTHLY:
-			if date.month - 1 > 0:
-				max_day = calendar.monthrange(date.year, date.month - 1)[1]
-				query['date'] = datetime.date(date.year, date.month - 1, max_day)
-			else:
-				# começo de ano sempre pega o compilado anual
-				query['consolidation'] = self.statistic_model.CONSOLIDATION_YEARLY
-				query['date'] = datetime.date.max.replace(year=date.year - 1)
+		if date.month - 1 > 0:
+			max_day = calendar.monthrange(date.year, date.month - 1)[1]
+			query['date'] = datetime.date(date.year, date.month - 1, max_day)
 		else:
-			query['date'] = date
-
+			max_day = calendar.monthrange(date.year - 1, 12)[1]
+			query['date'] = datetime.date(date.year - 1, 12, max_day)
 		try:
 			instance = self.statistic_model.objects.get(**query)
 		except self.statistic_model.DoesNotExist:
@@ -54,9 +47,8 @@ class StatsReport:
 				**options)
 			stats = Stats()
 			if statistics:
-				stats.cumulative_losses += statistics.cumulative_losses
 				# prejuízos acumulados no ano continuam contando em datas futuras
-				stats.losses += statistics.cumulative_losses
+				stats.cumulative_losses += statistics.cumulative_losses
 				# prejuízos no mês acumulam para o mês/ano seguinte
 				stats.losses += statistics.losses
 			self.data[category_name] = stats
