@@ -1,5 +1,6 @@
 import time
 from datetime import date
+from irpf.report.stats import StatsReport
 
 import django.forms as django_forms
 from django.apps import apps
@@ -54,14 +55,14 @@ class AdminReportIrpfModelView(AdminFormView):
 	"""View that produces the report with data consolidation (average cost, sum of earnings, etc)."""
 	template_name = "irpf/adminx_report_irpf_view.html"
 	form_class = ReportIRPFForm
-
+	stats_report_class = StatsReport
 	title = "Relatório IRPF"
 
 	def init_request(self, *args, **kwargs):
 		super().init_request(*args, **kwargs)
 		self.model_app_label = self.kwargs['model_app_label']
 		self.report = self.results = None
-		self.start_date = self.ts = self.end_date = None
+		self.start_date = self.stats = self.ts = self.end_date = None
 
 	def get_media(self):
 		media = super().get_media()
@@ -137,6 +138,12 @@ class AdminReportIrpfModelView(AdminFormView):
 		                                  asset=asset,
 		                                  consolidation=consolidation,
 		                                  categories=categories)
+
+		self.stats = self.stats_report_class(self.user, self.results).report(
+			date=start,
+			consolidation=consolidation
+		)
+
 		# tempo da operação
 		if form_data['ts']:
 			self.ts = time.time() - ts

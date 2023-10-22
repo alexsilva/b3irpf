@@ -1,18 +1,65 @@
+import calendar
+import datetime
 from collections import OrderedDict
 
-from irpf.models import Asset, Position
+from irpf.models import Asset, Statistic
 from irpf.report.utils import Stats
 
 
 class StatsReport:
 	"""Estatísticas pode categoria de ativo"""
-	def __init__(self, results: list):
-		self.results = results
+	asset_model = Asset
+	statistic_model = Statistic
 
-	@staticmethod
-	def _get_stats(key: str, data: dict) -> Stats:
-		if (stats := data.get(key)) is None:
-			data[key] = stats = Stats()
+	def __init__(self, user, results: list):
+		self.user = user
+		self.results = results
+		self.data = OrderedDict()
+
+	def _get_statistics(self, date: datetime.date, category: int, **options):
+		consolidation = options['consolidation']
+		query = dict(
+			category=category,
+			consolidation=consolidation,
+			user=self.user
+		)
+		if institution := options.get('institution'):
+			query['institution'] = institution
+
+		# a data de posição é sempre o último dia do mês ou ano.
+		if consolidation == self.statistic_model.CONSOLIDATION_YEARLY:
+			query['date'] = datetime.date.max.replace(year=date.year - 1)
+		elif consolidation == self.statistic_model.CONSOLIDATION_MONTHLY:
+			if date.month - 1 > 0:
+				max_day = calendar.monthrange(date.year, date.month - 1)[1]
+				query['date'] = datetime.date(date.year, date.month - 1, max_day)
+			else:
+				# começo de ano sempre pega o compilado anual
+				query['consolidation'] = self.statistic_model.CONSOLIDATION_YEARLY
+				query['date'] = datetime.date.max.replace(year=date.year - 1)
+		else:
+			query['date'] = date
+
+		try:
+			instance = self.statistic_model.objects.get(**query)
+		except self.statistic_model.DoesNotExist:
+			instance = None
+		return instance
+
+	def _get_stats(self, category_name: str, date: datetime.date, **options) -> Stats:
+		if (stats := self.data.get(category_name)) is None:
+			# busca dados no histórico
+			statistics: Statistic = self._get_statistics(
+				date, self.asset_model.get_category_by_name(category_name),
+				**options)
+			stats = Stats()
+			if statistics:
+				stats.cumulative_losses += statistics.cumulative_losses
+				# prejuízos acumulados no ano continuam contando em datas futuras
+				stats.losses += statistics.cumulative_losses
+				# prejuízos no mês acumulam para o mês/ano seguinte
+				stats.losses += statistics.losses
+			self.data[category_name] = stats
 		return stats
 
 	@staticmethod
@@ -22,12 +69,8 @@ class StatsReport:
 			_stats += stats
 		return _stats
 
-	def report(self, consolidation=None) -> dict:
-		data = OrderedDict()
-
-		if consolidation is None:
-			consolidation = Position.CONSOLIDATION_YEARLY
-
+	def report(self, date: datetime.date, **options) -> dict:
+		consolidation = options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_YEARLY)
 		for item in self.results:
 			asset = item['asset']
 			# não cadastrado
@@ -35,13 +78,13 @@ class StatsReport:
 			if instance is None:
 				continue
 
-			stats = self._get_stats(instance.category_name, data)
+			stats = self._get_stats(instance.category_name, date=date, **options)
 
 			stats.buy += asset.period.buy.total
 			stats.sell += asset.sell.total + asset.sell.fraction.total
 
 			# taxas do período sendo trabalhado
-			if consolidation == Position.CONSOLIDATION_YEARLY:
+			if consolidation == self.statistic_model.CONSOLIDATION_YEARLY:
 				stats.tax += asset.buy.tax + asset.sell.tax
 			else:
 				stats.tax += asset.period.buy.tax + asset.sell.tax
@@ -54,4 +97,4 @@ class StatsReport:
 
 			# total de todos os períodos
 			stats.patrimony += asset.buy.total
-		return data
+		return self.data
