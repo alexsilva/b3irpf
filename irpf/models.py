@@ -640,6 +640,60 @@ class Position(BaseIRPFModel):
 		]
 
 
+class Statistic(BaseIRPFModel):
+	"""Estatística de evolução da carteira"""
+	category = models.IntegerField(verbose_name="Categoria",
+	                               help_text="Categoria de ativos.",
+	                               choices=Asset.CATEGORY_CHOICES)
+
+	consolidation = models.PositiveIntegerField(
+		verbose_name="Consolidação",
+		choices=Position.CONSOLIDATION_CHOICES,
+		default=Position.CONSOLIDATION_YEARLY
+	)
+
+	institution = models.ForeignKey(Institution,
+	                                on_delete=models.CASCADE,
+	                                verbose_name="Instituição",
+	                                blank=True, null=True)
+
+	losses = MoneyField(verbose_name="Prejuízos",
+	                    max_digits=DECIMAL_MAX_DIGITS,
+	                    decimal_places=DECIMAL_PLACES,
+	                    amount_default=Decimal(0),
+	                    blank=True)
+	cumulative_losses = MoneyField(verbose_name="Prejuízos acumulados",
+	                               max_digits=DECIMAL_MAX_DIGITS,
+	                               decimal_places=DECIMAL_PLACES,
+	                               amount_default=Decimal(0),
+	                               blank=True)
+	date = DateField(verbose_name="Data")
+
+	def __str__(self):
+		msg = []
+		dt = date_format(self.date)
+		label = Position.consolidation_choices[self.consolidation]
+		msg.append(f"Estatística ({label.lower()}) até {dt}")
+		if self.institution:
+			msg.append(f" - {self.institution.name}")
+		return ' '.join(msg)
+
+	class Meta:
+		unique_together = (
+			"category",
+			"consolidation",
+			"institution",
+			"user",
+			"date"
+		)
+		ordering = ('category', '-date',)
+		verbose_name = "Estatística de dado"
+		verbose_name_plural = verbose_name + "s"
+		indexes = [
+			models.Index(fields=['-date'])
+		]
+
+
 class Taxes(BaseIRPFModel):
 	"""Modelo usado para registro de impostos a pagar"""
 	TAX_CHOICES = [
