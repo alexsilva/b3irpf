@@ -570,18 +570,18 @@ class NegotiationReport(BaseReport):
 			self.registry_bonus(date, assets, **self.options)
 			# cria um registro de subscrição para os ativos do dia
 			self.registry_subscription(date, assets, **self.options)
-		results = []
+
+		# limpeza de resultados anteriores
+		self.results.clear()
 		for code in assets:
 			asset = assets[code]
-			results.append({
+			self.results.append({
 				'code': code,
 				'institution': institution,
 				'instance': asset.instance,
 				'asset': asset
 			})
-
-		results = sorted(results, key=self.results_sorted)
-
+		self.results.sort(key=self.results_sorted)
 		# reset cache
 		self.reset_cache()
-		return results
+		return self.results
