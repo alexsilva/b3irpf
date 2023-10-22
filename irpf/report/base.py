@@ -8,9 +8,14 @@ class BaseReport:
 		self.user = user
 		self.options = options
 
-	def get_opts(self, name: str):
+	def get_opts(self, name: str, *args):
 		"""Returns a filter option with the name"""
-		return self.options[name]
+		try:
+			return self.options[name]
+		except KeyError:
+			if not args:
+				raise
+			return args
 
 	@staticmethod
 	def results_sorted(item):
