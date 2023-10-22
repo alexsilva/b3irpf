@@ -3,12 +3,9 @@ import datetime
 from decimal import Decimal
 from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, SubscriptionInfo
 from irpf.report.base import BaseReport
+from irpf.report.cache import EmptyCacheError
 from irpf.report.utils import Event, Assets, Buy, MoneyLC
 from irpf.utils import range_dates
-
-
-class EmptyError(KeyError):
-	...
 
 
 class NegotiationReport(BaseReport):
@@ -20,10 +17,6 @@ class NegotiationReport(BaseReport):
 	subscription_info_model = SubscriptionInfo
 	bonus_model = Bonus
 	bonus_info_model = BonusInfo
-
-	def __init__(self, model, user, **options):
-		super().__init__(model, user, **options)
-		self._caches = {}
 
 	def get_asset(self, code):
 		"""A empresa"""
@@ -44,23 +37,6 @@ class NegotiationReport(BaseReport):
 			qs_options['asset__category__in'] = categories
 		return qs_options
 
-	def get_cache(self, key: str):
-		try:
-			return self._caches[key]
-		except KeyError as exc:
-			raise EmptyError(exc)
-
-	def remove_cache(self, key: str):
-		return self._caches.pop(key, None)
-
-	def set_cache(self, key: str, value):
-		self._caches[key] = value
-		return value
-
-	def reset_cache(self):
-		"""Limpa valores de cache"""
-		self._caches.clear()
-
 	@staticmethod
 	def _update_defaults(instance, defaults):
 		"""Atualiza, se necessário a instância com valores padrão"""
@@ -77,9 +53,9 @@ class NegotiationReport(BaseReport):
 	def get_bonus_registry_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de bônus no intervalo pela data"""
 		try:
-			return self.get_cache('bonus_registry_by_date')
-		except EmptyError:
-			by_date = self.set_cache('bonus_registry_by_date', {})
+			return self.cache.get('bonus_registry_by_date')
+		except EmptyCacheError:
+			by_date = self.cache.set('bonus_registry_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date_com__gte'] = options['start_date']
 		qs_options['date_com__lte'] = options['end_date']
@@ -90,9 +66,9 @@ class NegotiationReport(BaseReport):
 	def get_bonus_by_date(self, **options) -> dict:
 		"""Cache dos bônus registrados para a data de incorporação"""
 		try:
-			return self.get_cache('bonus_by_date')
-		except EmptyError:
-			by_date = self.set_cache('bonus_by_date', {})
+			return self.cache.get('bonus_by_date')
+		except EmptyCacheError:
+			by_date = self.cache.set('bonus_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['bonus__date__gte'] = options['start_date']
 		qs_options['bonus__date__lte'] = options['end_date']
@@ -186,11 +162,11 @@ class NegotiationReport(BaseReport):
 			)
 			if created:
 				# sempre é necessário limpar o cache para garantir que esse novo registro vai ser calculado no futuro
-				self.remove_cache('bonus_by_date')
+				self.cache.remove('bonus_by_date')
 			# atualiza os dados sempre que necessário
 			elif self._update_defaults(bonus_info, defaults):
 				# sempre é necessário limpar o cache para garantir que esse novo registro vai ser calculado no futuro
-				self.remove_cache('bonus_by_date')
+				self.cache.remove('bonus_by_date')
 
 			event = Event("Valor da bonificação",
 			              quantity=quantity,
@@ -205,9 +181,9 @@ class NegotiationReport(BaseReport):
 	def get_subscription_registry_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de subscrição pela 'data com'"""
 		try:
-			return self.get_cache('subscription_registry_by_date')
-		except EmptyError:
-			by_date = self.set_cache('subscription_registry_by_date', {})
+			return self.cache.get('subscription_registry_by_date')
+		except EmptyCacheError:
+			by_date = self.cache.set('subscription_registry_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date_com__gte'] = options['start_date']
 		qs_options['date_com__lte'] = options['end_date']
@@ -218,9 +194,9 @@ class NegotiationReport(BaseReport):
 	def get_subscription_by_date(self, **options) -> dict:
 		"""Cache dos registros de subscrição pela data da incorporação"""
 		try:
-			return self.get_cache('subscription_by_date')
-		except EmptyError:
-			by_date = self.set_cache('subscription_by_date', {})
+			return self.cache.get('subscription_by_date')
+		except EmptyCacheError:
+			by_date = self.cache.set('subscription_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['subscription__date__gte'] = options['start_date']
 		qs_options['subscription__date__lte'] = options['end_date']
@@ -310,11 +286,11 @@ class NegotiationReport(BaseReport):
 			)
 			if created:
 				# necessário remover o cache para incluir o novo registro
-				self.remove_cache('subscription_by_date')
+				self.cache.remove('subscription_by_date')
 			# atualiza os dados sempre que necessário
 			elif self._update_defaults(subscription_info, defaults):
 				# necessário remover o cache para atualizar o registro existente
-				self.remove_cache('subscription_by_date')
+				self.cache.remove('subscription_by_date')
 
 			if subscription_quantity > 0:
 				try:
@@ -335,9 +311,9 @@ class NegotiationReport(BaseReport):
 	def get_events_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de eventos no intervalo pela data"""
 		try:
-			return self.get_cache('events_by_date')
-		except EmptyError:
-			by_date = self.set_cache('events_by_date', {})
+			return self.cache.get('events_by_date')
+		except EmptyCacheError:
+			by_date = self.cache.set('events_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date_com__gte'] = options['start_date']
 		qs_options['date_com__lte'] = options['end_date']
@@ -420,9 +396,9 @@ class NegotiationReport(BaseReport):
 
 	def get_earnings_group_by_date(self, **options):
 		try:
-			return self.get_cache('earnings_by_date')
-		except EmptyError:
-			by_date = self.set_cache('earnings_by_date', {})
+			return self.cache.get('earnings_by_date')
+		except EmptyCacheError:
+			by_date = self.cache.set('earnings_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
 		qs_options['date__gte'] = options['start_date']
 		qs_options['date__lte'] = options['end_date']
@@ -583,5 +559,5 @@ class NegotiationReport(BaseReport):
 			})
 		self.results.sort(key=self.results_sorted)
 		# reset cache
-		self.reset_cache()
+		self.cache.clear()
 		return self.results
