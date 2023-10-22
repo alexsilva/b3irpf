@@ -34,5 +34,5 @@ class BaseReport:
 		sort_keys.append(item['code'])
 		return sort_keys
 
-	def report(self, date_start: datetime.date, date_end: datetime.date, **options):
+	def generate(self, date_start: datetime.date, date_end: datetime.date, **options):
 		raise NotImplementedError
