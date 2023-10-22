@@ -132,7 +132,7 @@ class AdminReportIrpfModelView(AdminFormView):
 				start, end = dates.get_month_interval(now)
 
 		# gera os dados de results
-		report.report(
+		report.generate(
 			start, end,
 			institution=institution,
 			asset=asset,

@@ -498,7 +498,7 @@ class NegotiationReport(BaseReport):
 			assets[ticker] = asset
 		return assets
 
-	def report(self, start_date: datetime.date, end_date: datetime.date, **options):
+	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
 		self.options.setdefault('start_date', start_date)
 		self.options.setdefault('end_date', end_date)
 		self.options.setdefault('consolidation', self.position_model.CONSOLIDATION_YEARLY)

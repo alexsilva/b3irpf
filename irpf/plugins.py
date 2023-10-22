@@ -432,7 +432,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		"""Gera dados estatísticos"""
 		stats = self.stats_report_class(self.user)
 		start_date = report.get_opts('start_date')
-		stats.report(date=start_date, results=report.get_results())
+		stats.generate(date=start_date, results=report.get_results())
 		return stats
 
 	def get_context_data(self, context, **kwargs):

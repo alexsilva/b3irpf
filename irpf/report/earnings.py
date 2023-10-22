@@ -39,7 +39,7 @@ class EarningsReport(BaseReport):
 		queryset = self.model.objects.filter(**qs_options)
 		return queryset
 
-	def report(self, date_start, date_end, **options):
+	def generate(self, date_start, date_end, **options):
 		results = []
 		assets = {}
 		asset = options.get('asset')

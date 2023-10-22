@@ -61,7 +61,7 @@ class StatsReport:
 	def get_results(self):
 		return self.results
 
-	def report(self, date: datetime.date, results: list, **options) -> dict:
+	def generate(self, date: datetime.date, results: list, **options) -> dict:
 		consolidation = options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_YEARLY)
 		self.results.clear()
 		for item in results:
