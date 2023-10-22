@@ -13,6 +13,7 @@ from datetime import datetime
 
 
 from irpf.models import Institution, Asset, Position
+from irpf.report import BaseReport
 from irpf.utils import MonthYearDates
 from irpf.views.base import AdminFormView
 from irpf.widgets import MonthYearWidget, MonthYearField
@@ -59,8 +60,8 @@ class AdminReportIrpfModelView(AdminFormView):
 	def init_request(self, *args, **kwargs):
 		super().init_request(*args, **kwargs)
 		self.model_app_label = self.kwargs['model_app_label']
-		self.report = self.results = None
 		self.start_date = self.ts = self.end_date = None
+		self.report: BaseReport = None
 
 	def get_media(self):
 		media = super().get_media()
@@ -97,7 +98,7 @@ class AdminReportIrpfModelView(AdminFormView):
 
 		report_class = import_string(model.report_class)
 
-		self.report = self.report_object(report_class, model, self.user)
+		report = self.report_object(report_class, model, self.user)
 
 		now = datetime.now()
 
@@ -130,18 +131,21 @@ class AdminReportIrpfModelView(AdminFormView):
 				dates = MonthYearDates(dates.month - 1 if dates.month > 1 else 1, dates.year)
 				start, end = dates.get_month_interval(now)
 
-		results = self.report.report(start, end,
-		                             institution=institution,
-		                             asset=asset,
-		                             consolidation=consolidation,
-		                             categories=categories)
+		# gera os dados de results
+		report.report(
+			start, end,
+			institution=institution,
+			asset=asset,
+			consolidation=consolidation,
+			categories=categories
+		)
 		self.start_date, self.end_date = start, end
-		return results
+		return report
 
 	@filter_hook
 	def form_valid(self, form):
 		ts = time.time()
-		self.results = self.report_generate(form)
+		self.report = self.report_generate(form)
 		if form.cleaned_data['ts']:  # tempo da operação
 			self.ts = time.time() - ts
 		form.data = self._get_form_data(form, self.start_date, self.end_date)
@@ -168,13 +172,13 @@ class AdminReportIrpfModelView(AdminFormView):
 	@filter_hook
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		if self.report and self.results:
+		if self.report and (results := self.report.get_results()):
 			context['report'] = {
+				'report': self.report,
+				'results': results,
 				'start_date': self.start_date,
 				'end_date': self.end_date,
 				'ts': self.ts,
-				'report': self.report,
-				'results': self.results
 			}
 		return context
 

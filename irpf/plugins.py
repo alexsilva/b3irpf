@@ -146,12 +146,12 @@ class ReportBaseAdminPlugin(BaseAdminPlugin):
 			value = field.initial
 		return value
 
-	def report_generate(self, results, form):
-		if self.is_save_position and self.admin_view.report and results:
-			self.save(self.admin_view.end_date, results, self.admin_view.report)
-		return results
+	def report_generate(self, report, form):
+		if self.is_save_position and report.get_results():
+			self.save(self.admin_view.end_date, report)
+		return report
 
-	def save(self, date: datetime.date, results: list, report: BaseReport):
+	def save(self, date: datetime.date, report: BaseReport):
 		...
 
 
@@ -206,9 +206,9 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 				continue
 
 	@atomic
-	def save(self, date: datetime.date, results: list, report: BaseReport):
+	def save(self, date: datetime.date, report: BaseReport):
 		try:
-			for item in results:
+			for item in report.get_results():
 				asset = item['asset']
 				# ativo não cadastrado
 				if asset.instance is None:
@@ -419,20 +419,20 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			if not created:
 				self._update_defaults(instance, defaults)
 
-	def report_generate(self, results, form):
-		if self.admin_view.report:
-			date = self.admin_view.report.get_opts('start_date')
-			self.admin_view.stats = self.get_stats(date, results)
-		return super().report_generate(results, form)
+	def report_generate(self, report, form):
+		if report.get_results():
+			self.admin_view.stats = self.get_stats(report)
+		return super().report_generate(report, form)
 
 	@atomic
-	def save(self, date: datetime.date, results: list, report: BaseReport):
+	def save(self, date: datetime.date, report: BaseReport):
 		return self.save_stats(date, report, self.admin_view.stats.get_results())
 
-	def get_stats(self, date, results):
+	def get_stats(self, report):
 		"""Gera dados estatísticos"""
 		stats = self.stats_report_class(self.user)
-		stats.report(date=date, results=results)
+		start_date = report.get_opts('start_date')
+		stats.report(date=start_date, results=report.get_results())
 		return stats
 
 	def get_context_data(self, context, **kwargs):
