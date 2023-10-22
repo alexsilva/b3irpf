@@ -120,20 +120,7 @@ class ListActionModelPlugin(BaseAdminPlugin):
 		return media
 
 
-class SaveReportPositionPlugin(BaseAdminPlugin):
-	"""Salva os dados de posição do relatório"""
-	position_model = Position
-	asset_model = Asset
-	position_permission = list(auth.ACTION_NAME)
-
-	def form_valid(self, response, form):
-		if self.is_save_position and self.admin_view.report and self.admin_view.results:
-			self.save_position(self.admin_view.end_date,
-			                   self.admin_view.results,
-			                   self.admin_view.report,
-			                   self.admin_view.stats)
-		return response
-
+class ReportBaseAdminPlugin(BaseAdminPlugin):
 	def setup(self, *args, **kwargs):
 		self._caches = {}
 
@@ -154,7 +141,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 		if self.admin_view.report:
 			return render_to_string("irpf/blocks/blocks.form.buttons.button_save_position.html")
 
-	def _save(self, date: datetime.date, asset: Assets, report: BaseReport):
+	def save_position(self, date: datetime.date, asset: Assets, report: BaseReport):
 		consolidation = report.get_opts('consolidation')
 		institution = asset.institution
 
@@ -196,16 +183,14 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 				continue
 
 	@atomic
-	def save_position(self, date, results, report, stats):
+	def save(self, date: datetime.date, results: list, report: BaseReport):
 		try:
 			for item in results:
 				asset = item['asset']
 				# ativo não cadastrado
 				if asset.instance is None:
 					continue
-				self._save(date, asset, report)
-
-			self.save_stats(date, report, stats)
+				self.save_position(date, asset, report)
 		except Exception as exc:
 			self.message_user(f"Falha ao salvar posições: {exc}", level="error")
 		else:
