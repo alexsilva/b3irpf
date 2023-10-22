@@ -80,9 +80,17 @@ class Asset(models.Model):
 	                                  on_delete=models.SET_NULL,
 	                                  null=True, blank=True)
 
-	@cached_property
-	def category_choices(self) -> dict:
-		return dict(self.CATEGORY_CHOICES)
+	@classproperty
+	def category_choices(cls) -> dict:
+		return dict(cls.CATEGORY_CHOICES)
+
+	@classproperty
+	def category_by_name_choices(cls) -> dict:
+		return dict([(v, k) for k, v in cls.category_choices.items()])
+
+	@classmethod
+	def get_category_by_name(cls, name):
+		return cls.category_by_name_choices[name]
 
 	@cached_property
 	def category_name(self) -> str:
