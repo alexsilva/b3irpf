@@ -1,6 +1,5 @@
 import time
 from datetime import date
-from irpf.report.stats import StatsReport
 
 import django.forms as django_forms
 from django.apps import apps
@@ -55,14 +54,13 @@ class AdminReportIrpfModelView(AdminFormView):
 	"""View that produces the report with data consolidation (average cost, sum of earnings, etc)."""
 	template_name = "irpf/adminx_report_irpf_view.html"
 	form_class = ReportIRPFForm
-	stats_report_class = StatsReport
 	title = "Relatório IRPF"
 
 	def init_request(self, *args, **kwargs):
 		super().init_request(*args, **kwargs)
 		self.model_app_label = self.kwargs['model_app_label']
 		self.report = self.results = None
-		self.start_date = self.stats = self.ts = self.end_date = None
+		self.start_date = self.ts = self.end_date = None
 
 	def get_media(self):
 		media = super().get_media()
@@ -90,7 +88,7 @@ class AdminReportIrpfModelView(AdminFormView):
 		return report
 
 	@filter_hook
-	def form_valid(self, form):
+	def report_generate(self, form):
 		model = apps.get_model(*self.model_app_label.split('.', 1))
 		report_class = getattr(model, "report_class", None)
 
@@ -132,23 +130,21 @@ class AdminReportIrpfModelView(AdminFormView):
 				dates = MonthYearDates(dates.month - 1 if dates.month > 1 else 1, dates.year)
 				start, end = dates.get_month_interval(now)
 
-		ts = time.time()
-		self.results = self.report.report(start, end,
-		                                  institution=institution,
-		                                  asset=asset,
-		                                  consolidation=consolidation,
-		                                  categories=categories)
-
-		self.stats = self.stats_report_class(self.user, self.results).report(
-			date=start,
-			consolidation=consolidation
-		)
-
-		# tempo da operação
-		if form_data['ts']:
-			self.ts = time.time() - ts
+		results = self.report.report(start, end,
+		                             institution=institution,
+		                             asset=asset,
+		                             consolidation=consolidation,
+		                             categories=categories)
 		self.start_date, self.end_date = start, end
-		form.data = self._get_form_data(form, start, end)
+		return results
+
+	@filter_hook
+	def form_valid(self, form):
+		ts = time.time()
+		self.results = self.report_generate(form)
+		if form.cleaned_data['ts']:  # tempo da operação
+			self.ts = time.time() - ts
+		form.data = self._get_form_data(form, self.start_date, self.end_date)
 		return self.render_to_response(self.get_context_data(form=form))
 
 	@staticmethod
