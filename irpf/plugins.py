@@ -1,4 +1,5 @@
 import collections
+import datetime
 import io
 import itertools
 import re
@@ -11,13 +12,13 @@ from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from guardian.shortcuts import get_objects_for_user, assign_perm
-
 from correpy.domain.entities.security import Security
 from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import TransactionType
 from irpf.fields import CharCodeField
-from irpf.models import Negotiation, Earnings, Position, Asset
-from irpf.report.utils import Assets
+from irpf.models import Negotiation, Earnings, Position, Asset, Statistic
+from irpf.report import BaseReport
+from irpf.report.utils import Assets, Stats
 from irpf.report.stats import StatsReport
 from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
@@ -127,32 +128,50 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 
 	def form_valid(self, response, form):
 		if self.is_save_position and self.admin_view.report and self.admin_view.results:
-			self.save_position(self.admin_view.end_date, self.admin_view.results,
-			                   dict(form.cleaned_data))
+			self.save_position(self.admin_view.end_date,
+			                   self.admin_view.results,
+			                   self.admin_view.report,
+			                   self.admin_view.stats)
 		return response
 
 	def setup(self, *args, **kwargs):
 		self._caches = {}
 
+	@staticmethod
+	def _update_defaults(instance, defaults):
+		"""Atualiza, se necessário a instância com valores padrão"""
+		updated = False
+		for key in defaults:
+			value = defaults[key]
+			if not updated and getattr(instance, key) != value:
+				updated = True
+			setattr(instance, key, value)
+		if updated:
+			instance.save(update_fields=list(defaults))
+		return updated
+
 	def block_form_buttons(self, context, nodes):
 		if self.admin_view.report:
 			return render_to_string("irpf/blocks/blocks.form.buttons.button_save_position.html")
 
-	def _save(self, date, asset: Assets, data: dict):
+	def _save(self, date: datetime.date, asset: Assets, report: BaseReport):
+		consolidation = report.get_opts('consolidation')
 		institution = asset.institution
+
 		defaults = {
 			'quantity': asset.buy.quantity,
 			'avg_price': asset.buy.avg_price,
 			'total': asset.buy.total,
 			'tax': asset.buy.tax
 		}
+
 		# remove registro acima da data
 		self.position_model.objects.filter(
 			user=self.user,
 			date__gt=date,
 			asset=asset.instance,
 			institution=institution,
-			consolidation=data['consolidation']
+			consolidation=consolidation
 		).delete()
 		instance, created = self.position_model.objects.get_or_create(
 			defaults=defaults,
@@ -160,7 +179,7 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 			user=self.user,
 			asset=asset.instance,
 			institution=institution,
-			consolidation=data['consolidation']
+			consolidation=consolidation
 		)
 		if not created:
 			for field_name in defaults:
@@ -177,18 +196,49 @@ class SaveReportPositionPlugin(BaseAdminPlugin):
 				continue
 
 	@atomic
-	def save_position(self, date, results, data):
+	def save_position(self, date, results, report, stats):
 		try:
 			for item in results:
 				asset = item['asset']
 				# ativo não cadastrado
 				if asset.instance is None:
 					continue
-				self._save(date, asset, data)
+				self._save(date, asset, report)
+
+			self.save_stats(date, report, stats)
 		except Exception as exc:
 			self.message_user(f"Falha ao salvar posições: {exc}", level="error")
 		else:
 			self.message_user("Posições salvas com sucesso!", level="info")
+
+	def save_stats(self, date: datetime.date, report: BaseReport, stats: dict[str]):
+		"""Salva dados de estatística"""
+		institution = report.get_opts('institution', None)
+		consolidation = report.get_opts('consolidation')
+
+		for category_name in stats:
+			stats_category: Stats = stats[category_name]
+			category = Asset.get_category_by_name(category_name)
+			defaults = {}
+
+			# prejuízos acumulados em anos anteriores
+			if consolidation == Position.CONSOLIDATION_YEARLY:
+				defaults['cumulative_losses'] = stats_category.losses
+			# prejuízos no mês
+			elif consolidation == Position.CONSOLIDATION_MONTHLY:
+				defaults['losses'] = stats_category.losses
+
+			instance, created = Statistic.objects.get_or_create(
+				category=category,
+				consolidation=consolidation,
+				institution=institution,
+				date=date,
+				user=self.user,
+				defaults=defaults
+			)
+
+			if not created:
+				self._update_defaults(instance, defaults)
 
 	@cached_property
 	def is_save_position(self):
@@ -367,14 +417,12 @@ class ReportStatsAdminPlugin(BaseAdminPlugin):
 
 	def get_stats(self):
 		"""Gera dados estatísticos"""
-		stats = StatsReport(self.admin_view.results)
-		consolidation = self.admin_view.report.options['consolidation']
-		return stats.report(consolidation=consolidation)
+		return self.admin_view.stats
 
 	def get_context_data(self, context, **kwargs):
-		if self.admin_view.report and self.admin_view.results:
-			context['report']['stats_category'] = stats = self.get_stats()
+		if self.admin_view.report and self.admin_view.results and (stats := self.get_stats()):
 			context['report']['stats'] = StatsReport.compile(stats)
+			context['report']['stats_category'] = stats
 		return context
 
 	def block_bonus_stats(self, context, nodes):
