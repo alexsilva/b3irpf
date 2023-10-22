@@ -219,42 +219,6 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 		else:
 			self.message_user("Posições salvas com sucesso!", level="info")
 
-	def save_stats(self, date: datetime.date, report: BaseReport, stats: dict[str]):
-		"""Salva dados de estatística"""
-		institution = report.get_opts('institution', None)
-
-		for category_name in stats:
-			stats_category: Stats = stats[category_name]
-			category = Asset.get_category_by_name(category_name)
-			defaults = {}
-
-			# perdas do ano anterior com o mês
-			cumulative_losses = stats_category.cumulative_losses
-			cumulative_losses += stats_category.losses
-			defaults['cumulative_losses'] = cumulative_losses
-			defaults['losses'] = MoneyLC(0)
-
-			instance, created = Statistic.objects.get_or_create(
-				category=category,
-				consolidation=Statistic.CONSOLIDATION_MONTHLY,
-				institution=institution,
-				date=date,
-				user=self.user,
-				defaults=defaults
-			)
-
-			if not created:
-				self._update_defaults(instance, defaults)
-
-	@cached_property
-	def is_save_position(self):
-		field = django_forms.BooleanField(initial=False)
-		try:
-			value = field.to_python(self.request.GET.get('position'))
-		except django_forms.ValidationError:
-			value = field.initial
-		return value
-
 
 class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 	"""Plugin que faz o registro da nota de corretagem
@@ -415,18 +379,66 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 				self._parser_file(parser, instance)
 
 
-class StatsReportAdminPlugin(BaseAdminPlugin):
+class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	"""Gera dados estatísticos (compra, venda, etc)"""
+	stats_report_class = StatsReport
+	asset_model = Asset
 
 	def init_request(self, *args, **kwargs):
 		return True
 
-	def get_stats(self):
+	def setup(self, *args, **kwargs):
+		super().setup(*args, **kwargs)
+		# guarda a referência na view
+		self.admin_view.stats = None
+
+	def save_stats(self, date: datetime.date, report: BaseReport, stats: dict[str]):
+		"""Salva dados de estatística"""
+		institution = report.get_opts('institution', None)
+
+		for category_name in stats:
+			stats_category: Stats = stats[category_name]
+			category = self.asset_model.get_category_by_name(category_name)
+			defaults = {}
+
+			# perdas do ano anterior com o mês
+			cumulative_losses = stats_category.cumulative_losses
+			cumulative_losses += stats_category.losses
+			defaults['cumulative_losses'] = cumulative_losses
+			defaults['losses'] = MoneyLC(0)
+
+			instance, created = Statistic.objects.get_or_create(
+				category=category,
+				consolidation=Statistic.CONSOLIDATION_MONTHLY,
+				institution=institution,
+				date=date,
+				user=self.user,
+				defaults=defaults
+			)
+
+			if not created:
+				self._update_defaults(instance, defaults)
+
+	def report_generate(self, results, form):
+		if self.admin_view.report:
+			date = self.admin_view.report.get_opts('start_date')
+			self.admin_view.stats = self.get_stats(date, results)
+		return super().report_generate(results, form)
+
+	@atomic
+	def save(self, date: datetime.date, results: list, report: BaseReport):
+		return self.save_stats(date, report, self.admin_view.stats)
+
+	def get_stats(self, date, results):
 		"""Gera dados estatísticos"""
-		return self.admin_view.stats
+		stats = self.stats_report_class(self.user, results).report(
+			date=date
+		)
+		return stats
 
 	def get_context_data(self, context, **kwargs):
-		if self.admin_view.report and self.admin_view.results and (stats := self.get_stats()):
+		if self.admin_view.report:
+			stats = self.admin_view.stats
 			context['report']['stats'] = StatsReport.compile(stats)
 			context['report']['stats_category'] = stats
 		return context
