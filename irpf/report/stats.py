@@ -67,27 +67,11 @@ class StatsReport:
 	@classmethod
 	def compile_months(cls, stats_months: OrderedDict[int], **options) -> Stats:
 		stats_category = OrderedDict()
-		stocks_rates = settings.TAX_RATES['stocks']
-		bdrs_rates = settings.TAX_RATES['bdrs']
-		fiis_rates = settings.TAX_RATES['fiis']
 		for month in stats_months:
 			stats_month = stats_months[month]
 			stats_results = stats_month.get_results()
 			for category_name in stats_results:
 				value: Stats = stats_results[category_name]
-				category = cls.asset_model.get_category_by_name(category_name)
-				if category == cls.asset_model.CATEGORY_STOCK:
-					# vendeu mais que R$ 20.000,00 e teve lucro?
-					if value.sell > MoneyLC(stocks_rates['exempt_profit']) and value.profits:
-						# paga 15% sobre o lucro no swing trade
-						value.taxes = value.profits * Decimal(stocks_rates['swing_trade'])
-				elif category == cls.asset_model.CATEGORY_BDR:
-					if value.profits:
-						#  paga 15% sobre o lucro no swing trade
-						value.taxes = value.profits * Decimal(bdrs_rates['swing_trade'])
-				elif category == cls.asset_model.CATEGORY_FII:
-					#  paga 20% sobre o lucro no swing trade / day trade
-					value.taxes = value.profits * Decimal(fiis_rates['swing_trade'])
 				if (stats := stats_category.get(category_name)) is None:
 					stats_category[category_name] = stats = Stats()
 				stats.update(value)
@@ -97,6 +81,28 @@ class StatsReport:
 
 	def get_results(self):
 		return self.results
+
+	def generate_taxes(self):
+		"""Calcula os impostos a se serem pagos (quando aplicável)"""
+		stocks_rates = settings.TAX_RATES['stocks']
+		bdrs_rates = settings.TAX_RATES['bdrs']
+		fiis_rates = settings.TAX_RATES['fiis']
+
+		for category_name in self.results:
+			stats: Stats = self.results[category_name]
+			category = self.asset_model.get_category_by_name(category_name)
+			if category == self.asset_model.CATEGORY_STOCK:
+				# vendeu mais que R$ 20.000,00 e teve lucro?
+				if stats.sell > MoneyLC(stocks_rates['exempt_profit']) and stats.profits:
+					# paga 15% sobre o lucro no swing trade
+					stats.taxes = stats.profits * Decimal(stocks_rates['swing_trade'])
+			elif category == self.asset_model.CATEGORY_BDR:
+				if stats.profits:
+					#  paga 15% sobre o lucro no swing trade
+					stats.taxes = stats.profits * Decimal(bdrs_rates['swing_trade'])
+			elif category == self.asset_model.CATEGORY_FII:
+				#  paga 20% sobre o lucro no swing trade / day trade
+				stats.taxes = stats.profits * Decimal(fiis_rates['swing_trade'])
 
 	def generate(self, date: datetime.date, results: list, **options) -> dict:
 		options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_MONTHLY)
@@ -121,4 +127,6 @@ class StatsReport:
 
 			# total de todos os períodos
 			stats.patrimony += asset.buy.total
+		# taxas de período
+		self.generate_taxes()
 		return self.results
