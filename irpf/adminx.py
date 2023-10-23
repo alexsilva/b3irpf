@@ -124,12 +124,14 @@ class PositionAdmin(BaseIRPFAdmin):
 	list_filter = (
 		"asset__code",
 		'consolidation',
-		'institution'
+		'institution',
+		'date'
 	)
 	search_fields = (
 		'asset__code',
 		'asset__name',
-		'institution__name'
+		'institution__name',
+		'date'
 	)
 	list_display = (
 		'asset_code',
