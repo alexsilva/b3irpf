@@ -460,19 +460,14 @@ class NegotiationReport(BaseReport):
 			related_fields.append('institution')
 		if (field_name := 'asset') in qs_options:
 			related_fields.append(field_name)
-		# a data de posição é sempre o último dia do mês ou ano.
-		if consolidation == self.position_model.CONSOLIDATION_YEARLY:
-			qs_options['date'] = datetime.date.max.replace(year=date.year - 1)
-		elif consolidation == self.position_model.CONSOLIDATION_MONTHLY:
-			if date.month - 1 > 0:
-				max_day = calendar.monthrange(date.year, date.month - 1)[1]
-				qs_options['date'] = datetime.date(date.year, date.month - 1, max_day)
-			else:
-				# começo de ano sempre pega o compilado anual
-				qs_options['consolidation'] = self.position_model.CONSOLIDATION_YEARLY
-				qs_options['date'] = datetime.date.max.replace(year=date.year - 1)
+
+		if date.month - 1 > 0:
+			max_day = calendar.monthrange(date.year, date.month - 1)[1]
+			qs_options['date'] = datetime.date(date.year, date.month - 1, max_day)
 		else:
-			qs_options['date'] = date
+			max_day = calendar.monthrange(date.year - 1, 12)[1]
+			qs_options['date'] = datetime.date(date.year - 1, 12, max_day)
+
 		queryset = self.position_model.objects.filter(**qs_options)
 		queryset = queryset.exclude(quantity=0)
 		if related_fields:
@@ -501,7 +496,7 @@ class NegotiationReport(BaseReport):
 	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
 		self.options.setdefault('start_date', start_date)
 		self.options.setdefault('end_date', end_date)
-		self.options.setdefault('consolidation', self.position_model.CONSOLIDATION_YEARLY)
+		self.options.setdefault('consolidation', self.position_model.CONSOLIDATION_MONTHLY)
 		self.options.setdefault('categories', ())
 		self.options.update(options)
 
