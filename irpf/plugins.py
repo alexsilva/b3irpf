@@ -1,8 +1,8 @@
 import collections
-import datetime
 import io
 import itertools
 import re
+from collections import OrderedDict
 import django.forms as django_forms
 from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from django.contrib.auth import get_permission_codename
@@ -146,12 +146,12 @@ class ReportBaseAdminPlugin(BaseAdminPlugin):
 			value = field.initial
 		return value
 
-	def report_generate(self, report, form):
-		if self.is_save_position and report.get_results():
-			self.save(self.admin_view.end_date, report)
-		return report
+	def report_generate(self, reports: OrderedDict[int], form):
+		if self.is_save_position and reports:
+			self.save(reports)
+		return reports
 
-	def save(self, date: datetime.date, report: BaseReport):
+	def save(self, reports: OrderedDict[int]):
 		...
 
 
@@ -161,11 +161,12 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 	position_permission = list(auth.ACTION_NAME)
 
 	def block_form_buttons(self, context, nodes):
-		if self.admin_view.report:
+		if self.admin_view.reports:
 			return render_to_string("irpf/blocks/blocks.form.buttons.button_save_position.html")
 
-	def save_position(self, date: datetime.date, asset: Assets, report: BaseReport):
+	def save_position(self, report: BaseReport, asset: Assets):
 		consolidation = report.get_opts('consolidation')
+		date = report.get_opts('end_date')
 		institution = asset.institution
 
 		defaults = {
@@ -206,14 +207,16 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 				continue
 
 	@atomic
-	def save(self, date: datetime.date, report: BaseReport):
+	def save(self, reports: OrderedDict[int]):
 		try:
-			for item in report.get_results():
-				asset = item['asset']
-				# ativo não cadastrado
-				if asset.instance is None:
-					continue
-				self.save_position(date, asset, report)
+			for month in reports:
+				report = reports[month]
+				for item in report.get_results():
+					asset = item['asset']
+					# ativo não cadastrado
+					if asset.instance is None:
+						continue
+					self.save_position(report, asset)
 		except Exception as exc:
 			self.message_user(f"Falha ao salvar posições: {exc}", level="error")
 		else:
@@ -392,12 +395,14 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		# guarda a referência na view
 		self.admin_view.stats = None
 
-	def save_stats(self, date: datetime.date, report: BaseReport, stats: dict[str]):
+	def save_stats(self, report: BaseReport, stats: StatsReport):
 		"""Salva dados de estatística"""
 		institution = report.get_opts('institution', None)
+		date = report.get_opts('end_date')
 
-		for category_name in stats:
-			stats_category: Stats = stats[category_name]
+		stats_results = stats.get_results()
+		for category_name in stats_results:
+			stats_category: Stats = stats_results[category_name]
 			category = self.asset_model.get_category_by_name(category_name)
 			defaults = {}
 
@@ -419,29 +424,37 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			if not created:
 				self._update_defaults(instance, defaults)
 
-	def report_generate(self, report, form):
-		if report.get_results():
-			self.admin_view.stats = self.get_stats(report)
-		return super().report_generate(report, form)
+	def report_generate(self, reports, form):
+		self.admin_view.stats = self.get_stats(reports)
+		return super().report_generate(reports, form)
 
 	@atomic
-	def save(self, date: datetime.date, report: BaseReport):
-		return self.save_stats(date, report, self.admin_view.stats.get_results())
+	def save(self, reports: OrderedDict[int]):
+		for month in reports:
+			report = reports[month]
+			stats = self.admin_view.stats[month]
+			self.save_stats(report, stats)
 
-	def get_stats(self, report):
+	def get_stats(self, reports):
 		"""Gera dados estatísticos"""
-		stats = self.stats_report_class(self.user)
-		start_date = report.get_opts('start_date')
-		stats.generate(date=start_date, results=report.get_results())
-		return stats
+		stats_months = collections.OrderedDict()
+		for month in reports:
+			report = reports[month]
+			date = report.get_opts('end_date')
+			stats = self.stats_report_class(self.user)
+			stats.generate(date=date, results=report.get_results())
+			stats_months[month] = stats
+		return stats_months
 
 	def get_context_data(self, context, **kwargs):
-		if self.admin_view.report:
-			stats = self.admin_view.stats
+		if self.admin_view.reports:
+			stats_months = self.stats_report_class.compile_months(
+				self.admin_view.stats
+			)
 			stats_category = collections.OrderedDict([
-				('TODOS', stats.compile())
+				('TODOS', self.stats_report_class.compile(stats_months))
 			])
-			stats_category.update(stats.get_results())
+			stats_category.update(stats_months)
 			context['report']['stats_category'] = stats_category
 		return context
 

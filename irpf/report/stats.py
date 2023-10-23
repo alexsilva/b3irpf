@@ -1,9 +1,12 @@
 import calendar
 import datetime
 from collections import OrderedDict
+from decimal import Decimal
+
+from django.conf import settings
 
 from irpf.models import Asset, Statistic
-from irpf.report.utils import Stats
+from irpf.report.utils import Stats, MoneyLC
 
 
 class StatsReport:
@@ -52,17 +55,51 @@ class StatsReport:
 			self.results[category_name] = stats
 		return stats
 
-	def compile(self) -> Stats:
-		_stats = Stats()
-		for stats in self.results.values():
-			_stats += stats
-		return _stats
+	@staticmethod
+	def compile(stats_categories: OrderedDict[int]) -> Stats:
+		stats = Stats()
+		for stats_category in stats_categories.values():
+			stats.update(stats_category)
+			stats.cumulative_losses += stats_category.cumulative_losses
+			stats.patrimony += stats_category.patrimony
+		return stats
+
+	@classmethod
+	def compile_months(cls, stats_months: OrderedDict[int], **options) -> Stats:
+		stats_category = OrderedDict()
+		stocks_rates = settings.TAX_RATES['stocks']
+		bdrs_rates = settings.TAX_RATES['bdrs']
+		fiis_rates = settings.TAX_RATES['fiis']
+		for month in stats_months:
+			stats_month = stats_months[month]
+			results = stats_month.get_results()
+			for category_name in results:
+				value: Stats = results[category_name]
+				category = cls.asset_model.get_category_by_name(category_name)
+				if category == cls.asset_model.CATEGORY_STOCK:
+					# vendeu mais que R$ 20.000,00 e teve lucro?
+					if value.sell > MoneyLC(stocks_rates['exempt_profit']) and value.profits:
+						# paga 15% sobre o lucro no swing trade
+						value.taxes = value.profits * Decimal(stocks_rates['swing_trade'])
+				elif category == cls.asset_model.CATEGORY_BDR:
+					if value.profits:
+						#  paga 15% sobre o lucro no swing trade
+						value.taxes = value.profits * Decimal(bdrs_rates['swing_trade'])
+				elif category == cls.asset_model.CATEGORY_FII:
+					#  paga 20% sobre o lucro no swing trade / day trade
+					value.taxes = value.profits * Decimal(fiis_rates['swing_trade'])
+				if (stats := stats_category.get(category_name)) is None:
+					stats_category[category_name] = stats = Stats()
+				stats.update(value)
+				stats.cumulative_losses = value.cumulative_losses
+				stats.patrimony = value.patrimony
+		return stats_category
 
 	def get_results(self):
 		return self.results
 
 	def generate(self, date: datetime.date, results: list, **options) -> dict:
-		consolidation = options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_YEARLY)
+		options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_MONTHLY)
 		self.results.clear()
 		for item in results:
 			asset = item['asset']
@@ -75,13 +112,7 @@ class StatsReport:
 
 			stats.buy += asset.period.buy.total
 			stats.sell += asset.sell.total + asset.sell.fraction.total
-
-			# taxas do período sendo trabalhado
-			if consolidation == self.statistic_model.CONSOLIDATION_YEARLY:
-				stats.tax += asset.buy.tax + asset.sell.tax
-			else:
-				stats.tax += asset.period.buy.tax + asset.sell.tax
-
+			stats.tax += asset.period.buy.tax + asset.sell.tax
 			stats.profits += asset.sell.profits
 			stats.losses += asset.sell.losses
 

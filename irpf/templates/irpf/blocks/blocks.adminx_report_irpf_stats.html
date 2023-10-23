@@ -71,7 +71,18 @@
       </div>
     </li>
   {% endif %}
-
+  {% if stats.taxes %}
+    <li class="list-group-item py-2">
+      <div class="row">
+        <div class="col-sm-8 text-center text-sm-left text-success">
+          Imposto
+        </div>
+        <div class="col-sm-4 text-center text-sm-right">
+          <span class="text-muted">{{ stats.taxes }}</span>
+        </div>
+      </div>
+    </li>
+  {% endif %}
   {% if stats.bonus %}
     <li class="list-group-item py-2">
       <div class="row">
