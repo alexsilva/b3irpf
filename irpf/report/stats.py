@@ -72,9 +72,9 @@ class StatsReport:
 		fiis_rates = settings.TAX_RATES['fiis']
 		for month in stats_months:
 			stats_month = stats_months[month]
-			results = stats_month.get_results()
-			for category_name in results:
-				value: Stats = results[category_name]
+			stats_results = stats_month.get_results()
+			for category_name in stats_results:
+				value: Stats = stats_results[category_name]
 				category = cls.asset_model.get_category_by_name(category_name)
 				if category == cls.asset_model.CATEGORY_STOCK:
 					# vendeu mais que R$ 20.000,00 e teve lucro?
