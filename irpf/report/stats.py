@@ -82,27 +82,48 @@ class StatsReport:
 	def get_results(self):
 		return self.results
 
+	def calc_profits(self, profits, stats: Stats):
+		"""Lucro com compensação de prejuízo"""
+		if profits and (cumulative_losses := abs(stats.cumulative_losses)):
+			if cumulative_losses >= profits:
+				stats.cumulative_losses += profits
+				profits = Decimal(0)
+			else:
+				profits -= cumulative_losses
+				stats.cumulative_losses = Decimal(0)
+		return profits
+
 	def generate_taxes(self):
 		"""Calcula os impostos a se serem pagos (quando aplicável)"""
 		stocks_rates = settings.TAX_RATES['stocks']
 		bdrs_rates = settings.TAX_RATES['bdrs']
 		fiis_rates = settings.TAX_RATES['fiis']
 
+		category_bdr_name = self.asset_model.category_choices[self.asset_model.CATEGORY_BDR]
+		category_stock_name = self.asset_model.category_choices[self.asset_model.CATEGORY_STOCK]
+
 		for category_name in self.results:
 			stats: Stats = self.results[category_name]
 			category = self.asset_model.get_category_by_name(category_name)
 			if category == self.asset_model.CATEGORY_STOCK:
 				# vendeu mais que R$ 20.000,00 e teve lucro?
-				if stats.sell > MoneyLC(stocks_rates['exempt_profit']) and stats.profits:
-					# paga 15% sobre o lucro no swing trade
-					stats.taxes = stats.profits * Decimal(stocks_rates['swing_trade'])
+				if stats.sell > MoneyLC(stocks_rates['exempt_profit']):
+					if profits := self.calc_profits(stats.profits, stats):
+						# compensação de prejuízos de bdrs
+						if profits := self.calc_profits(profits, self.results[category_bdr_name]):
+							# paga 15% sobre o lucro no swing trade
+							stats.taxes = profits * Decimal(stocks_rates['swing_trade'])
 			elif category == self.asset_model.CATEGORY_BDR:
-				if stats.profits:
-					#  paga 15% sobre o lucro no swing trade
-					stats.taxes = stats.profits * Decimal(bdrs_rates['swing_trade'])
+				# compensação de prejuízos da categoria
+				if profits := self.calc_profits(stats.profits, stats):
+					# compensação de prejuízos de ações
+					if profits := self.calc_profits(profits, self.results[category_stock_name]):
+						# paga 15% sobre o lucro no swing trade
+						stats.taxes = profits * Decimal(bdrs_rates['swing_trade'])
 			elif category == self.asset_model.CATEGORY_FII:
-				#  paga 20% sobre o lucro no swing trade / day trade
-				stats.taxes = stats.profits * Decimal(fiis_rates['swing_trade'])
+				if profits := self.calc_profits(stats.profits, stats):
+					# paga 20% sobre o lucro no swing trade / day trade
+					stats.taxes = profits * Decimal(fiis_rates['swing_trade'])
 
 	def generate(self, date: datetime.date, results: list, **options) -> dict:
 		options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_MONTHLY)
@@ -124,6 +145,9 @@ class StatsReport:
 
 			# total de bônus recebido dos ativos
 			stats.bonus += asset.bonus
+
+			# os prejuízos vão acumulando
+			stats.cumulative_losses += asset.sell.losses
 
 			# total de todos os períodos
 			stats.patrimony += asset.buy.total
