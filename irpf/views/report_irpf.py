@@ -128,6 +128,8 @@ class AdminReportIrpfModelView(AdminFormView):
 		reports_months = OrderedDict()
 		for start, end in months:
 			report = self.report_object(report_class, model, self.user)
+			# após o processamento do relatório esse dado vai ser removido
+			report.cache.set('report_history', reports_months.get(start.month - 1))
 			# gera os dados de results
 			report.generate(
 				start, end,
