@@ -84,6 +84,22 @@ AUTHENTICATION_BACKENDS = [
     'guardian.backends.ObjectPermissionBackend',
 ]
 
+# alíquotas de imposto
+TAX_RATES = {
+    'stocks': {
+        'exempt_profit': '20000',  # 20.000,00
+        'swing_trade': '0.15',  # 15%
+        'day_trade': '0.2'  # 20%
+    },
+    'bdrs': {
+        'swing_trade': '0.15',  # 15%
+        'day_trade': '0.2'  # 20%
+    },
+    'fiis': {
+        'swing_trade': '0.2',  # 20%
+        'day_trade': '0.2'  # 20%
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
