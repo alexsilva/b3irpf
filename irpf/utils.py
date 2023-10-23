@@ -30,7 +30,12 @@ class MonthYearDates:
 		"""
 		months = []
 		year = now.year if self.year > now.year else self.year
-		year_month = now.month if self.month < now.month else self.month
+		if year < now.year:
+			year_month = 12
+		elif year >= now.year:
+			year_month = now.month
+		else:
+			year_month = self.month
 		for month in range(1, year_month + 1):
 			max_day = calendar.monthrange(year, month)[1]
 			months.append([
