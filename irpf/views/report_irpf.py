@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import time
 from datetime import date
 
@@ -61,7 +62,7 @@ class AdminReportIrpfModelView(AdminFormView):
 		super().init_request(*args, **kwargs)
 		self.model_app_label = self.kwargs['model_app_label']
 		self.start_date = self.ts = self.end_date = None
-		self.report: BaseReport = None
+		self.reports: OrderedDict[int] = None
 
 	def get_media(self):
 		media = super().get_media()
@@ -97,9 +98,6 @@ class AdminReportIrpfModelView(AdminFormView):
 			raise Http404
 
 		report_class = import_string(model.report_class)
-
-		report = self.report_object(report_class, model, self.user)
-
 		now = datetime.now()
 
 		form_data = form.cleaned_data
@@ -109,43 +107,46 @@ class AdminReportIrpfModelView(AdminFormView):
 		categories = form_data['categories']
 		asset = form_data['asset']
 
-		if consolidation == Position.CONSOLIDATION_YEARLY:
-			start, end = dates.get_year_interval(now)
-		elif consolidation == Position.CONSOLIDATION_MONTHLY:
-			start, end = dates.get_month_interval(now)
-		else:
-			start, end = None, None
-
 		if (_dates := self.request.GET.get('_dates')) == "next":
 			if consolidation == Position.CONSOLIDATION_YEARLY:
 				dates = MonthYearDates(dates.month, dates.year + 1)
-				start, end = dates.get_year_interval(now)
 			elif consolidation == Position.CONSOLIDATION_MONTHLY:
 				dates = MonthYearDates(dates.month + 1 if dates.month < 12 else 12, dates.year)
-				start, end = dates.get_month_interval(now)
 		elif _dates == "prev":
 			if consolidation == Position.CONSOLIDATION_YEARLY:
 				dates = MonthYearDates(dates.month, dates.year - 1)
-				start, end = dates.get_year_interval(now)
 			elif consolidation == Position.CONSOLIDATION_MONTHLY:
 				dates = MonthYearDates(dates.month - 1 if dates.month > 1 else 1, dates.year)
-				start, end = dates.get_month_interval(now)
 
-		# gera os dados de results
-		report.generate(
-			start, end,
-			institution=institution,
-			asset=asset,
-			consolidation=consolidation,
-			categories=categories
-		)
-		self.start_date, self.end_date = start, end
-		return report
+		if consolidation == Position.CONSOLIDATION_YEARLY:
+			months = dates.get_year_months(now)
+		elif consolidation == Position.CONSOLIDATION_MONTHLY:
+			months = [dates.get_month_interval(now)]
+		else:
+			months = []
+
+		reports_months = OrderedDict()
+		for start, end in months:
+			report = self.report_object(report_class, model, self.user)
+			# gera os dados de results
+			report.generate(
+				start, end,
+				institution=institution,
+				categories=categories,
+				asset=asset
+			)
+			reports_months[start.month] = report
+
+		if len(months) == 1:
+			self.start_date, self.end_date = months[0]
+		else:
+			self.start_date, self.end_date = months[0][0], months[-1][1]
+		return reports_months
 
 	@filter_hook
 	def form_valid(self, form):
 		ts = time.time()
-		self.report = self.report_generate(form)
+		self.reports = self.report_generate(form)
 		if form.cleaned_data['ts']:  # tempo da operação
 			self.ts = time.time() - ts
 		form.data = self._get_form_data(form, self.start_date, self.end_date)
@@ -172,10 +173,11 @@ class AdminReportIrpfModelView(AdminFormView):
 	@filter_hook
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		if self.report and (results := self.report.get_results()):
+		if self.reports:
+			report = self.reports[self.end_date.month]
 			context['report'] = {
-				'report': self.report,
-				'results': results,
+				'reports': self.reports,
+				'results': report.get_results(),
 				'start_date': self.start_date,
 				'end_date': self.end_date,
 				'ts': self.ts,
