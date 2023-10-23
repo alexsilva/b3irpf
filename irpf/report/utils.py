@@ -56,7 +56,7 @@ class Event:
 
 
 class Stats:
-	def __init__(self, buy: Decimal = Decimal(0),
+	def __init__(self, buy: MoneyLC = MoneyLC(0),
 	             sell: MoneyLC = MoneyLC(0),
 	             profits: MoneyLC = MoneyLC(0),
 	             losses: MoneyLC = MoneyLC(0),
@@ -72,17 +72,17 @@ class Stats:
 		self.patrimony = patrimony
 		self.tax = tax
 		self.bonus = Event("Bonificação") if bonus is None else bonus
+		self.taxes = MoneyLC(0)
 
-	def __add__(self, stats):
+	def update(self, stats):
 		"""Acrescenta os dados de outro objeto stats"""
 		self.buy += stats.buy
 		self.sell += stats.sell
 		self.profits += stats.profits
 		self.losses += stats.losses
-		self.cumulative_losses += stats.cumulative_losses
-		self.patrimony += stats.patrimony
 		self.tax += stats.tax
 		self.bonus += stats.bonus
+		self.taxes += stats.taxes
 		return self
 
 	def __bool__(self):
