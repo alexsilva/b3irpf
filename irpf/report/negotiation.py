@@ -495,7 +495,7 @@ class NegotiationReport(BaseReport):
 		if report_history := self.cache.get('report_history', None):
 			for item in report_history.get_results():
 				asset = item['asset']
-				if asset.ticker in positions or asset.buy.quantity == 0:
+				if asset.ticker in positions:
 					continue
 				assets = Assets(
 					ticker=asset.ticker,
