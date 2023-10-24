@@ -49,7 +49,7 @@ class StatsReport:
 			stats = Stats()
 			if statistics:
 				# prejuízos acumulados no ano continuam contando em datas futuras
-				stats.cumulative_losses += statistics.cumulative_losses
+				stats.cumulative_losses = statistics.cumulative_losses
 			self.results[category_name] = stats
 		return stats
 
@@ -82,15 +82,24 @@ class StatsReport:
 
 	def calc_profits(self, profits, stats: Stats):
 		"""Lucro com compensação de prejuízo"""
-		if profits and (cumulative_losses := abs(stats.cumulative_losses)):
-			if cumulative_losses >= profits:
-				stats.cumulative_losses += profits
-				stats.compensated_losses += profits
-				profits = Decimal(0)
-			else:
-				profits -= cumulative_losses
-				stats.compensated_losses += cumulative_losses
-				stats.cumulative_losses = Decimal(0)
+		if profits:
+			# compensação de prejuízos acumulados
+			if cumulative_losses := abs(stats.cumulative_losses):
+				if cumulative_losses >= profits:
+					stats.cumulative_losses += profits
+					stats.compensated_losses += profits
+					profits = Decimal(0)
+				else:
+					profits -= cumulative_losses
+					stats.compensated_losses += cumulative_losses
+			# compensação de prejuízos do período
+			if losses := abs(stats.losses):
+				if losses >= profits:
+					stats.compensated_losses += profits
+					profits = Decimal(0)
+				else:
+					profits -= losses
+					stats.compensated_losses += losses
 		return profits
 
 	def generate_taxes(self):
@@ -145,9 +154,6 @@ class StatsReport:
 
 			# total de bônus recebido dos ativos
 			stats.bonus += asset.bonus
-
-			# os prejuízos vão acumulando
-			stats.cumulative_losses += asset.sell.losses
 
 			# total de todos os períodos
 			stats.patrimony += asset.buy.total
