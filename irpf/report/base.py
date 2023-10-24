@@ -26,7 +26,7 @@ class BaseReport:
 
 	@staticmethod
 	def compile(date: datetime.date, reports):
-		return reports[date.month]
+		raise NotImplementedError
 
 	@staticmethod
 	def results_sorted(item):
