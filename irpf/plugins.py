@@ -118,6 +118,14 @@ class ListActionModelPlugin(BaseAdminPlugin):
 
 
 class ReportBaseAdminPlugin(BaseAdminPlugin):
+	report_for_model = Negotiation
+
+	def init_request(self, *args, **kwargs):
+		activate = False
+		if model_app_label := kwargs.get('model_app_label'):
+			activate = model_app_label == self.report_for_model._meta.label_lower
+		return activate
+
 	def setup(self, *args, **kwargs):
 		self._caches = {}
 
@@ -383,9 +391,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	"""Gera dados estatísticos (compra, venda, etc)"""
 	stats_report_class = StatsReport
 	asset_model = Asset
-
-	def init_request(self, *args, **kwargs):
-		return True
 
 	def setup(self, *args, **kwargs):
 		super().setup(*args, **kwargs)
