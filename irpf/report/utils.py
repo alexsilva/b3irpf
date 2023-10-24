@@ -74,6 +74,9 @@ class Stats:
 		self.bonus = Event("Bonificação") if bonus is None else bonus
 		self.taxes = MoneyLC(0)
 
+		# prejuízos compensados
+		self.compensated_losses = MoneyLC(0)
+
 	def update(self, stats):
 		"""Acrescenta os dados de outro objeto stats"""
 		self.buy += stats.buy
@@ -83,6 +86,7 @@ class Stats:
 		self.tax += stats.tax
 		self.bonus += stats.bonus
 		self.taxes += stats.taxes
+		self.compensated_losses += stats.compensated_losses
 		return self
 
 	def __bool__(self):

@@ -87,9 +87,11 @@ class StatsReport:
 		if profits and (cumulative_losses := abs(stats.cumulative_losses)):
 			if cumulative_losses >= profits:
 				stats.cumulative_losses += profits
+				stats.compensated_losses += profits
 				profits = Decimal(0)
 			else:
 				profits -= cumulative_losses
+				stats.compensated_losses += cumulative_losses
 				stats.cumulative_losses = Decimal(0)
 		return profits
 
