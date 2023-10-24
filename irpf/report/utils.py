@@ -146,6 +146,10 @@ class SellFrac:
 		self.quantity = quantity
 		self.total = total
 
+	def update(self, sellfrac):
+		self.quantity += sellfrac.quantity
+		self.total += sellfrac.total
+
 
 class Sell:
 	"""Vendas"""
@@ -161,6 +165,14 @@ class Sell:
 		self.total = total  # total vendas
 		self.tax = tax  # taxas
 		self.fraction = SellFrac()
+
+	def update(self, sell):
+		self.quantity += sell.quantity
+		self.total += sell.total
+		self.profits += sell.profits
+		self.losses += sell.losses
+		self.tax += sell.tax
+		self.fraction.update(sell.fraction)
 
 	@property
 	def avg_price(self):
@@ -215,6 +227,7 @@ class Assets:
 
 	def update(self, asset):
 		"""Atualiza os dados desse asset com outro"""
+		self.sell.update(asset.sell)
 		self.bonus += asset.bonus
 		self.events.update(asset.events)
 		self.credit.update(asset.credit)
