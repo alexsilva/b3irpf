@@ -508,6 +508,28 @@ class NegotiationReport(BaseReport):
 				positions[assets.ticker] = assets
 		return positions
 
+	@staticmethod
+	def compile(date: datetime.date, reports):
+		report = reports[date.month]
+		assets = {}
+		for month in reports:
+			if month == date.month:
+				continue
+			for item in reports[month].get_results():
+				_asset = item['asset']
+				if (asset := assets.get(_asset.ticker)) is None:
+					asset = assets[_asset.ticker] = Assets(_asset.ticker)
+				asset.events.update(_asset.events)
+				asset.bonus += _asset.bonus
+		results = report.get_results()
+		for item in results:
+			_asset = item['asset']
+			if _asset.ticker in assets:
+				asset = assets[_asset.ticker]
+				_asset.events.update(asset.events)
+				_asset.bonus += asset.bonus
+		return results
+
 	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
 		self.options.setdefault('start_date', start_date)
 		self.options.setdefault('end_date', end_date)

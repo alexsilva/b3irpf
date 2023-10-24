@@ -14,7 +14,6 @@ from datetime import datetime
 
 
 from irpf.models import Institution, Asset, Position
-from irpf.report import BaseReport
 from irpf.utils import MonthYearDates
 from irpf.views.base import AdminFormView
 from irpf.widgets import MonthYearWidget, MonthYearField
@@ -64,6 +63,14 @@ class AdminReportIrpfModelView(AdminFormView):
 		self.start_date = self.ts = self.end_date = None
 		self.reports: OrderedDict[int] = None
 
+		self.model = apps.get_model(*self.model_app_label.split('.', 1))
+		report_class = getattr(self.model, "report_class", None)
+
+		if not (self.admin_site.get_registry(self.model, None) and report_class):
+			raise Http404
+
+		self.report_class = import_string(self.model.report_class)
+
 	def get_media(self):
 		media = super().get_media()
 		media += django_forms.Media(js=(
@@ -84,20 +91,13 @@ class AdminReportIrpfModelView(AdminFormView):
 			title = mark_safe(title)
 		return title
 
-	def report_object(self, report_class, model, user, **options):
+	def report_object(self, user, **options):
 		"""report to specified model"""
-		report = report_class(model, user, **options)
+		report = self.report_class(self.model, user, **options)
 		return report
 
 	@filter_hook
 	def report_generate(self, form):
-		model = apps.get_model(*self.model_app_label.split('.', 1))
-		report_class = getattr(model, "report_class", None)
-
-		if not (self.admin_site.get_registry(model, None) and report_class):
-			raise Http404
-
-		report_class = import_string(model.report_class)
 		now = datetime.now()
 
 		form_data = form.cleaned_data
@@ -127,7 +127,7 @@ class AdminReportIrpfModelView(AdminFormView):
 
 		reports_months = OrderedDict()
 		for start, end in months:
-			report = self.report_object(report_class, model, self.user)
+			report = self.report_object(self.user)
 			# após o processamento do relatório esse dado vai ser removido
 			report.cache.set('report_history', reports_months.get(start.month - 1))
 			# gera os dados de results
@@ -176,10 +176,10 @@ class AdminReportIrpfModelView(AdminFormView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		if self.reports:
-			report = self.reports[self.end_date.month]
+			results = self.report_class.compile(self.end_date, self.reports)
 			context['report'] = {
 				'reports': self.reports,
-				'results': report.get_results(),
+				'results': results,
 				'start_date': self.start_date,
 				'end_date': self.end_date,
 				'ts': self.ts,
