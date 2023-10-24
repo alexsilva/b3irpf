@@ -93,11 +93,21 @@ class Stats:
 		return bool(self.buy or self.sell)
 
 
-class Credit(OrderedDict):
+class OrderedStorage(OrderedDict):
+	def include(self, store: OrderedDict):
+		"""Armazena o valore de 'store' sequencialmente"""
+		for key, value in store.items():
+			if key in self:
+				self[key] += value
+			else:
+				self[key] = value
+
+
+class Credit(OrderedStorage):
 	"""credito"""
 
 
-class Debit(OrderedDict):
+class Debit(OrderedStorage):
 	"""Débito"""
 
 
@@ -114,6 +124,12 @@ class Buy:
 		self.quantity = quantity
 		self.total = total
 		self.tax = tax
+
+	def update(self, buy):
+		self.quantity += buy.quantity
+		self.total += buy.total
+		self.tax += buy.tax
+		return self
 
 	@property
 	def avg_price(self):
@@ -168,9 +184,9 @@ class Sell:
 
 	def update(self, sell):
 		self.quantity += sell.quantity
-		self.total += sell.total
 		self.profits += sell.profits
 		self.losses += sell.losses
+		self.total += sell.total
 		self.tax += sell.tax
 		self.fraction.update(sell.fraction)
 
@@ -227,11 +243,13 @@ class Assets:
 
 	def update(self, asset):
 		"""Atualiza os dados desse asset com outro"""
+		self.items.extend(asset.items)
+		# self.buy.update(asset.buy)
 		self.sell.update(asset.sell)
+		self.events.update()
+		self.credit.include(asset.credit)
+		self.debit.include(asset.debit)
 		self.bonus += asset.bonus
-		self.events.update(asset.events)
-		self.credit.update(asset.credit)
-		self.debit.update(asset.debit)
 		return self
 
 	@property
