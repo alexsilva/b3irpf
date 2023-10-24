@@ -56,6 +56,7 @@ class AdminReportIrpfModelView(AdminFormView):
 	template_name = "irpf/adminx_report_irpf_view.html"
 	form_class = ReportIRPFForm
 	title = "Relatório IRPF"
+	models_report_class = {}
 
 	def init_request(self, *args, **kwargs):
 		super().init_request(*args, **kwargs)
@@ -64,12 +65,12 @@ class AdminReportIrpfModelView(AdminFormView):
 		self.reports: OrderedDict[int] = None
 
 		self.model = apps.get_model(*self.model_app_label.split('.', 1))
-		report_class = getattr(self.model, "report_class", None)
-
-		if not (self.admin_site.get_registry(self.model, None) and report_class):
+		if not self.admin_site.get_registry(self.model, None):
 			raise Http404
-
-		self.report_class = import_string(self.model.report_class)
+		try:
+			self.report_class = self.models_report_class[self.model]
+		except KeyError:
+			raise Http404
 
 	def get_media(self):
 		media = super().get_media()

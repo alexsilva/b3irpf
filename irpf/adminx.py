@@ -8,6 +8,7 @@ from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bon
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, SubscriptionInfo
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	StatsReportAdminPlugin, BrokerageNoteAdminPlugin
+from irpf.report import NegotiationReport, EarningsReport
 from irpf.themes import themes
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
@@ -29,6 +30,14 @@ site.register_plugin(BrokerageNoteAdminPlugin, ModelFormAdminView)
 
 def _get_field_opts(name, model):
 	return model._meta.get_field(name)
+
+
+@sites.register(AdminReportIrpfModelView)
+class AdminReportIrpfModelViewOptions:
+	models_report_class = {
+		Negotiation: NegotiationReport,
+		Earnings: EarningsReport
+	}
 
 
 @sites.register(BaseAdminView)
@@ -206,6 +215,7 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 @sites.register(Negotiation)
 class NegotiationAdmin(BaseIRPFAdmin):
 	collect_related_nested_objects = False
+	list_action_activate = True
 	model_icon = "fa fa-credit-card-alt"
 	list_filter = ("kind", "date", "asset")
 	search_fields = ("code",)
@@ -321,6 +331,7 @@ class AssetEventAdmin(BaseIRPFAdmin):
 
 @sites.register(Earnings)
 class EarningsAdmin(BaseIRPFAdmin):
+	list_action_activate = True
 	list_filter = ("kind", "date", "asset")
 	search_fields = ("code",)
 	list_display = (

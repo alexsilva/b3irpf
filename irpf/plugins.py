@@ -77,23 +77,20 @@ class AssignUserAdminPlugin(BaseAdminPlugin):
 
 
 class ListActionModelPlugin(BaseAdminPlugin):
+	list_action_activate = False
 
 	def init_request(self, *args, **kwargs):
-		return issubclass(self.model, (Negotiation, Earnings))
-
-	@cached_property
-	def model_app_label(self):
-		return f"{self.opts.app_label}.{self.opts.model_name}"
+		return self.list_action_activate
 
 	def get_import_action(self):
-		url = self.get_admin_url("import_listmodel", self.model_app_label)
+		url = self.get_admin_url("import_listmodel", self.opts.label_lower)
 		return {
 			'title': "Importar lista de dados",
 			'url': url
 		}
 
 	def get_report_action(self):
-		url = self.get_admin_url("reportirpf", self.model_app_label)
+		url = self.get_admin_url("reportirpf", self.opts.label_lower)
 		return {
 			'title': "Relatório do IRPF",
 			'url': url
