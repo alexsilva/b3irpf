@@ -213,6 +213,14 @@ class Assets:
 		"""Se a data presenta uma posição já calculada"""
 		return bool(date and self.position and date <= self.position.date)
 
+	def update(self, asset):
+		"""Atualiza os dados desse asset com outro"""
+		self.bonus += asset.bonus
+		self.events.update(asset.events)
+		self.credit.update(asset.credit)
+		self.debit.update(asset.debit)
+		return self
+
 	@property
 	def period(self) -> Period:
 		"""Compras e vendas do intervalo (sem posição)"""
