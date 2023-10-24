@@ -25,7 +25,9 @@ class EarningsReport(BaseReport):
 		event.value += instance.total
 
 	@staticmethod
-	def compile(date: datetime.date, reports):
+	def compile(date: datetime.date, reports: OrderedDict[int]):
+		if len(reports) == 1:
+			return reports[date.month].get_results()
 		assets = OrderedDict()
 		for month in reports:
 			for item in reports[month].get_results():

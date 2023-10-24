@@ -1,5 +1,6 @@
 import calendar
 import datetime
+from collections import OrderedDict
 from decimal import Decimal
 from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, SubscriptionInfo
 from irpf.report.base import BaseReport
@@ -509,8 +510,10 @@ class NegotiationReport(BaseReport):
 		return positions
 
 	@staticmethod
-	def compile(date: datetime.date, reports):
+	def compile(date: datetime.date, reports: OrderedDict[int]):
 		report = reports[date.month]
+		if len(reports) == 1:
+			return report.get_results()
 		assets = {}
 		for month in reports:
 			if month == date.month:
