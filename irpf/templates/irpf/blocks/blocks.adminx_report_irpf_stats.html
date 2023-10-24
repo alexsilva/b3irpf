@@ -29,7 +29,7 @@
     <li class="list-group-item py-2">
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-success">
-          Lucros
+          Lucro do período
         </div>
         <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">{{ stats.profits }}</span>
@@ -41,7 +41,7 @@
     <li class="list-group-item py-2">
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-danger">
-          Prejuízos do período
+          Prejuízo do período
         </div>
         <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">{{ stats.losses }}</span>
@@ -53,7 +53,7 @@
     <li class="list-group-item py-2">
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-muted">
-          Prejuízos acumulados
+          Prejuízo (acumulado)
         </div>
         <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">{{ stats.cumulative_losses }}</span>
@@ -75,7 +75,7 @@
     <li class="list-group-item py-2">
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-success">
-          Prejuízos compensados
+          Prejuízo (compensado)
         </div>
         <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">{{ stats.compensated_losses }}</span>
@@ -86,8 +86,9 @@
   {% if stats.taxes %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-success">
+        <div class="col-sm-8 text-center text-sm-left text-danger">
           Imposto
+          <span class="badge badge-pill badge-light" title="pagar até final o último dia útil do mês seguinte cod: 6015">DARF</span>
         </div>
         <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">{{ stats.taxes }}</span>
@@ -107,7 +108,6 @@
       </div>
     </li>
   {% endif %}
-
   {% if stats.patrimony %}
     <li class="list-group-item py-2">
       <div class="row">
