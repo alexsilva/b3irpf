@@ -1,3 +1,6 @@
+import datetime
+from collections import OrderedDict
+
 from irpf.models import Asset, Earnings
 from irpf.report.base import BaseReport
 from irpf.report.utils import Assets, Event
@@ -21,6 +24,31 @@ class EarningsReport(BaseReport):
 		event.quantity += instance.quantity
 		event.value += instance.total
 
+	@staticmethod
+	def compile(date: datetime.date, reports):
+		assets = OrderedDict()
+		for month in reports:
+			for item in reports[month].get_results():
+				_asset = item['asset']
+				if (asset := assets.get(_asset.ticker)) is None:
+					asset = assets[_asset.ticker] = Assets(
+						ticker=_asset.ticker,
+						institution=_asset.institution,
+						instance=_asset.instance
+					)
+				asset.credit.update(_asset.credit)
+				asset.debit.update(_asset.debit)
+		results = []
+		for ticker in assets:
+			asset = assets[ticker]
+			results.append({
+				'code': ticker,
+				'institution': asset.institution,
+				'instance': asset.instance,
+				'asset': asset
+			})
+		return results
+
 	def get_queryset(self, date_start, date_end, **options):
 		qs_options = dict(
 			user=self.user,
@@ -40,7 +68,6 @@ class EarningsReport(BaseReport):
 		return queryset
 
 	def generate(self, date_start, date_end, **options):
-		results = []
 		assets = {}
 		asset = options.get('asset')
 		institution = options.get('institution')
@@ -60,14 +87,15 @@ class EarningsReport(BaseReport):
 				for obj in self.get_queryset(date_start, date_end, **options):
 					self.consolidate(obj, assets[asset.code])
 
+		self.results.clear()
 		for code in assets:
 			asset = assets[code]
-			results.append({
+			self.results.append({
 				'code': code,
 				'institution': institution,
 				'instance': asset.instance,
 				'asset': asset
 			})
-
-		results = sorted(results, key=self.results_sorted)
-		return results
+		self.cache.clear()
+		self.results.sort(key=self.results_sorted)
+		return self.results
