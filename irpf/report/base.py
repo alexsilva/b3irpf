@@ -25,6 +25,10 @@ class BaseReport:
 			return args
 
 	@staticmethod
+	def compile(date: datetime.date, reports):
+		return reports[date.month]
+
+	@staticmethod
 	def results_sorted(item):
 		"""Função usada para ordenar resultados do relatório"""
 		sort_keys = []
