@@ -50,8 +50,6 @@ class StatsReport:
 			if statistics:
 				# prejuízos acumulados no ano continuam contando em datas futuras
 				stats.cumulative_losses += statistics.cumulative_losses
-				# prejuízos no mês acumulam para o mês/ano seguinte
-				stats.losses += statistics.losses
 			self.results[category_name] = stats
 		return stats
 
