@@ -493,15 +493,13 @@ class NegotiationReport(BaseReport):
 		# se não tem uma posição determinada tenta buscar no histórico do mês anterior
 		if report_history := self.cache.get('report_history', None):
 			for item in report_history.get_results():
-				if item['code'] in positions:
-					continue
 				asset = item['asset']
-				if asset.buy.quantity == 0:
+				if asset.ticker in positions or asset.buy.quantity == 0:
 					continue
 				assets = Assets(
-					ticker=item['code'],
+					ticker=asset.ticker,
 					institution=item['institution'],
-					instance=item['instance'],
+					instance=asset.instance,
 					position=asset.position,
 					buy=Buy(quantity=asset.buy.quantity,
 					        total=asset.buy.total,
