@@ -36,8 +36,7 @@ class EarningsReport(BaseReport):
 						institution=_asset.institution,
 						instance=_asset.instance
 					)
-				asset.credit.update(_asset.credit)
-				asset.debit.update(_asset.debit)
+				asset.update(_asset)
 		results = []
 		for ticker in assets:
 			asset = assets[ticker]

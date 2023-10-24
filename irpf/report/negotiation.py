@@ -519,15 +519,12 @@ class NegotiationReport(BaseReport):
 				_asset = item['asset']
 				if (asset := assets.get(_asset.ticker)) is None:
 					asset = assets[_asset.ticker] = Assets(_asset.ticker)
-				asset.events.update(_asset.events)
-				asset.bonus += _asset.bonus
+				asset.update(_asset)
 		results = report.get_results()
 		for item in results:
 			_asset = item['asset']
 			if _asset.ticker in assets:
-				asset = assets[_asset.ticker]
-				_asset.events.update(asset.events)
-				_asset.bonus += asset.bonus
+				_asset.update(assets[_asset.ticker])
 		return results
 
 	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
