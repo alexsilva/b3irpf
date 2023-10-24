@@ -1,4 +1,5 @@
 import datetime
+from collections import OrderedDict
 
 from irpf.report.cache import Cache
 
@@ -25,7 +26,7 @@ class BaseReport:
 			return args
 
 	@staticmethod
-	def compile(date: datetime.date, reports):
+	def compile(date: datetime.date, reports: OrderedDict[int]):
 		raise NotImplementedError
 
 	@staticmethod
