@@ -511,23 +511,31 @@ class NegotiationReport(BaseReport):
 
 	@staticmethod
 	def compile(date: datetime.date, reports: OrderedDict[int]):
-		report = reports[date.month]
 		if len(reports) == 1:
+			report = reports[date.month]
 			return report.get_results()
-		assets = {}
+		assets = OrderedDict()
 		for month in reports:
 			if month == date.month:
 				continue
 			for item in reports[month].get_results():
 				_asset = item['asset']
 				if (asset := assets.get(_asset.ticker)) is None:
-					asset = assets[_asset.ticker] = Assets(_asset.ticker)
+					asset = Assets(ticker=_asset.ticker,
+					               position=_asset.position,
+					               instance=_asset.instance)
+					assets[_asset.ticker] = asset
+				asset.buy = _asset.buy
 				asset.update(_asset)
-		results = report.get_results()
-		for item in results:
-			_asset = item['asset']
-			if _asset.ticker in assets:
-				_asset.update(assets[_asset.ticker])
+		results = []
+		for code in assets:
+			asset = assets[code]
+			results.append({
+				'code': code,
+				'institution': asset.institution,
+				'instance': asset.instance,
+				'asset': asset
+			})
 		return results
 
 	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
