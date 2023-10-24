@@ -662,12 +662,6 @@ class Statistic(BaseIRPFModel):
 	                                on_delete=models.CASCADE,
 	                                verbose_name="Instituição",
 	                                blank=True, null=True)
-
-	losses = MoneyField(verbose_name="Prejuízos",
-	                    max_digits=DECIMAL_MAX_DIGITS,
-	                    decimal_places=DECIMAL_PLACES,
-	                    amount_default=Decimal(0),
-	                    blank=True)
 	cumulative_losses = MoneyField(verbose_name="Prejuízos acumulados",
 	                               max_digits=DECIMAL_MAX_DIGITS,
 	                               decimal_places=DECIMAL_PLACES,
