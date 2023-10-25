@@ -499,7 +499,7 @@ class NegotiationReport(BaseReport):
 					continue
 				assets = Assets(
 					ticker=asset.ticker,
-					institution=item['institution'],
+					institution=asset.institution,
 					instance=asset.instance,
 					position=asset.position,
 					buy=Buy(quantity=asset.buy.quantity,
