@@ -456,6 +456,14 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			stats_category = collections.OrderedDict([
 				('TODOS', self.stats_report_class.compile(stats_months))
 			])
+			category_choices = self.asset_model.category_choices
+			category_stocks_name = category_choices[self.asset_model.CATEGORY_STOCK]
+			category_fiis_name = category_choices[self.asset_model.CATEGORY_FII]
+			# ordenação dos ativos mais importantes manualmente
+			if stocks := stats_months.pop(category_stocks_name, None):
+				stats_category[category_stocks_name] = stocks
+			if fiis := stats_months.pop(category_fiis_name, None):
+				stats_category[category_fiis_name] = fiis
 			stats_category.update(stats_months)
 			context['report']['stats_category'] = stats_category
 		return context
