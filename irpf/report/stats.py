@@ -72,7 +72,7 @@ class StatsReport:
 		return stats
 
 	@classmethod
-	def compile_months(cls, stats_months: OrderedDict[int], **options) -> Stats:
+	def compile_months(cls, stats_months: OrderedDict[int], **options) -> OrderedDict:
 		stats_category = OrderedDict()
 		for month in stats_months:
 			stats_month = stats_months[month]
