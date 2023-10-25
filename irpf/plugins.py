@@ -409,8 +409,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 
 			# perdas do ano anterior com o mês
 			cumulative_losses = stats_category.cumulative_losses
-			# compensação de prejuízos acumulados
-			cumulative_losses += stats_category.compensated_losses
 			defaults = {'cumulative_losses': cumulative_losses}
 
 			instance, created = Statistic.objects.get_or_create(
