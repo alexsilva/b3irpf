@@ -145,9 +145,10 @@ class StatsReport:
 
 			stats = self._get_stats(instance.category_name, date=date, **options)
 
-			stats.buy += asset.period.buy.total
+			asset_period = asset.period
+			stats.buy += asset_period.buy.total
 			stats.sell += asset.sell.total + asset.sell.fraction.total
-			stats.tax += asset.period.buy.tax + asset.sell.tax
+			stats.tax += asset_period.buy.tax + asset.sell.tax
 			stats.profits += asset.sell.profits
 			stats.losses += asset.sell.losses
 
