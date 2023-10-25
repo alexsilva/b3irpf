@@ -161,4 +161,5 @@ class StatsReport:
 			stats.patrimony += asset.buy.total
 		# taxas de período
 		self.generate_taxes()
+		self.cache.clear()
 		return self.results
