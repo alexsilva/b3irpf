@@ -516,8 +516,6 @@ class NegotiationReport(BaseReport):
 			return report.get_results()
 		assets = OrderedDict()
 		for month in reports:
-			if month == date.month:
-				continue
 			for item in reports[month].get_results():
 				_asset = item['asset']
 				if (asset := assets.get(_asset.ticker)) is None:
