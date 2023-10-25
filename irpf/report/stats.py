@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.conf import settings
 
 from irpf.models import Asset, Statistic
+from irpf.report.cache import Cache
 from irpf.report.utils import Stats, MoneyLC
 
 
@@ -17,6 +18,7 @@ class StatsReport:
 	def __init__(self, user):
 		self.user = user
 		self.results = OrderedDict()
+		self.cache = Cache()
 
 	def _get_statistics(self, date: datetime.date, category: int, **options):
 		query = dict(
@@ -46,11 +48,18 @@ class StatsReport:
 			statistics: Statistic = self._get_statistics(
 				date, self.asset_model.get_category_by_name(category_name),
 				**options)
-			stats = Stats()
+			self.results[category_name] = stats = Stats(instance=statistics)
+			# prejuízos acumulados no ano continuam contando em datas futuras
 			if statistics:
-				# prejuízos acumulados no ano continuam contando em datas futuras
 				stats.cumulative_losses = statistics.cumulative_losses
-			self.results[category_name] = stats
+			# quando os dados de prejuízo ainda não estão salvos usamos o último mês processado
+			elif stats_last_month := self.cache.get('stats_last_month', None):
+				stats_results = stats_last_month.get_results()
+				if category_name in stats_results:
+					st = stats_results[category_name]
+					cumulative_losses = st.cumulative_losses
+					cumulative_losses += st.compensated_losses
+					stats.cumulative_losses = cumulative_losses
 		return stats
 
 	@staticmethod
@@ -82,24 +91,14 @@ class StatsReport:
 
 	def calc_profits(self, profits, stats: Stats):
 		"""Lucro com compensação de prejuízo"""
-		if profits:
+		if profits and (cumulative_losses := abs(stats.cumulative_losses)):
 			# compensação de prejuízos acumulados
-			if cumulative_losses := abs(stats.cumulative_losses):
-				if cumulative_losses >= profits:
-					stats.cumulative_losses += profits
-					stats.compensated_losses += profits
-					profits = Decimal(0)
-				else:
-					profits -= cumulative_losses
-					stats.compensated_losses += cumulative_losses
-			# compensação de prejuízos do período
-			if losses := abs(stats.losses):
-				if losses >= profits:
-					stats.compensated_losses += profits
-					profits = Decimal(0)
-				else:
-					profits -= losses
-					stats.compensated_losses += losses
+			if cumulative_losses >= profits:
+				stats.compensated_losses += profits
+				profits = Decimal(0)
+			else:
+				profits -= cumulative_losses
+				stats.compensated_losses += cumulative_losses
 		return profits
 
 	def generate_taxes(self):
@@ -151,6 +150,9 @@ class StatsReport:
 			stats.tax += asset.period.buy.tax + asset.sell.tax
 			stats.profits += asset.sell.profits
 			stats.losses += asset.sell.losses
+
+			# prejuízos acumulados
+			stats.cumulative_losses += asset.sell.losses
 
 			# total de bônus recebido dos ativos
 			stats.bonus += asset.bonus

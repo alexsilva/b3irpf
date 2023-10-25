@@ -409,7 +409,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 
 			# perdas do ano anterior com o mês
 			cumulative_losses = stats_category.cumulative_losses
-			cumulative_losses += stats_category.losses
+			# compensação de prejuízos acumulados
 			cumulative_losses += stats_category.compensated_losses
 			defaults = {'cumulative_losses': cumulative_losses}
 
@@ -443,6 +443,8 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			report = reports[month]
 			date = report.get_opts('end_date')
 			stats = self.stats_report_class(self.user)
+			if stats_last_month := stats_months.get(month - 1):
+				stats.cache.set('stats_last_month', stats_last_month)
 			stats.generate(date=date, results=report.get_results())
 			stats_months[month] = stats
 		return stats_months
