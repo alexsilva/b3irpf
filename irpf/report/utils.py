@@ -248,7 +248,7 @@ class Assets:
 		self.items.extend(asset.items)
 		# self.buy.update(asset.buy)
 		self.sell.update(asset.sell)
-		self.events.update()
+		self.events.update(asset.events)
 		self.credit.include(asset.credit)
 		self.debit.include(asset.debit)
 		self.bonus += asset.bonus
