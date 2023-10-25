@@ -407,6 +407,14 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			stats_category: Stats = stats_results[category_name]
 			category = self.asset_model.get_category_by_name(category_name)
 
+			Statistic.objects.filter(
+				category=category,
+				user=self.user,
+				date__gt=date,
+				institution=institution,
+				consolidation=Statistic.CONSOLIDATION_MONTHLY,
+			).delete()
+
 			# perdas do ano anterior com o mês
 			cumulative_losses = stats_category.cumulative_losses
 			cumulative_losses += stats_category.compensated_losses
