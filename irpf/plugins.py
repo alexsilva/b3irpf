@@ -216,8 +216,7 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 		try:
 			for month in reports:
 				report = reports[month]
-				for item in report.get_results():
-					asset = item['asset']
+				for asset in report.get_results():
 					# ativo não cadastrado
 					if asset.instance is None:
 						continue
