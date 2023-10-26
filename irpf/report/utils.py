@@ -42,7 +42,7 @@ class Event:
 		self.value = value
 		self.items = []
 
-	def __add__(self, event):
+	def update(self, event):
 		"""Acrescenta os dados de outro objeto event"""
 		assert isinstance(self, type(self)), 'invalid type!'
 		self.quantity += event.quantity
@@ -88,7 +88,7 @@ class Stats:
 		self.profits += stats.profits
 		self.losses += stats.losses
 		self.tax += stats.tax
-		self.bonus += stats.bonus
+		self.bonus.update(stats.bonus)
 		self.taxes += stats.taxes
 		self.compensated_losses += stats.compensated_losses
 		return self
@@ -106,7 +106,7 @@ class OrderedStorage(OrderedDict):
 		assert isinstance(self, type(self)), 'invalid type!'
 		for key, value in store.items():
 			if key in self:
-				self[key] += value
+				self[key].update(value)
 			else:
 				self[key] = value
 
@@ -261,7 +261,7 @@ class Assets:
 		self.events.update(asset.events)
 		self.credit.include(asset.credit)
 		self.debit.include(asset.debit)
-		self.bonus += asset.bonus
+		self.bonus.update(asset.bonus)
 		return self
 
 	@property

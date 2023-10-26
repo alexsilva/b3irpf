@@ -160,7 +160,7 @@ class StatsReport:
 			stats.cumulative_losses += asset.sell.losses
 
 			# total de bônus recebido dos ativos
-			stats.bonus += asset.bonus
+			stats.bonus.update(asset.bonus)
 
 			# total de todos os períodos
 			stats.patrimony += asset.buy.total
