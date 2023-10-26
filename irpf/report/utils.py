@@ -44,6 +44,7 @@ class Event:
 
 	def __add__(self, event):
 		"""Acrescenta os dados de outro objeto event"""
+		assert isinstance(self, type(self)), 'invalid type!'
 		self.quantity += event.quantity
 		self.value += event.value
 		return self
@@ -81,6 +82,7 @@ class Stats:
 
 	def update(self, stats):
 		"""Acrescenta os dados de outro objeto stats"""
+		assert isinstance(self, type(self)), 'invalid type!'
 		self.buy += stats.buy
 		self.sell += stats.sell
 		self.profits += stats.profits
@@ -101,6 +103,7 @@ class Stats:
 class OrderedStorage(OrderedDict):
 	def include(self, store: OrderedDict):
 		"""Armazena o valore de 'store' sequencialmente"""
+		assert isinstance(self, type(self)), 'invalid type!'
 		for key, value in store.items():
 			if key in self:
 				self[key] += value
@@ -131,6 +134,7 @@ class Buy:
 		self.tax = tax
 
 	def update(self, buy):
+		assert isinstance(self, type(self)), 'invalid type!'
 		self.quantity += buy.quantity
 		self.total += buy.total
 		self.tax += buy.tax
@@ -168,6 +172,7 @@ class SellFrac:
 		self.total = total
 
 	def update(self, sellfrac):
+		assert isinstance(self, type(self)), 'invalid type!'
 		self.quantity += sellfrac.quantity
 		self.total += sellfrac.total
 
@@ -188,6 +193,7 @@ class Sell:
 		self.fraction = SellFrac()
 
 	def update(self, sell):
+		assert isinstance(self, type(self)), 'invalid type!'
 		self.quantity += sell.quantity
 		self.profits += sell.profits
 		self.losses += sell.losses
@@ -248,6 +254,7 @@ class Assets:
 
 	def update(self, asset):
 		"""Atualiza os dados desse asset com outro"""
+		assert isinstance(self, type(self)), 'invalid type!'
 		self.items.extend(asset.items)
 		# self.buy.update(asset.buy)
 		self.sell.update(asset.sell)
