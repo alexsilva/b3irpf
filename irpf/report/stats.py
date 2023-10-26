@@ -48,7 +48,7 @@ class StatsReport:
 			statistics: Statistic = self._get_statistics(
 				date, self.asset_model.get_category_by_name(category_name),
 				**options)
-			self.results[category_name] = stats = Stats(instance=statistics)
+			stats = Stats(instance=statistics)
 			# prejuízos acumulados no ano continuam contando em datas futuras
 			if statistics:
 				stats.cumulative_losses = statistics.cumulative_losses
@@ -136,6 +136,11 @@ class StatsReport:
 	def generate(self, date: datetime.date, results: list, **options) -> dict:
 		options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_MONTHLY)
 		self.results.clear()
+
+		# cache de todas as categorias (permite a compensação de posições finalizadas)
+		for category_name in self.asset_model.category_by_name_choices:
+			self.results[category_name] = self._get_stats(category_name, date=date, **options)
+
 		for asset in results:
 			# não cadastrado
 			instance: Asset = asset.instance
