@@ -30,13 +30,12 @@ class BaseReport:
 		raise NotImplementedError
 
 	@staticmethod
-	def results_sorted(item):
+	def results_sorted(asset):
 		"""Função usada para ordenar resultados do relatório"""
 		sort_keys = []
-		_instance = item['instance']
-		if _instance and _instance.category:
-			sort_keys.append(_instance.category_choices[_instance.category])
-		sort_keys.append(item['code'])
+		if asset.instance and asset.instance.category:
+			sort_keys.append(asset.instance.category_choices[asset.instance.category])
+		sort_keys.append(asset.ticker)
 		return sort_keys
 
 	def generate(self, date_start: datetime.date, date_end: datetime.date, **options):

@@ -493,8 +493,7 @@ class NegotiationReport(BaseReport):
 			positions[assets.ticker] = assets
 		# se não tem uma posição determinada tenta buscar no histórico do mês anterior
 		if report_history := self.cache.get('report_history', None):
-			for item in report_history.get_results():
-				asset = item['asset']
+			for asset in report_history.get_results():
 				if asset.ticker in positions:
 					continue
 				assets = Assets(
@@ -512,12 +511,10 @@ class NegotiationReport(BaseReport):
 	@staticmethod
 	def compile(date: datetime.date, reports: OrderedDict[int]):
 		if len(reports) == 1:
-			report = reports[date.month]
-			return report.get_results()
+			return reports[date.month].get_results()
 		assets = OrderedDict()
 		for month in reports:
-			for item in reports[month].get_results():
-				_asset = item['asset']
+			for _asset in reports[month].get_results():
 				if (asset := assets.get(_asset.ticker)) is None:
 					asset = Assets(ticker=_asset.ticker,
 					               position=_asset.position,
@@ -525,16 +522,7 @@ class NegotiationReport(BaseReport):
 					assets[_asset.ticker] = asset
 				asset.buy = _asset.buy
 				asset.update(_asset)
-		results = []
-		for code in assets:
-			asset = assets[code]
-			results.append({
-				'code': code,
-				'institution': asset.institution,
-				'instance': asset.instance,
-				'asset': asset
-			})
-		return results
+		return list(assets.values())
 
 	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
 		self.options.setdefault('start_date', start_date)
@@ -587,14 +575,7 @@ class NegotiationReport(BaseReport):
 
 		# limpeza de resultados anteriores
 		self.results.clear()
-		for code in assets:
-			asset = assets[code]
-			self.results.append({
-				'code': code,
-				'institution': institution,
-				'instance': asset.instance,
-				'asset': asset
-			})
+		self.results.extend(assets.values())
 		self.results.sort(key=self.results_sorted)
 		# reset cache
 		self.cache.clear()

@@ -136,8 +136,7 @@ class StatsReport:
 	def generate(self, date: datetime.date, results: list, **options) -> dict:
 		options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_MONTHLY)
 		self.results.clear()
-		for item in results:
-			asset = item['asset']
+		for asset in results:
 			# não cadastrado
 			instance: Asset = asset.instance
 			if instance is None:

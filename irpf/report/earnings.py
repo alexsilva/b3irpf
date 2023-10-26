@@ -30,8 +30,7 @@ class EarningsReport(BaseReport):
 			return reports[date.month].get_results()
 		assets = OrderedDict()
 		for month in reports:
-			for item in reports[month].get_results():
-				_asset = item['asset']
+			for _asset in reports[month].get_results():
 				if (asset := assets.get(_asset.ticker)) is None:
 					asset = assets[_asset.ticker] = Assets(
 						ticker=_asset.ticker,
@@ -39,16 +38,7 @@ class EarningsReport(BaseReport):
 						instance=_asset.instance
 					)
 				asset.update(_asset)
-		results = []
-		for ticker in assets:
-			asset = assets[ticker]
-			results.append({
-				'code': ticker,
-				'institution': asset.institution,
-				'instance': asset.instance,
-				'asset': asset
-			})
-		return results
+		return list(assets.values())
 
 	def get_queryset(self, date_start, date_end, **options):
 		qs_options = dict(
@@ -69,9 +59,9 @@ class EarningsReport(BaseReport):
 		return queryset
 
 	def generate(self, date_start, date_end, **options):
-		assets = {}
-		asset = options.get('asset')
 		institution = options.get('institution')
+		asset = options.get('asset')
+		assets = {}
 		if asset:
 			options['asset'] = asset
 			assets[asset.code] = Assets(ticker=asset.code,
@@ -88,15 +78,11 @@ class EarningsReport(BaseReport):
 				for obj in self.get_queryset(date_start, date_end, **options):
 					self.consolidate(obj, assets[asset.code])
 
+		# atualização resultados
 		self.results.clear()
-		for code in assets:
-			asset = assets[code]
-			self.results.append({
-				'code': code,
-				'institution': institution,
-				'instance': asset.instance,
-				'asset': asset
-			})
+		self.results.extend(assets.values())
+
+		# limpeza do cache
 		self.cache.clear()
 		self.results.sort(key=self.results_sorted)
 		return self.results
