@@ -40,11 +40,11 @@ class EarningsReport(BaseReport):
 				asset.update(_asset)
 		return list(assets.values())
 
-	def get_queryset(self, date_start, date_end, **options):
+	def get_queryset(self, start_date: datetime.date, end_date: datetime.date, **options):
 		qs_options = dict(
 			user=self.user,
-			date__gte=date_start,
-			date__lte=date_end,
+			date__gte=start_date,
+			date__lte=end_date,
 		)
 		institution = options.get('institution')
 		if institution:
@@ -58,7 +58,7 @@ class EarningsReport(BaseReport):
 		queryset = self.model.objects.filter(**qs_options)
 		return queryset
 
-	def generate(self, date_start, date_end, **options):
+	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
 		institution = options.get('institution')
 		asset = options.get('asset')
 		assets = {}
@@ -67,7 +67,7 @@ class EarningsReport(BaseReport):
 			assets[asset.code] = Assets(ticker=asset.code,
 			                            institution=institution,
 			                            instance=asset)
-			for obj in self.get_queryset(date_start, date_end, **options):
+			for obj in self.get_queryset(start_date, end_date, **options):
 				self.consolidate(obj, assets[asset.code])
 		else:
 			for asset in self.asset_model.objects.all():
@@ -75,7 +75,7 @@ class EarningsReport(BaseReport):
 				                            institution=institution,
 				                            instance=asset)
 				options['asset'] = asset
-				for obj in self.get_queryset(date_start, date_end, **options):
+				for obj in self.get_queryset(start_date, end_date, **options):
 					self.consolidate(obj, assets[asset.code])
 
 		# atualização resultados
