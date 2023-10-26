@@ -6,7 +6,7 @@
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left">Quantidade</div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ item.asset.sell.quantity|smart_desc }}</span>
+        <span class="text-muted">{{ asset.sell.quantity|smart_desc }}</span>
       </div>
     </div>
   </li>
@@ -14,36 +14,36 @@
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left">Preço médio</div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ item.asset.sell.avg_price }}</span>
+        <span class="text-muted">{{ asset.sell.avg_price }}</span>
       </div>
     </div>
   </li>
   <li class="list-group-item py-2">
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left">Valor total
-      <span class="badge badge-light badge-pill" title="Taxas">{{ item.asset.sell.tax }}</span>
+      <span class="badge badge-light badge-pill" title="Taxas">{{ asset.sell.tax }}</span>
       </div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ item.asset.sell.total }}</span>
+        <span class="text-muted">{{ asset.sell.total }}</span>
       </div>
     </div>
   </li>
-  {% if item.asset.sell.profits %}
+  {% if asset.sell.profits %}
   <li class="list-group-item py-2">
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left text-success">Lucros</div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ item.asset.sell.profits }}</span>
+        <span class="text-muted">{{ asset.sell.profits }}</span>
       </div>
     </div>
   </li>
   {% endif %}
-  {% if item.asset.sell.losses %}
+  {% if asset.sell.losses %}
   <li class="list-group-item py-2">
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left text-danger">Prejuízos</div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ item.asset.sell.losses }}</span>
+        <span class="text-muted">{{ asset.sell.losses }}</span>
       </div>
     </div>
   </li>

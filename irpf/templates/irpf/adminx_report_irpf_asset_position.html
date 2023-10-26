@@ -2,14 +2,14 @@
 {% load irpf_tags %}
 
 {% block card_title %}Posição anterior{% endblock %}
-{% block card_subtitle %}{{ item.asset.position.date }}{% endblock %}
+{% block card_subtitle %}{{ asset.position.date }}{% endblock %}
 
 {% block card_list_group %}
   <li class="list-group-item py-2">
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left">Quantidade</div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ item.asset.position.quantity|smart_desc }}</span>
+        <span class="text-muted">{{ asset.position.quantity|smart_desc }}</span>
       </div>
     </div>
   </li>
@@ -17,17 +17,17 @@
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left">Preço médio</div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ item.asset.position.avg_price }}</span>
+        <span class="text-muted">{{ asset.position.avg_price }}</span>
       </div>
     </div>
   </li>
   <li class="list-group-item py-2">
     <div class="row">
       <div class="col-sm-8 text-center text-sm-left">Valor total
-      <span class="badge badge-light badge-pill" title="Taxas">{{ item.asset.position.tax }}</span>
+      <span class="badge badge-light badge-pill" title="Taxas">{{ asset.position.tax }}</span>
       </div>
       <div class="col-sm-4 text-center text-sm-right">
-        <span class="text-muted">{{ item.asset.position.total }}</span>
+        <span class="text-muted">{{ asset.position.total }}</span>
       </div>
     </div>
   </li>

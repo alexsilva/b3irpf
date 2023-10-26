@@ -8,7 +8,7 @@
 
 {% block card_body %}
 <div class="card-body py-2">
-  {% for bonus in item.asset.events.bonus %}
+  {% for bonus in asset.events.bonus %}
     <h6 class="card-text mb-1">
       Proporção <span class="text-muted">{{ bonus.instance.proportion|floatformat:4 }}%</span> de
       <span class="text-muted">{{ bonus.bonus_info.from_quantity }}</span> ativos no dia {{ bonus.instance.date_com }}

@@ -1,23 +1,22 @@
 {% load irpf_tags %}
-{% with asset_buy=item.asset.buy %}
 <div class="card mt-1 mb-2 unsort irpfreport irpf-card-sm">
   <div class="card-header">
     <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
             aria-expanded="true" aria-controls="collapsebody-{{ forloop.counter }}">
-      {{ item.code }}{% if item.instance %} - {{ item.instance.name }} ({{ item.instance.cnpj }}){% endif %}
+      {{ asset.ticker }}{% if asset.instance %} - {{ asset.instance.name }} ({{ asset.instance.cnpj }}){% endif %}
     </button>
     <button type="button" class="btn btn-link" data-toggle="popover"
             data-content="
-        {% if item.instance %}
-          {{ asset_buy.quantity|as_int_desc }}
-          {% if item.instance.is_fii %}cota{{ asset_buy.quantity|pluralize:"s" }}
-          {% elif item.instance.is_stock %}ações
-          {% elif item.instance.is_bdr %}bdr{{ asset_buy.quantity|pluralize:"s" }}
+        {% if asset.instance %}
+          {{ asset.buy.quantity|as_int_desc }}
+          {% if asset.instance.is_fii %}cota{{ asset.buy.quantity|pluralize:"s" }}
+          {% elif asset.instance.is_stock %}ações
+          {% elif asset.instance.is_bdr %}bdr{{ asset.buy.quantity|pluralize:"s" }}
           {% endif %}
-          {{ item.code }} // {{ item.instance.name }} - {{ item.instance.cnpj }}
-          {% if item.instance.administrator %} // Administrador: {{ item.instance.administrator.name }} - {{ item.instance.administrator.cnpj }}{% endif %}
+          {{ asset.ticker }} // {{ asset.instance.name }} - {{ asset.instance.cnpj }}
+          {% if asset.instance.administrator %} // Administrador: {{ asset.instance.administrator.name }} - {{ asset.instance.administrator.cnpj }}{% endif %}
         {% else %}
-          {{ item.code }}
+          {{ asset.ticker }}
         {% endif %}">
       <i class="fa fa-info-circle"></i>
     </button>
@@ -25,37 +24,36 @@
   </div>
   <div id="collapsebody-{{ forloop.counter }}" class="collapse show">
     <div class="card-body p-2">
-      {% if item.asset.position %}
+      {% if asset.position %}
        {% include "irpf/adminx_report_irpf_asset_position.html" with card_title_class="text-primary" %}
       {% endif %}
 
-      {% if item.asset.sell %}
+      {% if asset.sell %}
         {% include "irpf/adminx_report_irpf_asset_sell.html" with card_title="Vendas do período" card_title_class="text-danger"%}
       {% endif %}
 
-      {% if item.asset.buy %}
+      {% if asset.buy %}
       {% include "irpf/adminx_report_irpf_asset_period.html" with card_title="Posição do período" card_subtitle=report.end_date card_title_class="text-success"%}
       {% endif %}
 
-      {% if item.asset.credit or item.asset.debit %}
+      {% if asset.credit or asset.debit %}
         {% include "irpf/adminx_report_irpf_asset_movement.html" with card_title="Movimentações" card_title_class="text-info"%}
       {% endif %}
 
-      {% if item.asset.events.bonus %}
+      {% if asset.events.bonus %}
           {% include "irpf/adminx_report_irpf_bonus_item.html" with card_title_class="text-info" %}
       {% endif %}
 
-      {% if item.asset.events.subscription %}
+      {% if asset.events.subscription %}
           {% include "irpf/adminx_report_irpf_subscription_item.html" with card_title_class="text-info" %}
       {% endif %}
 
-      {% if item.instance and item.instance.bookkeeping %}
+      {% if asset.instance and asset.instance.bookkeeping %}
         <hr/>
         <p class="card-subtitle text-info">Escriturador:
-        <a href="{{ item.instance.bookkeeping.link }}" target="_blank">{{ item.instance.bookkeeping.name }}</a>
+        <a href="{{ asset.instance.bookkeeping.link }}" target="_blank">{{ asset.instance.bookkeeping.name }}</a>
         </p>
       {% endif %}
     </div>
   </div>
 </div>
-{% endwith %}
