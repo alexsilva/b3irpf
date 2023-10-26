@@ -34,5 +34,7 @@ $(function () {
     });
     $('.irpfreport [data-toggle="popover"]').popover({
         animation: false
+    }).on("shown.bs.popover", function () {
+        $(this).copyClipboard();
     });
 })
