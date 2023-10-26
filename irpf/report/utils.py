@@ -176,6 +176,7 @@ class SellFrac:
 		assert isinstance(sellfrac, type(self)), 'invalid type!'
 		self.quantity += sellfrac.quantity
 		self.total += sellfrac.total
+		return self
 
 
 class Sell:
@@ -201,6 +202,7 @@ class Sell:
 		self.total += sell.total
 		self.tax += sell.tax
 		self.fraction.update(sell.fraction)
+		return self
 
 	@property
 	def avg_price(self):
