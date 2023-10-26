@@ -81,8 +81,8 @@ class EarningsReport(BaseReport):
 		# atualização resultados
 		self.results.clear()
 		self.results.extend(assets.values())
+		self.results.sort(key=self.results_sorted)
 
 		# limpeza do cache
 		self.cache.clear()
-		self.results.sort(key=self.results_sorted)
 		return self.results
