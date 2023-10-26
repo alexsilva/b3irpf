@@ -38,5 +38,5 @@ class BaseReport:
 		sort_keys.append(asset.ticker)
 		return sort_keys
 
-	def generate(self, date_start: datetime.date, date_end: datetime.date, **options):
+	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
 		raise NotImplementedError
