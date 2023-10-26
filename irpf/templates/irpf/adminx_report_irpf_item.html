@@ -1,27 +1,36 @@
 {% load irpf_tags %}
 <div class="card mt-1 mb-2 unsort irpfreport irpf-card-sm">
   <div class="card-header">
-    <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
+    <div class="row">
+      <div class="col-10 text-truncate">
+        <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
             aria-expanded="true" aria-controls="collapsebody-{{ forloop.counter }}">
-      {{ asset.ticker }}{% if asset.instance %} - {{ asset.instance.name }} ({{ asset.instance.cnpj }}){% endif %}
-    </button>
-    <button type="button" class="btn btn-link" data-toggle="popover"
-            data-content="
-        {% if asset.instance %}
-          {{ asset.buy.quantity|as_int_desc }}
-          {% if asset.instance.is_fii %}cota{{ asset.buy.quantity|pluralize:"s" }}
-          {% elif asset.instance.is_stock %}ações
-          {% elif asset.instance.is_bdr %}bdr{{ asset.buy.quantity|pluralize:"s" }}
-          {% endif %}
-          {{ asset.ticker }} // {{ asset.instance.name }} - {{ asset.instance.cnpj }}
-          {% if asset.instance.administrator %} // Administrador: {{ asset.instance.administrator.name }} - {{ asset.instance.administrator.cnpj }}{% endif %}
-        {% else %}
-          {{ asset.ticker }}
-        {% endif %}">
-      <i class="fa fa-info-circle"></i>
-    </button>
-
+            {{ asset.ticker }}{% if asset.instance %} - {{ asset.instance.name }} ({{ asset.instance.cnpj }}){% endif %}
+        </button>
+      </div>
+      <div class="col-2">
+        <div class="row justify-content-end">
+        <button type="button" class="btn btn-link" data-toggle="popover"
+              data-content="
+          {% if asset.instance %}
+            {{ asset.buy.quantity|as_int_desc }}
+            {% if asset.instance.is_fii %}cota{{ asset.buy.quantity|pluralize:"s" }}
+            {% elif asset.instance.is_stock %}ações
+            {% elif asset.instance.is_bdr %}bdr{{ asset.buy.quantity|pluralize:"s" }}
+            {% endif %}
+            {{ asset.ticker }} // {{ asset.instance.name }} - {{ asset.instance.cnpj }}
+            {% if asset.instance.administrator %} // Administrador: {{ asset.instance.administrator.name }} - {{ asset.instance.administrator.cnpj }}{% endif %}
+            // {{ asset.buy.total }}
+          {% else %}
+            {{ asset.ticker }}
+          {% endif %}">
+          <i class="fa fa-info-circle"></i>
+        </button>
+        </div>
+      </div>
   </div>
+</div>
+
   <div id="collapsebody-{{ forloop.counter }}" class="collapse show">
     <div class="card-body p-2">
       {% if asset.position %}
