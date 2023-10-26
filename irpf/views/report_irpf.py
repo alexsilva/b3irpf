@@ -75,6 +75,7 @@ class AdminReportIrpfModelView(AdminFormView):
 	def get_media(self):
 		media = super().get_media()
 		media += django_forms.Media(js=(
+			"irpf/js/irpf.plugin.clipboard.js",
 			"irpf/js/irpf.report.js",
 		), css={
 			'screen': ('irpf/css/irpf.report.css',)
