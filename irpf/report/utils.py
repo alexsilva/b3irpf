@@ -92,7 +92,8 @@ class Stats:
 		return self
 
 	def __bool__(self):
-		return bool(self.buy or self.sell)
+		# exibe o resultados enquanto tiver patrimonio investido
+		return bool(self.buy or self.sell or self.patrimony)
 
 
 class OrderedStorage(OrderedDict):
