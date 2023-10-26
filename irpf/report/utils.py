@@ -34,6 +34,7 @@ def smart_desc(value) -> Decimal:
 
 
 class Event:
+	"""Eventos de bonificação, subscrição, dividendos, proventos, etc"""
 	def __init__(self, title: str,
 	             quantity: Decimal = Decimal(0),
 	             value: MoneyLC = MoneyLC(0)):
