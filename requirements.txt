@@ -4,4 +4,5 @@ git+https://github.com/alexsilva/django-assetprice.git@main
 git+https://github.com/alexsilva/django-moneyfield.git@master
 django-guardian==2.4.0
 django-environ==0.9.0
+mysqlclient
 babel
