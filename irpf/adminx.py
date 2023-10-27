@@ -386,7 +386,7 @@ class TaxesAdmin(BaseIRPFAdmin):
 
 	def get_form_datas(self):
 		data = super().get_form_datas()
-		if self.request_method == 'get':
+		if self.request_method == 'get' and data.get('instance') is None:
 			initial = data.setdefault('initial', {})
 			current_date = datetime.now()
 			initial.setdefault('pay_date', (current_date.month, current_date.year))
