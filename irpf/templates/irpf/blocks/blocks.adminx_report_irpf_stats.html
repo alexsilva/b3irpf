@@ -75,16 +75,6 @@
       </div>
     </li>
   {% endif %}
-  {% if stats.tax %}
-    <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-info">Taxas</div>
-        <div class="col-sm-4 text-center text-sm-right">
-          <span class="text-muted">{{ stats.tax }}</span>
-        </div>
-      </div>
-    </li>
-  {% endif %}
   {% if stats.compensated_losses %}
     <li class="list-group-item py-2">
       <div class="row">
@@ -118,6 +108,16 @@
         </div>
         <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">{{ stats.bonus.value }}</span>
+        </div>
+      </div>
+    </li>
+  {% endif %}
+  {% if stats.tax %}
+    <li class="list-group-item py-2">
+      <div class="row">
+        <div class="col-sm-8 text-center text-sm-left text-info">Taxas</div>
+        <div class="col-sm-4 text-center text-sm-right">
+          <span class="text-muted">{{ stats.tax }}</span>
         </div>
       </div>
     </li>
