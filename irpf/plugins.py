@@ -451,7 +451,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		stats_months = collections.OrderedDict()
 		for month in reports:
 			report = reports[month]
-			date = report.get_opts('end_date')
+			date = report.get_opts('start_date')
 			stats = self.stats_report_class(self.user)
 			stats.cache.set('stats_last_month', stats_months.get(month - 1))
 			stats.generate(date=date, results=report.get_results())
