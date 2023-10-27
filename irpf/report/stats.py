@@ -120,18 +120,18 @@ class StatsReport:
 						# compensação de prejuízos de bdrs
 						if profits := self.calc_profits(profits, self.results[category_bdr_name]):
 							# paga 15% sobre o lucro no swing trade
-							stats.taxes = profits * Decimal(stocks_rates['swing_trade'])
+							stats.taxes += profits * Decimal(stocks_rates['swing_trade'])
 			elif category == self.asset_model.CATEGORY_BDR:
 				# compensação de prejuízos da categoria
 				if profits := self.calc_profits(stats.profits, stats):
 					# compensação de prejuízos de ações
 					if profits := self.calc_profits(profits, self.results[category_stock_name]):
 						# paga 15% sobre o lucro no swing trade
-						stats.taxes = profits * Decimal(bdrs_rates['swing_trade'])
+						stats.taxes += profits * Decimal(bdrs_rates['swing_trade'])
 			elif category == self.asset_model.CATEGORY_FII:
 				if profits := self.calc_profits(stats.profits, stats):
 					# paga 20% sobre o lucro no swing trade / day trade
-					stats.taxes = profits * Decimal(fiis_rates['swing_trade'])
+					stats.taxes += profits * Decimal(fiis_rates['swing_trade'])
 
 	def generate(self, date: datetime.date, results: list, **options) -> dict:
 		options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_MONTHLY)
