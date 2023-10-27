@@ -544,19 +544,6 @@ class BreadcrumbMonths(BaseAdminPlugin):
 			})
 		return months
 
-	def _get_months(self, reports):
-		"""Gera os meses com base no relatório memória"""
-		months = []
-		for month in reports:
-			report = reports[month]
-			date = report.get_opts('start_date')
-			months.append({
-				'name': calendar.month_name[month].upper(),
-				'count': len([asset for asset in report.get_results() if asset.buy.quantity > 0]),
-				'url': self._get_report_url(date)
-			})
-		return months
-
 	def block_report(self, context, nodes):
 		context = get_context_dict(context)
 		if self.admin_view.reports:
