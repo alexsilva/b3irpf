@@ -1,4 +1,6 @@
+import calendar
 import collections
+import datetime
 import io
 import itertools
 import re
@@ -8,6 +10,8 @@ from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
 from django.core.management import get_commands
+from django.db.models import Count
+from django.db.models.functions import ExtractMonth
 from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
@@ -483,3 +487,83 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		context = get_context_dict(context)
 		return render_to_string('irpf/adminx_report_irpf_stats.html',
 		                        context=context)
+
+
+class BreadcrumbMonths(BaseAdminPlugin):
+	"""Plugin gera um breadcrumb com meses de posição de total de ativos"""
+	report_for_model = Negotiation
+	position_model = Position
+
+	def init_request(self, *args, **kwargs):
+		activate = False
+		if model_app_label := kwargs.get('model_app_label'):
+			activate = model_app_label == self.report_for_model._meta.label_lower
+		return activate
+
+	def setup(self, *args, **kwargs):
+		self.report_url = self.get_admin_url("reportirpf", self.report_for_model._meta.label_lower)
+
+	def _get_report_url(self, date):
+		query_string = self._get_query_string(date)
+		return self.report_url + query_string
+
+	def _get_query_string(self, date: datetime.date):
+		"""Querystring gerada para cada item o breadcrumb (mês apurado)"""
+		query_string = self.get_query_string(new_params={
+			'consolidation': self.position_model.CONSOLIDATION_MONTHLY,
+			'dates_0': date.month,
+			'dates_1': date.year,
+		}, remove=['ts', '_dates'])
+		return query_string
+
+	def _get_position_months(self, reports):
+		"""https://stackoverflow.com/questions/37851053/django-query-group-by-month"""
+		months_num = list(reports)
+		months_num.sort()
+		report = reports[months_num[-1]]
+		end_date = report.get_opts('end_date')
+		if end_date.month == 1:  # janeiro
+			return ()
+		start_date = datetime.date(end_date.year, 1, 1)
+		queryset = self.position_model.objects.filter(
+			quantity__gt=0,
+			date__gte=start_date,
+			date__lte=end_date
+		).annotate(
+			month=ExtractMonth('date')
+		).values('month').annotate(
+			count=Count("asset_id")
+		).order_by()
+		months = []
+		for obj in queryset:
+			month, count = obj['month'], obj['count']
+			date = datetime.date(end_date.year, month=month, day=1)
+			months.append({
+				'name': calendar.month_name[month].upper(),
+				'url': self._get_report_url(date),
+				'count': count
+			})
+		return months
+
+	def _get_months(self, reports):
+		"""Gera os meses com base no relatório memória"""
+		months = []
+		for month in reports:
+			report = reports[month]
+			date = report.get_opts('start_date')
+			months.append({
+				'name': calendar.month_name[month].upper(),
+				'count': len([asset for asset in report.get_results() if asset.buy.quantity > 0]),
+				'url': self._get_report_url(date)
+			})
+		return months
+
+	def block_report(self, context, nodes):
+		context = get_context_dict(context)
+		if self.admin_view.reports:
+			months = self._get_position_months(self.admin_view.reports)
+			if len(months) > 1:
+				context['breadcrumb_months'] = months
+				nodes.append(render_to_string('irpf/blocks/blocks.adminx_report_irpf_breadcrumb_months.html',
+				                              context=context))
+	block_report.priority = 1000
