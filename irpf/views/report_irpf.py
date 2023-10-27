@@ -17,7 +17,6 @@ from irpf.views.base import AdminFormView
 from irpf.widgets import MonthYearWidgetNavigator, MonthYearNavigatorField
 
 _now = datetime.now()
-startdt, enddt = MonthYearDates(_now.year, _now.month).get_year_interval(_now)
 
 
 class ReportIRPFForm(django_forms.Form):
