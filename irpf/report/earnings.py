@@ -59,6 +59,9 @@ class EarningsReport(BaseReport):
 		return queryset
 
 	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
+		self.options.setdefault('start_date', start_date)
+		self.options.setdefault('end_date', end_date)
+		self.options.update(**options)
 		institution = options.get('institution')
 		asset = options.get('asset')
 		assets = {}
