@@ -516,11 +516,9 @@ class BreadcrumbMonths(BaseAdminPlugin):
 		}, remove=['ts', '_dates'])
 		return query_string
 
-	def _get_position_months(self, reports):
+	def _get_position_months(self, date: datetime.date, reports):
 		"""https://stackoverflow.com/questions/37851053/django-query-group-by-month"""
-		months_num = list(reports)
-		months_num.sort()
-		report = reports[months_num[-1]]
+		report = reports[date.month]
 		end_date = report.get_opts('end_date')
 		if end_date.month == 1:  # janeiro
 			return ()
@@ -533,7 +531,7 @@ class BreadcrumbMonths(BaseAdminPlugin):
 			month=ExtractMonth('date')
 		).values('month').annotate(
 			count=Count("asset_id")
-		).order_by()
+		).order_by('month')
 		months = []
 		for obj in queryset:
 			month, count = obj['month'], obj['count']
@@ -541,6 +539,7 @@ class BreadcrumbMonths(BaseAdminPlugin):
 			months.append({
 				'name': calendar.month_name[month].upper(),
 				'url': self._get_report_url(date),
+				'active': end_date.month == month,
 				'count': count
 			})
 		return months
@@ -561,7 +560,7 @@ class BreadcrumbMonths(BaseAdminPlugin):
 	def block_report(self, context, nodes):
 		context = get_context_dict(context)
 		if self.admin_view.reports:
-			months = self._get_position_months(self.admin_view.reports)
+			months = self._get_position_months(self.admin_view.end_date, self.admin_view.reports)
 			if len(months) > 1:
 				context['breadcrumb_months'] = months
 				nodes.append(render_to_string('irpf/blocks/blocks.adminx_report_irpf_breadcrumb_months.html',
