@@ -9,6 +9,11 @@ class MonthYearDates:
 		self.year = year
 
 	@property
+	def to_date(self):
+		"""Retorna uma data para o mês/ano (começando dia 1)"""
+		return date(self.year, self.month, 1)
+
+	@property
 	def year_interval(self):
 		start = date.min.replace(year=self.year)
 		end = date.max.replace(year=start.year)
