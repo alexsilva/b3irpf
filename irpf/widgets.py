@@ -1,4 +1,5 @@
 import calendar
+import datetime
 
 import django.forms as django_forms
 from django.forms.widgets import MultiWidget, Select, NumberInput
@@ -43,6 +44,8 @@ class MonthYearWidget(MultiWidget):
 
 	def decompress(self, value):
 		if value:
+			if isinstance(value, datetime.date):
+				value = [value.month, value.year]
 			return value
 		return [None, None]
 
