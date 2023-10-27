@@ -47,6 +47,10 @@ class MonthYearWidget(MultiWidget):
 		return [None, None]
 
 
+class MonthYearWidgetNavigator(MonthYearWidget):
+	template_name = 'irpf/forms/widgets/monthyear_nav.html'
+
+
 class MonthYearField(django_forms.MultiValueField):
 	widget = MonthYearWidget
 
@@ -62,3 +66,8 @@ class MonthYearField(django_forms.MultiValueField):
 		if data_list:
 			return MonthYearDates(*data_list)
 		return None
+
+
+class MonthYearNavigatorField(MonthYearField):
+	"""Inclui botões de navegação datas passadas e futuras"""
+	widget = MonthYearWidgetNavigator
