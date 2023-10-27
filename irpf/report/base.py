@@ -25,8 +25,8 @@ class BaseReport:
 				raise
 			return args
 
-	@staticmethod
-	def compile(date: datetime.date, reports: OrderedDict[int]):
+	@classmethod
+	def compile(cls, date: datetime.date, reports: OrderedDict[int]):
 		raise NotImplementedError
 
 	@staticmethod
