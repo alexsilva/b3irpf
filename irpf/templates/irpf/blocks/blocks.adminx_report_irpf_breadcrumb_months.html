@@ -1,0 +1,18 @@
+{% load irpf_tags %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    {% for month in breadcrumb_months %}
+      <li class="breadcrumb-item{% if month.active %} active{% endif %}"
+              {% if month.active %}aria-current="page"{% endif %}>
+        {% if not month.active %}
+          <a href="{{ month.url }}" class="text-monospace">{{ month.name }}
+            <span class="badge badge-pill badge-light">{{ month.count }}</span>
+          </a>
+        {% else %}
+          {{ month.name }}
+          <span class="badge badge-pill badge-light text-muted">{{ month.count }}</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+</nav>
