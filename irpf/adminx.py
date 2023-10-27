@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from django.contrib.auth import get_permission_codename
 from django.core.management import call_command
@@ -10,10 +12,13 @@ from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserA
 	StatsReportAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonths
 from irpf.report import NegotiationReport, EarningsReport
 from irpf.themes import themes
+from irpf.utils import MonthYearDates
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from irpf.views.xlsx_viewer import AdminXlsxViewer
 from moneyfield import MoneyModelForm
+
+from irpf.widgets import MonthYearField, MonthYearWidget
 
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
 site.register_view("^irpf/report/(?P<model_app_label>.+)/$", AdminReportIrpfModelView, "reportirpf")
@@ -347,19 +352,43 @@ class EarningsAdmin(BaseIRPFAdmin):
 	)
 
 
+class TaxesMoneyModelForm(ModelForm):
+	def clean_pay_date(self):
+		pay_date: MonthYearDates = self.cleaned_data['pay_date']
+		return pay_date.to_date
+
+
 @sites.register(Taxes)
 class TaxesAdmin(BaseIRPFAdmin):
+	# para evitar conflito com a meta classe
+	form = type("MoneyModelForm", (TaxesMoneyModelForm, MoneyModelForm), {})
 	list_display = (
 		"created",
 		"total",
 		"category",
 		"tax",
 		"taxes_to_pay",
+		"pay_date",
 		"paid"
 	)
+	formfield_classes = {
+		'pay_date': MonthYearField
+	}
+	formfield_widgets = {
+		'pay_date': MonthYearWidget(attrs={'class': "form-control my-1"})
+	}
 
 	def taxes_to_pay(self, instance):
 		return str(instance.taxes_to_pay)
 
 	taxes_to_pay.is_column = False
 	taxes_to_pay.short_description = "A pagar"
+
+	def get_form_datas(self):
+		data = super().get_form_datas()
+		if self.request_method == 'get':
+			initial = data.setdefault('initial', {})
+			current_date = datetime.now()
+			initial.setdefault('pay_date', (current_date.month, current_date.year))
+		return data
+
