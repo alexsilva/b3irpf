@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from django.conf import settings
 
-from irpf.models import Asset, Statistic
+from irpf.models import Asset, Statistic, Taxes
 from irpf.report.cache import Cache
 from irpf.report.utils import Stats, MoneyLC
 
@@ -14,6 +14,7 @@ class StatsReport:
 	"""Estatísticas pode categoria de ativo"""
 	asset_model = Asset
 	statistic_model = Statistic
+	taxes_model = Taxes
 
 	def __init__(self, user):
 		self.user = user
@@ -139,7 +140,16 @@ class StatsReport:
 
 		# cache de todas as categorias (permite a compensação de posições finalizadas)
 		for category_name in self.asset_model.category_by_name_choices:
-			self.results[category_name] = self._get_stats(category_name, date=date, **options)
+			self.results[category_name] = stats = self._get_stats(category_name, date=date, **options)
+			# impostos registrados, calculados, mas que ainda não foram pagos
+			# acontece na venda dos direitos de subscrição ou qualquer outro evento registrado
+			for taxes in self.taxes_model.objects.filter(
+				category=self.asset_model.get_category_by_name(category_name),
+				pay_date__month=date.month,
+				pay_date__year=date.year,
+				user=self.user,
+				total__gt=0):
+				stats.taxes += taxes.taxes_to_pay
 
 		for asset in results:
 			# não cadastrado
