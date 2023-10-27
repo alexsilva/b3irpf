@@ -1,22 +1,20 @@
 from collections import OrderedDict
-import time
 from datetime import date
+from datetime import datetime
 
 import django.forms as django_forms
+import time
 from django.apps import apps
 from django.http import Http404
 from django.utils.formats import date_format
-from django.utils.module_loading import import_string
 from django.utils.safestring import mark_safe
 from xadmin.views import filter_hook
 from xadmin.widgets import AdminSelectWidget, AdminSelectMultiple
-from datetime import datetime
-
 
 from irpf.models import Institution, Asset, Position
 from irpf.utils import MonthYearDates
 from irpf.views.base import AdminFormView
-from irpf.widgets import MonthYearWidget, MonthYearField
+from irpf.widgets import MonthYearWidgetNavigator, MonthYearNavigatorField
 
 _now = datetime.now()
 startdt, enddt = MonthYearDates(_now.year, _now.month).get_year_interval(_now)
@@ -29,7 +27,7 @@ class ReportIRPFForm(django_forms.Form):
 		initial=Position.CONSOLIDATION_MONTHLY
 	)
 
-	dates = MonthYearField(label="Período", widget=MonthYearWidget(attrs={
+	dates = MonthYearNavigatorField(label="Período", widget=MonthYearWidgetNavigator(attrs={
 		'class': 'form-control my-1',
 	}), initial=(_now.month, _now.year))
 
