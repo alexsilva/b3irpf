@@ -62,6 +62,7 @@ class Stats:
 	             sell: MoneyLC = MoneyLC(0),
 	             profits: MoneyLC = MoneyLC(0),
 	             losses: MoneyLC = MoneyLC(0),
+	             exempt_profit: MoneyLC = MoneyLC(0),
 	             cumulative_losses: MoneyLC = MoneyLC(0),
 	             patrimony: MoneyLC = MoneyLC(0),
 	             tax: MoneyLC = MoneyLC(0),
@@ -71,6 +72,7 @@ class Stats:
 		self.sell = sell
 		self.profits = profits  # lucros
 		self.losses = losses  # prejuízos
+		self.exempt_profit = exempt_profit  # lucro isento (no caso de ações venda de até 20mil)
 		self.cumulative_losses = cumulative_losses  # prejuízos acumulados
 		self.patrimony = patrimony
 		self.tax = tax
@@ -91,6 +93,7 @@ class Stats:
 		self.tax += stats.tax
 		self.bonus.update(stats.bonus)
 		self.taxes += stats.taxes
+		self.exempt_profit += stats.exempt_profit
 		self.compensated_losses += stats.compensated_losses
 		return self
 

@@ -7,6 +7,7 @@ import re
 from collections import OrderedDict
 import django.forms as django_forms
 from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
+from django.conf import settings
 from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
 from django.core.management import get_commands
@@ -476,6 +477,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 				stats_category[category_fiis_name] = fiis
 			stats_category.update(stats_months)
 			context['report']['stats_category'] = stats_category
+			context['report']['stock_exempt_profit'] = MoneyLC(settings.TAX_RATES['stocks']['exempt_profit'])
 		return context
 
 	def block_bonus_stats(self, context, nodes):

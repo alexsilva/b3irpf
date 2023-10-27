@@ -122,6 +122,10 @@ class StatsReport:
 						if profits := self.calc_profits(profits, self.results[category_bdr_name]):
 							# paga 15% sobre o lucro no swing trade
 							stats.taxes += profits * Decimal(stocks_rates['swing_trade'])
+				else:
+					# lucro isento no swing trade
+					stats.exempt_profit += stats.profits
+					stats.profits = MoneyLC(0)
 			elif category == self.asset_model.CATEGORY_BDR:
 				# compensação de prejuízos da categoria
 				if profits := self.calc_profits(stats.profits, stats):
