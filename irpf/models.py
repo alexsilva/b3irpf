@@ -716,9 +716,12 @@ class Taxes(BaseIRPFModel):
 
 	description = models.TextField(verbose_name="Descrição", blank=True)
 
-	paid = models.BooleanField(verbose_name="Pago", default=False,
-	                           help_text="Marque quando o imposto for pago.")
+	pay_date = DateField(verbose_name="Período de apuração",
+	                     help_text="Informe o mês/ano de apuração do imposto (mês válido para o IRPF).",
+	                     blank=True, null=True)
 
+	paid = models.BooleanField(verbose_name="Pago", default=False,
+	                           help_text="Marque quando o imposto for pago e mês/ano corresponde for configurado.")
 	created = models.DateTimeField(verbose_name="Data de registro", auto_now_add=True)
 
 	@property
