@@ -24,11 +24,11 @@ class EarningsReport(BaseReport):
 		event.quantity += instance.quantity
 		event.value += instance.total
 
-	@staticmethod
-	def compile(date: datetime.date, reports: OrderedDict[int]):
+	@classmethod
+	def compile(cls, date: datetime.date, reports: OrderedDict[int]):
 		if len(reports) == 1:
 			return reports[date.month].get_results()
-		assets = OrderedDict()
+		assets = {}
 		for month in reports:
 			for _asset in reports[month].get_results():
 				if (asset := assets.get(_asset.ticker)) is None:
@@ -38,7 +38,7 @@ class EarningsReport(BaseReport):
 						instance=_asset.instance
 					)
 				asset.update(_asset)
-		return list(assets.values())
+		return sorted(assets.values(), key=cls.results_sorted)
 
 	def get_queryset(self, start_date: datetime.date, end_date: datetime.date, **options):
 		qs_options = dict(

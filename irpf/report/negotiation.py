@@ -508,11 +508,11 @@ class NegotiationReport(BaseReport):
 				positions[assets.ticker] = assets
 		return positions
 
-	@staticmethod
-	def compile(date: datetime.date, reports: OrderedDict[int]):
+	@classmethod
+	def compile(cls, date: datetime.date, reports: OrderedDict[int]):
 		if len(reports) == 1:
 			return reports[date.month].get_results()
-		assets = OrderedDict()
+		assets = {}
 		for month in reports:
 			for _asset in reports[month].get_results():
 				if (asset := assets.get(_asset.ticker)) is None:
@@ -522,7 +522,7 @@ class NegotiationReport(BaseReport):
 					assets[_asset.ticker] = asset
 				asset.buy = _asset.buy
 				asset.update(_asset)
-		return list(assets.values())
+		return sorted(assets.values(), key=cls.results_sorted)
 
 	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
 		self.options.setdefault('start_date', start_date)
