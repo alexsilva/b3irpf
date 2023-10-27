@@ -7,7 +7,7 @@ from django.forms import ModelForm
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, SubscriptionInfo
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
-	StatsReportAdminPlugin, BrokerageNoteAdminPlugin
+	StatsReportAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonths
 from irpf.report import NegotiationReport, EarningsReport
 from irpf.themes import themes
 from irpf.views.import_list import AdminImportListModelView
@@ -25,6 +25,7 @@ site.register_plugin(GuardianAdminPlugin, ModelFormAdminView)
 site.register_plugin(AssignUserAdminPlugin, ModelFormAdminView)
 site.register_plugin(SaveReportPositionPlugin, AdminReportIrpfModelView)
 site.register_plugin(StatsReportAdminPlugin, AdminReportIrpfModelView)
+site.register_plugin(BreadcrumbMonths, AdminReportIrpfModelView)
 site.register_plugin(BrokerageNoteAdminPlugin, ModelFormAdminView)
 
 
