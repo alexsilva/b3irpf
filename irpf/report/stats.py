@@ -143,12 +143,18 @@ class StatsReport:
 			self.results[category_name] = stats = self._get_stats(category_name, date=date, **options)
 			# impostos registrados, calculados, mas que ainda não foram pagos
 			# acontece na venda dos direitos de subscrição ou qualquer outro evento registrado
-			for taxes in self.taxes_model.objects.filter(
+			queryset = self.taxes_model.objects.filter(
 				category=self.asset_model.get_category_by_name(category_name),
-				pay_date__month=date.month,
-				pay_date__year=date.year,
 				user=self.user,
-				total__gt=0):
+				total__gt=0)
+			# pagos no mês ano
+			for taxes in queryset.filter(
+					pay_date__month=date.month,
+					pay_date__year=date.year,
+					paid=True):
+				stats.taxes += taxes.taxes_to_pay
+			# ainda não foram pagos
+			for taxes in queryset.filter(paid=False):
 				stats.taxes += taxes.taxes_to_pay
 
 		for asset in results:
