@@ -209,6 +209,7 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 				continue
 
 	def _remove_positions(self, report: BaseReport):
+		"""Remove todos os dados de posição a partir da data 'end_date' relatório"""
 		institution = report.get_opts('institution', None)
 		consolidation = report.get_opts('consolidation')
 		end_date = report.get_opts('end_date')
@@ -407,6 +408,19 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		# guarda a referência na view
 		self.admin_view.stats = None
 
+	def _remove_stats(self, report: BaseReport):
+		"""Remove todos os dados de Stats a partir da data 'end_date' relatório"""
+		institution = report.get_opts('institution', None)
+		consolidation = report.get_opts('consolidation')
+		end_date = report.get_opts('end_date')
+		# remove registro acima da data
+		return Statistic.objects.filter(
+			user=self.user,
+			date__gt=end_date,
+			institution=institution,
+			consolidation=consolidation,
+		).delete()
+
 	def save_stats(self, report: BaseReport, stats: StatsReport):
 		"""Salva dados de estatística"""
 		institution = report.get_opts('institution', None)
@@ -416,14 +430,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		for category_name in stats_results:
 			stats_category: Stats = stats_results[category_name]
 			category = self.asset_model.get_category_by_name(category_name)
-
-			Statistic.objects.filter(
-				category=category,
-				user=self.user,
-				date__gt=date,
-				institution=institution,
-				consolidation=Statistic.CONSOLIDATION_MONTHLY,
-			).delete()
 
 			# perdas do ano anterior com o mês
 			cumulative_losses = stats_category.cumulative_losses
@@ -450,6 +456,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	def save(self, reports: BaseReportMonth):
 		for month in reports:
 			report = reports[month]
+			self._remove_stats(report)
 			stats = self.admin_view.stats[month]
 			self.save_stats(report, stats)
 
