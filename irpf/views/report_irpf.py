@@ -127,6 +127,7 @@ class AdminReportIrpfModelView(AdminFormView):
 		reports = self.report_object()
 		reports.generate(
 			months,
+			consolidation=Position.CONSOLIDATION_MONTHLY,
 			institution=institution,
 			categories=categories,
 			asset=asset
