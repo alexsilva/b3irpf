@@ -472,8 +472,9 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 
 	def update_residual_taxes_month(self, start_date, end_date,
 	                                stats_all: Stats,
-	                                stats_compile: Stats):
+	                                stats_report: StatsReport):
 		"""stats: é o compilado de todos os meses"""
+		stats_compile = stats_report.compile_month_results()
 		taxes_qs = self.stats_report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
 		darf_min_value = settings.TAX_RATES['darf']['min_value']
 		# mantém o histórico de impostos pagos no período
@@ -512,11 +513,10 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		"""
 		for month in self.admin_view.stats:
 			stats_month = self.admin_view.stats[month]
-			stats_compile = stats_month.compile_month_results()
 			report = self.admin_view.reports[month]
 			start_date = report.get_opts('start_date')
 			end_date = report.get_opts('end_date')
-			self.update_residual_taxes_month(start_date, end_date, stats_all, stats_compile)
+			self.update_residual_taxes_month(start_date, end_date, stats_all, stats_month)
 
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.reports:
