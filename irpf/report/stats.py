@@ -144,22 +144,7 @@ class StatsReport:
 
 		# cache de todas as categorias (permite a compensação de posições finalizadas)
 		for category_name in self.asset_model.category_by_name_choices:
-			self.results[category_name] = stats = self._get_stats(category_name, date=date, **options)
-			# impostos registrados, calculados, mas que ainda não foram pagos
-			# acontece na venda dos direitos de subscrição ou qualquer outro evento registrado
-			queryset = self.taxes_model.objects.filter(
-				category=self.asset_model.get_category_by_name(category_name),
-				user=self.user,
-				total__gt=0)
-			# pagos no mês ano
-			for taxes in queryset.filter(
-					pay_date__month=date.month,
-					pay_date__year=date.year,
-					paid=True):
-				stats.taxes += taxes.taxes_to_pay
-			# ainda não foram pagos
-			for taxes in queryset.filter(paid=False):
-				stats.taxes += taxes.taxes_to_pay
+			self.results[category_name] = self._get_stats(category_name, date=date, **options)
 
 		for asset in results:
 			# não cadastrado

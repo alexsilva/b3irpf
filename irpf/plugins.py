@@ -459,14 +459,63 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			stats_months[month] = stats
 		return stats_months
 
+	def get_taxes_qs(self, *categories):
+		# impostos registrados, calculados, mas que ainda não foram pagos
+		# acontece na venda dos direitos de subscrição ou qualquer outro evento registrado
+		queryset = self.stats_report_class.taxes_model.objects.filter(
+			category__in=categories,
+			user=self.user,
+			total__gt=0
+		)
+		return queryset
+
+	def update_residual_taxes(self, stats: Stats):
+		"""Tem que ser feito quando os impostos já foram calculados
+		# por se tratar de imposto residual, deve ser pago quando o total dos impostos
+		# for maior ou igual a R$ 10,00
+		"""
+		categories = set()
+		for month in self.admin_view.stats:
+			stats_month = self.admin_view.stats[month]
+			categories.update(list(stats_month.get_results()))
+		categories = [self.asset_model.get_category_by_name(name) for name in categories]
+		taxes_qs = self.get_taxes_qs(*categories)
+		# mantém o histórico de impostos pagos no período
+		taxes_paid_qs = taxes_qs.filter(
+			paid=True,
+			pay_date__gte=self.admin_view.start_date,
+			pay_date__lte=self.admin_view.end_date
+		)
+		stats_taxes = stats.taxes
+		taxes_unpaid = MoneyLC(0)
+		# impostos não pagos aparecem no período para ser pago (repeita o mínimo de R$ 10)
+		taxes_unpaid_qs = taxes_qs.filter(
+			pay_date__lte=self.admin_view.end_date,
+			paid=False
+		)
+		# incluindo os valore não pagos
+		for taxes in taxes_paid_qs:
+			stats.taxes += taxes.taxes_to_pay
+		for taxes in taxes_unpaid_qs:
+			taxes_unpaid += taxes.taxes_to_pay
+		if (stats_taxes + taxes_unpaid) >= MoneyLC('10'):
+			stats.taxes += taxes_unpaid
+			# os impostos residuais ficam congelados nessa data
+			taxes_unpaid_qs.update(
+				pay_date=self.admin_view.start_date,
+				paid=True
+			)
+
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.reports:
 			stats_months = self.stats_report_class.compile_months(
 				self.admin_view.stats
 			)
 			stats_category = collections.OrderedDict([
-				('TODOS', self.stats_report_class.compile(stats_months))
+				('TODOS', stats_all := self.stats_report_class.compile(stats_months))
 			])
+			# impostos residuais
+			self.update_residual_taxes(stats_all)
 			category_choices = self.asset_model.category_choices
 			category_stocks_name = category_choices[self.asset_model.CATEGORY_STOCK]
 			category_fiis_name = category_choices[self.asset_model.CATEGORY_FII]
@@ -476,6 +525,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			if fiis := stats_months.pop(category_fiis_name, None):
 				stats_category[category_fiis_name] = fiis
 			stats_category.update(stats_months)
+
 			context['report']['stats_category'] = stats_category
 			context['report']['stock_exempt_profit'] = MoneyLC(settings.TAX_RATES['stocks']['exempt_profit'])
 		return context
