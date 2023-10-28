@@ -394,6 +394,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	"""Gera dados estatísticos (compra, venda, etc)"""
 	stats_report_class = StatsReport
+	position_model = Position
 	asset_model = Asset
 
 	def setup(self, *args, **kwargs):
@@ -469,42 +470,51 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		)
 		return queryset
 
-	def update_residual_taxes(self, stats: Stats):
+	def update_residual_taxes_month(self, start_date, end_date,
+	                                stats_all: Stats,
+	                                stats_compile: Stats):
+		"""stats: é o compilado de todos os meses"""
+		taxes_qs = self.stats_report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
+		darf_min_value = settings.TAX_RATES['darf']['min_value']
+		# mantém o histórico de impostos pagos no período
+		taxes_paid_qs = taxes_qs.filter(
+			paid=True,
+			pay_date__gte=start_date,
+			pay_date__lte=end_date
+		)
+		taxes_unpaid = MoneyLC(0)
+		# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
+		taxes_unpaid_qs = taxes_qs.filter(
+			pay_date__lte=end_date,
+			paid=False
+		)
+		# incluindo valore pagos (readonly)
+		for taxes in taxes_paid_qs:
+			stats_all.taxes += taxes.taxes_to_pay
+		# incluindo os valore não pagos
+		for taxes in taxes_unpaid_qs:
+			taxes_unpaid += taxes.taxes_to_pay
+
+		if taxes_unpaid and (stats_compile.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
+			stats_all.taxes += taxes_unpaid
+			# os impostos residuais ficam congelados nessa data
+			taxes_unpaid_qs.update(
+				pay_date=end_date,
+				paid=True
+			)
+
+	def update_residual_taxes(self, stats_all: Stats):
 		"""Tem que ser feito quando os impostos já foram calculados
 		# por se tratar de imposto residual, deve ser pago quando o total dos impostos
 		# for maior ou igual a R$ 10,00
 		"""
-		categories = set()
 		for month in self.admin_view.stats:
 			stats_month = self.admin_view.stats[month]
-			categories.update(list(stats_month.get_results()))
-		categories = [self.asset_model.get_category_by_name(name) for name in categories]
-		taxes_qs = self.get_taxes_qs(*categories)
-		# mantém o histórico de impostos pagos no período
-		taxes_paid_qs = taxes_qs.filter(
-			paid=True,
-			pay_date__gte=self.admin_view.start_date,
-			pay_date__lte=self.admin_view.end_date
-		)
-		stats_taxes = stats.taxes
-		taxes_unpaid = MoneyLC(0)
-		# impostos não pagos aparecem no período para ser pago (repeita o mínimo de R$ 10)
-		taxes_unpaid_qs = taxes_qs.filter(
-			pay_date__lte=self.admin_view.end_date,
-			paid=False
-		)
-		# incluindo os valore não pagos
-		for taxes in taxes_paid_qs:
-			stats.taxes += taxes.taxes_to_pay
-		for taxes in taxes_unpaid_qs:
-			taxes_unpaid += taxes.taxes_to_pay
-		if (stats_taxes + taxes_unpaid) >= MoneyLC('10'):
-			stats.taxes += taxes_unpaid
-			# os impostos residuais ficam congelados nessa data
-			taxes_unpaid_qs.update(
-				pay_date=self.admin_view.start_date,
-				paid=True
-			)
+			stats_compile = stats_month.compile_month_results()
+			report = self.admin_view.reports[month]
+			start_date = report.get_opts('start_date')
+			end_date = report.get_opts('end_date')
+			self.update_residual_taxes_month(start_date, end_date, stats_all, stats_compile)
 
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.reports:

@@ -86,6 +86,9 @@ AUTHENTICATION_BACKENDS = [
 
 # alíquotas de imposto
 TAX_RATES = {
+    'darf': {
+      'min_value': '10'
+    },
     'stocks': {
         'exempt_profit': '20000',  # 20.000,00
         'swing_trade': '0.15',  # 15%

@@ -87,6 +87,16 @@ class StatsReport:
 				stats.patrimony = value.patrimony
 		return stats_category
 
+	def compile_month_results(self) -> Stats:
+		"""Compilado de todas as categorias do relatório (mês)"""
+		stats = Stats()
+		for category_name in self.results:
+			stats_category: Stats = self.results[category_name]
+			stats.update(stats_category)
+			stats.cumulative_losses = stats_category.cumulative_losses
+			stats.patrimony = stats_category.patrimony
+		return stats
+
 	def get_results(self):
 		return self.results
 
