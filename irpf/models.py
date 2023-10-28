@@ -710,7 +710,7 @@ class Taxes(BaseIRPFModel):
 
 	tax = models.PositiveIntegerField(verbose_name="Taxa",
 	                                  choices=TAX_CHOICES,
-	                                  help_text="Taxa do imposto.",
+	                                  help_text="alíquota (taxa) do imposto.",
 	                                  null=True, blank=True)
 
 	asset = models.ForeignKey(Asset, on_delete=models.SET_NULL,
