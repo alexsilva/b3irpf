@@ -695,11 +695,13 @@ class Statistic(BaseIRPFModel):
 class Taxes(BaseIRPFModel):
 	"""Modelo usado para registro de impostos a pagar"""
 	TAX_CHOICES = [
+		(None, "Valor líquido"),
 		(15, "15%"),
 		(20, "20%")
 	]
-	total = MoneyField(verbose_name="Valor bruto",
+	total = MoneyField(verbose_name="Valor",
 	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   help_text="O valor deve ser bruto quando uma alíquota (taxa) for selecionada.",
 	                   decimal_places=2)
 
 	category = models.IntegerField(verbose_name="Categoria",
@@ -708,7 +710,8 @@ class Taxes(BaseIRPFModel):
 
 	tax = models.PositiveIntegerField(verbose_name="Taxa",
 	                                  choices=TAX_CHOICES,
-	                                  help_text="Taxa do imposto.")
+	                                  help_text="Taxa do imposto.",
+	                                  null=True, blank=True)
 
 	asset = models.ForeignKey(Asset, on_delete=models.SET_NULL,
 	                          verbose_name="Ativo",
@@ -724,13 +727,22 @@ class Taxes(BaseIRPFModel):
 	                           help_text="Marque quando o imposto for pago e mês/ano corresponde for configurado.")
 	created = models.DateTimeField(verbose_name="Data de registro", auto_now_add=True)
 
+	@classproperty
+	def taxes_choices(cls):
+		return dict(cls.TAX_CHOICES)
+
 	@property
 	def taxes_to_pay(self):
-		return self.total * (self.tax / decimal.Decimal(100))
+		# com o valor líquido o total deverá ser pago
+		if self.tax:
+			taxes = self.total * (self.tax / decimal.Decimal(100))
+		else:
+			taxes = self.total
+		return taxes
 
 	def __str__(self):
 		paid = "pago" if self.paid else "devendo"
-		return f"{self.total} - {self.tax}% - {paid}"
+		return f"{self.total} - {self.taxes_choices[self.tax]} - {paid}"
 
 	class Meta:
 		verbose_name = "Imposto"
