@@ -10,8 +10,9 @@ class MonthYearDates:
 
 	@property
 	def to_date(self):
-		"""Retorna uma data para o mês/ano (começando dia 1)"""
-		return date(self.year, self.month, 1)
+		"""Retorna uma data para o mês/ano (final do mês)"""
+		day = calendar.monthrange(self.year, self.month)[1]
+		return date(self.year, self.month, day)
 
 	@property
 	def year_interval(self):
