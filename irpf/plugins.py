@@ -491,6 +491,8 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		# incluindo valore pagos (readonly)
 		for taxes in taxes_paid_qs:
 			stats_all.taxes += taxes.taxes_to_pay
+			stats_compile.taxes += taxes.taxes_to_pay
+
 		# incluindo os valore não pagos
 		for taxes in taxes_unpaid_qs:
 			taxes_unpaid += taxes.taxes_to_pay
