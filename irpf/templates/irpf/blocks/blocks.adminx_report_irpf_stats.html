@@ -28,9 +28,9 @@
   {% if stats.profits %}
     <li class="list-group-item py-2">
       <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-success">
+        <div class="col-sm-8 text-center text-sm-left text-danger">
           Lucro do período
-          <span class="badge badge-light">TRIBUTÁVEL</span>
+          <span class="badge badge-light" title="Lucro que exige pagamento de imposto">TRIBUTÁVEL</span>
         </div>
         <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">{{ stats.profits }}</span>
@@ -94,7 +94,7 @@
       <div class="row">
         <div class="col-sm-8 text-center text-sm-left text-danger">
           Imposto
-          <span class="badge badge-pill badge-light" title="pagar até final o último dia útil do mês seguinte cod: 6015">DARF</span>
+          <span class="badge badge-pill badge-light" title="Pagar até final o último dia útil do mês seguinte cod: 6015">DARF</span>
         </div>
         <div class="col-sm-4 text-center text-sm-right">
           <span class="text-muted">{{ stats.taxes }}</span>
