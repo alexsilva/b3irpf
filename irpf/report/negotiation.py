@@ -3,7 +3,7 @@ import datetime
 from collections import OrderedDict
 from decimal import Decimal
 from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, SubscriptionInfo
-from irpf.report.base import BaseReport
+from irpf.report.base import BaseReport, BaseReportMonth
 from irpf.report.cache import EmptyCacheError
 from irpf.report.utils import Event, Assets, Buy, MoneyLC
 from irpf.utils import range_dates
@@ -475,7 +475,7 @@ class NegotiationReport(BaseReport):
 			queryset = queryset.select_related(*related_fields)
 		return queryset.order_by('date')
 
-	def get_assets_position(self, date, **options) -> dict:
+	def get_assets_position(self, date: datetime.date, **options) -> dict:
 		"""Retorna dados de posição para caculo do período"""
 		positions = {}
 		queryset = self.get_position_queryset(date, **options)
@@ -492,8 +492,8 @@ class NegotiationReport(BaseReport):
 				))
 			positions[assets.ticker] = assets
 		# se não tem uma posição determinada tenta buscar no histórico do mês anterior
-		if report_history := self.cache.get('report_history', None):
-			for asset in report_history.get_results():
+		if report_month := self.cache.get(f'report_month[{date.month - 1}]', None):
+			for asset in report_month.get_results():
 				if asset.ticker in positions:
 					continue
 				assets = Assets(
@@ -507,22 +507,6 @@ class NegotiationReport(BaseReport):
 				)
 				positions[assets.ticker] = assets
 		return positions
-
-	@classmethod
-	def compile(cls, date: datetime.date, reports: OrderedDict[int]):
-		if len(reports) == 1:
-			return reports[date.month].get_results()
-		assets = {}
-		for month in reports:
-			for _asset in reports[month].get_results():
-				if (asset := assets.get(_asset.ticker)) is None:
-					asset = Assets(ticker=_asset.ticker,
-					               position=_asset.position,
-					               instance=_asset.instance)
-					assets[_asset.ticker] = asset
-				asset.buy = _asset.buy
-				asset.update(_asset)
-		return sorted(assets.values(), key=cls.results_sorted)
 
 	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
 		self.options.setdefault('start_date', start_date)
@@ -580,3 +564,47 @@ class NegotiationReport(BaseReport):
 		# reset cache
 		self.cache.clear()
 		return self.results
+
+
+class NegotiationReportMonth(BaseReportMonth):
+	"""Relatório de todos os meses de um range"""
+	report_class = NegotiationReport
+
+	def generate(self, months_range: list, **options) -> OrderedDict:
+		"""Gera um relatório para cada mês
+		months: é uma lista com tuplas contendo meses
+			[(start_date, end_date, ...)]
+		"""
+		self.options.update(**options)
+
+		for start_date, end_date in months_range:
+			report = self.report_class(self.user, self.model)
+
+			# relatório do mês anterior (usado como posição para o mês atual)
+			last_month = start_date.month - 1
+			report.cache.set(f'report_month[{last_month}]', self.results.get(last_month))
+			report.generate(start_date, end_date, **self.options)
+
+			self.results[start_date.month] = report
+		# datas inicial e final do range
+		if len(months_range) == 1:
+			self.start_date, self.end_date = months_range[0]
+		else:
+			self.start_date, self.end_date = months_range[0][0], months_range[-1][1]
+		return self.results
+
+	def compile(self) -> list:
+		"""Junta os relatórios de todos os meses como se fossem um só"""
+		if len(self.results) == 1:
+			return self.results[self.end_date.month].get_results()
+		assets = {}
+		for month in self.results:
+			for _asset in self.results[month].get_results():
+				if (asset := assets.get(_asset.ticker)) is None:
+					asset = Assets(ticker=_asset.ticker,
+					               position=_asset.position,
+					               instance=_asset.instance)
+					assets[_asset.ticker] = asset
+				asset.buy = _asset.buy
+				asset.update(_asset)
+		return sorted(assets.values(), key=self.report_class.results_sorted)
