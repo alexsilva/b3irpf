@@ -11,6 +11,7 @@ from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bon
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	StatsReportAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonths
 from irpf.report import NegotiationReport, EarningsReport
+from irpf.report.negotiation import NegotiationReportMonth
 from irpf.themes import themes
 from irpf.utils import MonthYearDates
 from irpf.views.import_list import AdminImportListModelView
@@ -41,7 +42,7 @@ def _get_field_opts(name, model):
 @sites.register(AdminReportIrpfModelView)
 class AdminReportIrpfModelViewOptions:
 	models_report_class = {
-		Negotiation: NegotiationReport,
+		Negotiation: NegotiationReportMonth,
 		Earnings: EarningsReport
 	}
 

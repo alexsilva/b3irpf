@@ -12,6 +12,7 @@ from xadmin.views import filter_hook
 from xadmin.widgets import AdminSelectWidget, AdminSelectMultiple
 
 from irpf.models import Institution, Asset, Position
+from irpf.report.base import BaseReportMonth
 from irpf.utils import MonthYearDates
 from irpf.views.base import AdminFormView
 from irpf.widgets import MonthYearWidgetNavigator, MonthYearNavigatorField
@@ -58,9 +59,8 @@ class AdminReportIrpfModelView(AdminFormView):
 	def init_request(self, *args, **kwargs):
 		super().init_request(*args, **kwargs)
 		self.model_app_label = self.kwargs['model_app_label']
-		self.start_date = self.ts = self.end_date = None
-		self.reports: OrderedDict[int] = None
-
+		self.reports: BaseReportMonth = None
+		self.ts = None
 		self.model = apps.get_model(*self.model_app_label.split('.', 1))
 		if not self.admin_site.get_registry(self.model, None):
 			raise Http404
@@ -81,18 +81,18 @@ class AdminReportIrpfModelView(AdminFormView):
 
 	def get_site_title(self):
 		title = super().get_site_title()
-		if self.start_date and self.end_date:
-			start = date_format(self.start_date)
-			end = date_format(self.end_date)
+		if self.reports:
+			start = date_format(self.reports.start_date)
+			end = date_format(self.reports.end_date)
 			title = f"{title} - {start} Até {end}"
 			if self.ts:
 				title += f" - TS({self.ts})"
 			title = mark_safe(title)
 		return title
 
-	def report_object(self, user, **options):
+	def report_object(self, **options):
 		"""report to specified model"""
-		report = self.report_class(self.model, user, **options)
+		report = self.report_class(self.user, self.model, **options)
 		return report
 
 	@filter_hook
@@ -124,25 +124,14 @@ class AdminReportIrpfModelView(AdminFormView):
 		else:
 			months = []
 
-		reports_months = OrderedDict()
-		for start, end in months:
-			report = self.report_object(self.user)
-			# após o processamento do relatório esse dado vai ser removido
-			report.cache.set('report_history', reports_months.get(start.month - 1))
-			# gera os dados de results
-			report.generate(
-				start, end,
-				institution=institution,
-				categories=categories,
-				asset=asset
-			)
-			reports_months[start.month] = report
-
-		if len(months) == 1:
-			self.start_date, self.end_date = months[0]
-		else:
-			self.start_date, self.end_date = months[0][0], months[-1][1]
-		return reports_months
+		reports = self.report_object()
+		reports.generate(
+			months,
+			institution=institution,
+			categories=categories,
+			asset=asset
+		)
+		return reports
 
 	@filter_hook
 	def form_valid(self, form):
@@ -150,7 +139,7 @@ class AdminReportIrpfModelView(AdminFormView):
 		self.reports = self.report_generate(form)
 		if form.cleaned_data['ts']:  # tempo da operação
 			self.ts = time.time() - ts
-		form.data = self._get_form_data(form, self.start_date, self.end_date)
+		form.data = self._get_form_data(form, self.reports.start_date, self.reports.end_date)
 		return self.render_to_response(self.get_context_data(form=form))
 
 	@staticmethod
@@ -175,12 +164,12 @@ class AdminReportIrpfModelView(AdminFormView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		if self.reports:
-			results = self.report_class.compile(self.end_date, self.reports)
+			results = self.reports.compile()
 			context['report'] = {
 				'reports': self.reports,
+				'start_date': self.reports.start_date,
+				'end_date': self.reports.end_date,
 				'results': results,
-				'start_date': self.start_date,
-				'end_date': self.end_date,
 				'ts': self.ts,
 			}
 		return context

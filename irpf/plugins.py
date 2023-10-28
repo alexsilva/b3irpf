@@ -23,6 +23,7 @@ from correpy.domain.enums import TransactionType
 from irpf.fields import CharCodeField
 from irpf.models import Negotiation, Earnings, Position, Asset, Statistic
 from irpf.report import BaseReport
+from irpf.report.base import BaseReportMonth
 from irpf.report.utils import Assets, Stats, MoneyLC
 from irpf.report.stats import StatsReport
 from xadmin.plugins import auth
@@ -156,12 +157,12 @@ class ReportBaseAdminPlugin(BaseAdminPlugin):
 			value = field.initial
 		return value
 
-	def report_generate(self, reports: OrderedDict[int], form):
+	def report_generate(self, reports: BaseReportMonth, form):
 		if self.is_save_position and reports:
 			self.save(reports)
 		return reports
 
-	def save(self, reports: OrderedDict[int]):
+	def save(self, reports: BaseReportMonth):
 		...
 
 
@@ -217,7 +218,7 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 				continue
 
 	@atomic
-	def save(self, reports: OrderedDict[int]):
+	def save(self, reports: BaseReportMonth):
 		try:
 			for month in reports:
 				report = reports[month]
@@ -442,13 +443,13 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		return super().report_generate(reports, form)
 
 	@atomic
-	def save(self, reports: OrderedDict[int]):
+	def save(self, reports: BaseReportMonth):
 		for month in reports:
 			report = reports[month]
 			stats = self.admin_view.stats[month]
 			self.save_stats(report, stats)
 
-	def get_stats(self, reports):
+	def get_stats(self, reports: BaseReportMonth):
 		"""Gera dados estatísticos"""
 		stats_months = collections.OrderedDict()
 		for month in reports:
@@ -580,9 +581,9 @@ class BreadcrumbMonths(BaseAdminPlugin):
 		}, remove=['ts', '_dates'])
 		return query_string
 
-	def _get_position_months(self, date: datetime.date, reports):
+	def _get_position_months(self, reports: BaseReportMonth):
 		"""https://stackoverflow.com/questions/37851053/django-query-group-by-month"""
-		report = reports[date.month]
+		report = reports.get_last()
 		end_date = report.get_opts('end_date')
 		if end_date.month == 1:  # janeiro
 			return ()
@@ -611,7 +612,7 @@ class BreadcrumbMonths(BaseAdminPlugin):
 	def block_report(self, context, nodes):
 		context = get_context_dict(context)
 		if self.admin_view.reports:
-			months = self._get_position_months(self.admin_view.end_date, self.admin_view.reports)
+			months = self._get_position_months(self.admin_view.reports)
 			if len(months) > 1:
 				context['breadcrumb_months'] = months
 				nodes.append(render_to_string('irpf/blocks/blocks.adminx_report_irpf_breadcrumb_months.html',
