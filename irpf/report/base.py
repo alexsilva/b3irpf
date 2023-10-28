@@ -15,6 +15,15 @@ class Base:
 	def get_results(self):
 		return self.results
 
+	def get_opts(self, name: str, *args):
+		"""Returns a filter option with the name"""
+		try:
+			return self.options[name]
+		except KeyError:
+			if not args:
+				raise
+			return args[0]
+
 	def __bool__(self):
 		return bool(self.results)
 
@@ -27,15 +36,6 @@ class Base:
 
 class BaseReport(Base):
 	"""Base report"""
-
-	def get_opts(self, name: str, *args):
-		"""Returns a filter option with the name"""
-		try:
-			return self.options[name]
-		except KeyError:
-			if not args:
-				raise
-			return args
 
 	@staticmethod
 	def results_sorted(asset):
