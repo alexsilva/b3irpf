@@ -1,24 +1,23 @@
-from datetime import datetime
-
 from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
+from datetime import datetime
 from django.contrib.auth import get_permission_codename
 from django.core.management import call_command
+from django.forms import ModelForm
+from moneyfield import MoneyModelForm
 from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
-from django.forms import ModelForm
+
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, SubscriptionInfo
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	StatsReportAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonths
-from irpf.report import NegotiationReport, EarningsReport
+from irpf.report.earnings import EarningsReportMonth
 from irpf.report.negotiation import NegotiationReportMonth
 from irpf.themes import themes
 from irpf.utils import MonthYearDates
 from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from irpf.views.xlsx_viewer import AdminXlsxViewer
-from moneyfield import MoneyModelForm
-
 from irpf.widgets import MonthYearField, MonthYearWidget
 
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
@@ -43,7 +42,7 @@ def _get_field_opts(name, model):
 class AdminReportIrpfModelViewOptions:
 	models_report_class = {
 		Negotiation: NegotiationReportMonth,
-		Earnings: EarningsReport
+		Earnings: EarningsReportMonth
 	}
 
 

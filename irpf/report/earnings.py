@@ -2,7 +2,7 @@ import datetime
 from collections import OrderedDict
 
 from irpf.models import Asset, Earnings
-from irpf.report.base import BaseReport
+from irpf.report.base import BaseReport, BaseReportMonth
 from irpf.report.utils import Assets, Event
 
 
@@ -23,22 +23,6 @@ class EarningsReport(BaseReport):
 		event.items.append(instance)
 		event.quantity += instance.quantity
 		event.value += instance.total
-
-	@classmethod
-	def compile(cls, date: datetime.date, reports: OrderedDict[int]):
-		if len(reports) == 1:
-			return reports[date.month].get_results()
-		assets = {}
-		for month in reports:
-			for _asset in reports[month].get_results():
-				if (asset := assets.get(_asset.ticker)) is None:
-					asset = assets[_asset.ticker] = Assets(
-						ticker=_asset.ticker,
-						institution=_asset.institution,
-						instance=_asset.instance
-					)
-				asset.update(_asset)
-		return sorted(assets.values(), key=cls.results_sorted)
 
 	def get_queryset(self, start_date: datetime.date, end_date: datetime.date, **options):
 		qs_options = dict(
@@ -89,3 +73,38 @@ class EarningsReport(BaseReport):
 		# limpeza do cache
 		self.cache.clear()
 		return self.results
+
+
+class EarningsReportMonth(BaseReportMonth):
+	report_class = EarningsReport
+
+	def generate(self, months_range: list, **options) -> OrderedDict:
+		"""Gera um relatório para cada mês
+		months: é uma lista com tuplas contendo meses
+			[(start_date, end_date, ...)]
+		"""
+		self.options.update(**options)
+
+		for start_date, end_date in months_range:
+			report = self.report_class(self.user, self.model)
+			report.generate(start_date, end_date, **self.options)
+			self.results[start_date.month] = report
+
+		# datas inicial e final do range
+		self.set_dates_range(months_range)
+		return self.results
+
+	def compile(self) -> list:
+		if len(self.results) == 1:
+			return self.get_last().get_results()
+		assets = {}
+		for month in self.results:
+			for _asset in self.results[month]:
+				if (asset := assets.get(_asset.ticker)) is None:
+					asset = assets[_asset.ticker] = Assets(
+						ticker=_asset.ticker,
+						institution=_asset.institution,
+						instance=_asset.instance
+					)
+				asset.update(_asset)
+		return sorted(assets.values(), key=self.report_class.results_sorted)

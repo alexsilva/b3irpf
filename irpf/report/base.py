@@ -52,12 +52,21 @@ class BaseReport(Base):
 
 class BaseReportMonth(Base):
 	"""Um conjunto de relatório dentro de vários meses"""
+	report_class: BaseReport = None
 
 	def __init__(self, user, model, **options):
 		super().__init__(user, model, **options)
 		self.start_date: datetime.date = None
 		self.end_date: datetime.date = None
 		self.results = OrderedDict()
+
+	def set_dates_range(self, months: list):
+		"""Configura as datas start e end"""
+		if len(months) > 1:
+			self.start_date, self.end_date = months[0][0], months[-1][1]
+		else:
+			self.start_date, self.end_date = months[0]
+		return self.start_date, self.end_date
 
 	def generate(self, months_range: list) -> OrderedDict:
 		raise NotImplementedError
