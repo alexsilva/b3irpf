@@ -587,19 +587,16 @@ class NegotiationReportMonth(BaseReportMonth):
 
 			self.results[start_date.month] = report
 		# datas inicial e final do range
-		if len(months_range) == 1:
-			self.start_date, self.end_date = months_range[0]
-		else:
-			self.start_date, self.end_date = months_range[0][0], months_range[-1][1]
+		self.set_dates_range(months_range)
 		return self.results
 
 	def compile(self) -> list:
 		"""Junta os relatórios de todos os meses como se fossem um só"""
 		if len(self.results) == 1:
-			return self.results[self.end_date.month].get_results()
+			return self.get_last().get_results()
 		assets = {}
 		for month in self.results:
-			for _asset in self.results[month].get_results():
+			for _asset in self.results[month]:
 				if (asset := assets.get(_asset.ticker)) is None:
 					asset = Assets(ticker=_asset.ticker,
 					               position=_asset.position,
