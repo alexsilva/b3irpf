@@ -4,17 +4,29 @@ from collections import OrderedDict
 from irpf.report.cache import Cache
 
 
-class BaseReport:
-	"""Base report"""
-	def __init__(self, model, user, **options):
-		self.model = model
+class Base:
+	def __init__(self, user, model, **options):
 		self.user = user
+		self.model = model
 		self.options = options
 		self.cache = Cache()
 		self.results = []
 
 	def get_results(self):
 		return self.results
+
+	def __bool__(self):
+		return bool(self.results)
+
+	def __iter__(self):
+		return iter(self.results)
+
+	def __getitem__(self, item):
+		return self.results[item]
+
+
+class BaseReport(Base):
+	"""Base report"""
 
 	def get_opts(self, name: str, *args):
 		"""Returns a filter option with the name"""
@@ -24,10 +36,6 @@ class BaseReport:
 			if not args:
 				raise
 			return args
-
-	@classmethod
-	def compile(cls, date: datetime.date, reports: OrderedDict[int]):
-		raise NotImplementedError
 
 	@staticmethod
 	def results_sorted(asset):
@@ -40,3 +48,24 @@ class BaseReport:
 
 	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
 		raise NotImplementedError
+
+
+class BaseReportMonth(Base):
+	"""Um conjunto de relatório dentro de vários meses"""
+
+	def __init__(self, user, model, **options):
+		super().__init__(user, model, **options)
+		self.start_date: datetime.date = None
+		self.end_date: datetime.date = None
+		self.results = OrderedDict()
+
+	def generate(self, months_range: list) -> OrderedDict:
+		raise NotImplementedError
+
+	def compile(self) -> list:
+		"""Tem a função de juntar os dados de todos os meses calculados"""
+		raise NotImplementedError
+
+	def get_last(self) -> BaseReport:
+		"""Retorna o relatório do último mês"""
+		return self.results[self.end_date.month]
