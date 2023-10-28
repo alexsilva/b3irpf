@@ -177,7 +177,7 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 
 	def save_position(self, report: BaseReport, asset: Assets):
 		consolidation = report.get_opts('consolidation')
-		date = report.get_opts('end_date')
+		end_date = report.get_opts('end_date')
 		institution = asset.institution
 
 		defaults = {
@@ -186,18 +186,9 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 			'total': asset.buy.total,
 			'tax': asset.buy.tax
 		}
-
-		# remove registro acima da data
-		self.position_model.objects.filter(
-			user=self.user,
-			date__gt=date,
-			asset=asset.instance,
-			institution=institution,
-			consolidation=consolidation
-		).delete()
 		instance, created = self.position_model.objects.get_or_create(
 			defaults=defaults,
-			date=date,
+			date=end_date,
 			user=self.user,
 			asset=asset.instance,
 			institution=institution,
@@ -217,11 +208,24 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 			except Permission.DoesNotExist:
 				continue
 
+	def _remove_positions(self, report: BaseReport):
+		institution = report.get_opts('institution', None)
+		consolidation = report.get_opts('consolidation')
+		end_date = report.get_opts('end_date')
+		# remove registro acima da data
+		return self.position_model.objects.filter(
+			user=self.user,
+			date__gt=end_date,
+			institution=institution,
+			consolidation=consolidation
+		).delete()
+
 	@atomic
 	def save(self, reports: BaseReportMonth):
 		try:
 			for month in reports:
 				report = reports[month]
+				self._remove_positions(report)
 				for asset in report.get_results():
 					# ativo não cadastrado
 					if asset.instance is None:
