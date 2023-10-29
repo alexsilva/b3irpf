@@ -706,7 +706,7 @@ class Taxes(BaseIRPFModel):
 	                   amount_default=None)
 
 	category = models.IntegerField(verbose_name="Categoria",
-	                               help_text="Categoria de ativo para cálculo do imposto.",
+	                               help_text="Categoria para a qual o valor do imposto de se aplica.",
 	                               choices=Asset.CATEGORY_CHOICES)
 
 	tax = models.PositiveIntegerField(verbose_name="Taxa",
