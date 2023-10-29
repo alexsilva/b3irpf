@@ -54,7 +54,7 @@ class StatsReport:
 			if statistics:
 				stats.cumulative_losses = statistics.cumulative_losses
 			# quando os dados de prejuízo ainda não estão salvos usamos o último mês processado
-			elif stats_last_month := self.cache.get('stats_last_month', None):
+			elif stats_last_month := self.cache.get(f'stats_month[{date.month -  1}]', None):
 				stats_results = stats_last_month.get_results()
 				if category_name in stats_results:
 					st = stats_results[category_name]

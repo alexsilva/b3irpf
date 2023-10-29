@@ -467,7 +467,8 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			report = reports[month]
 			date = report.get_opts('start_date')
 			stats = self.stats_report_class(self.user)
-			stats.cache.set('stats_last_month', stats_months.get(month - 1))
+			last_month = month - 1
+			stats.cache.set(f'stats_month[{last_month}]', stats_months.get(last_month))
 			stats.generate(date=date, results=report.get_results())
 			stats_months[month] = stats
 		return stats_months
