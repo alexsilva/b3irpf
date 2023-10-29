@@ -627,8 +627,7 @@ class BreadcrumbMonths(BaseAdminPlugin):
 	def block_report(self, context, nodes):
 		context = get_context_dict(context)
 		if self.admin_view.reports:
-			months = self._get_position_months(self.admin_view.reports)
-			if len(months) > 1:
+			if months := self._get_position_months(self.admin_view.reports):
 				context['breadcrumb_months'] = months
 				nodes.append(render_to_string('irpf/blocks/blocks.adminx_report_irpf_breadcrumb_months.html',
 				                              context=context))
