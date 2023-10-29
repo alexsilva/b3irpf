@@ -476,16 +476,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			stats_months[month] = stats
 		return stats_months
 
-	def get_taxes_qs(self, *categories):
-		# impostos registrados, calculados, mas que ainda não foram pagos
-		# acontece na venda dos direitos de subscrição ou qualquer outro evento registrado
-		queryset = self.stats_report_class.taxes_model.objects.filter(
-			category__in=categories,
-			user=self.user,
-			total__gt=0
-		)
-		return queryset
-
 	def update_residual_taxes_month(self, start_date, end_date,
 	                                stats_all: Stats,
 	                                stats_report: StatsReport):
