@@ -449,6 +449,10 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 				self._update_defaults(instance, defaults)
 
 	def report_generate(self, reports, form):
+		if self.is_save_position:
+			for month in reports:
+				# remove os dados salvos para o meses antes de recalculalos
+				self._remove_stats(reports[month])
 		self.admin_view.stats = self.get_stats(reports)
 		return super().report_generate(reports, form)
 
@@ -456,7 +460,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	def save(self, reports: BaseReportMonth):
 		for month in reports:
 			report = reports[month]
-			self._remove_stats(report)
 			stats = self.admin_view.stats[month]
 			self.save_stats(report, stats)
 
