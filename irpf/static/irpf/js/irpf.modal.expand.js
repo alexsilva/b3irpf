@@ -20,6 +20,7 @@ $(function () {
                 .insertAfter($$parent);
             $$parent.remove();
             $el.show();
+            modal.$el().remove();
         });
         $el.hide();
         $parent.detach()
