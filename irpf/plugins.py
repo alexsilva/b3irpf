@@ -589,7 +589,7 @@ class BreadcrumbMonths(BaseAdminPlugin):
 			'consolidation': self.position_model.CONSOLIDATION_MONTHLY,
 			'dates_0': date.month,
 			'dates_1': date.year,
-		}, remove=['ts', '_dates'])
+		}, remove=['ts', '_dates', 'position'])
 		return query_string
 
 	def _get_position_months(self, reports: BaseReportMonth):
