@@ -16,6 +16,7 @@ from irpf.report.base import BaseReportMonth
 from irpf.utils import MonthYearDates
 from irpf.views.base import AdminFormView
 from irpf.widgets import MonthYearWidgetNavigator, MonthYearNavigatorField
+from xadmin.util import vendor
 
 _now = datetime.now()
 
@@ -71,9 +72,11 @@ class AdminReportIrpfModelView(AdminFormView):
 
 	def get_media(self):
 		media = super().get_media()
+		media += vendor("xadmin.bs.modal.js")
 		media += django_forms.Media(js=(
 			"irpf/js/irpf.plugin.clipboard.js",
 			"irpf/js/irpf.report.js",
+			"irpf/js/irpf.modal.expand.js",
 		), css={
 			'screen': ('irpf/css/irpf.report.css',)
 		})
