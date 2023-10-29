@@ -9,10 +9,16 @@ python pip install -r requirements.txt
 python manage.py makemigrations
 
 python manage.py migrate
-### Criação do usuário padrão
-python manage.py createsupseruser
+
+python manage.py setup_project
 ### Execução
 python manage.py runserver
+
+# Características
+* Importação de dados do site do investidor (b3).
+* Importação de dados por pdf (lê e registra os dados das negociações e taxas cobradas).
+* Geração de relatório anual e mensal (armazenamento desses dados por posição salva manualmente).
+* Relatório com lucro e prejuízos, mensais e anuais e impostos residuais (aqueles abaixo de R$ 10,00).
 
 
 # Na tela adminstração (Empresas).
