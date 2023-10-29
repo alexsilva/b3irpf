@@ -20,8 +20,8 @@ python manage.py runserver
 * Geração de relatório anual e mensal (armazenamento desses dados por posição salva manualmente).
 * Relatório com lucro e prejuízos, mensais e anuais e impostos residuais (aqueles abaixo de R$ 10,00).
 
-## Na tela administração (Empresas).
-* registrar empresas listadas na bolsa (código, nome, cnpj, categoria).
+## Na tela administração (Ativos).
+* Registrar ativos listados em bolsa (código, nome, cnpj, categoria).
 
 ## No site do investidor
 Em https://www.investidor.b3.com.br/extrato/negociacao
