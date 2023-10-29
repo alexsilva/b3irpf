@@ -1,5 +1,5 @@
 {% load irpf_tags %}
-<div class="card mt-1 mb-2 unsort irpfreport irpf-card-sm">
+<div class="card mt-1 mb-2 unsort irpfreport irpf-card-sm asset" data-ticker="{{ asset.ticker }}">
   <div class="card-header">
     <div class="row">
       <div class="col-10 text-truncate">
@@ -25,6 +25,9 @@
             {{ asset.ticker }}
           {% endif %}">
           <i class="fa fa-info-circle"></i>
+        </button>
+        <button type="button" class="btn btn-outline-success card-expand-md">
+          <i class="fa fa-expand" aria-hidden="true"></i>
         </button>
         </div>
       </div>
