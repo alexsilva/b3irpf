@@ -85,7 +85,7 @@ class StatsReport(Base):
 				stats.patrimony = value.patrimony
 		return stats_category
 
-	def compile_month_results(self) -> Stats:
+	def compile_results(self) -> Stats:
 		"""Compilado de todas as categorias do relatório (mês)"""
 		stats = Stats()
 		for category_name in self.results:

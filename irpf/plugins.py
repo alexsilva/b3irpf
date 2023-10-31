@@ -480,7 +480,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	                                stats_all: Stats,
 	                                stats_report: StatsReport):
 		"""stats: é o compilado de todos os meses"""
-		stats_compile = stats_report.compile_month_results()
+		stats_compile = stats_report.compile_results()
 		taxes_qs = self.stats_report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
 		darf_min_value = settings.TAX_RATES['darf']['min_value']
 		# mantém o histórico de impostos pagos no período
