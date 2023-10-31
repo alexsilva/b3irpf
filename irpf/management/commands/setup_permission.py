@@ -18,7 +18,8 @@ from irpf.models import (
 	Taxes,
 	Subscription,
 	BonusInfo,
-	SubscriptionInfo
+	SubscriptionInfo,
+	Statistic
 )
 
 
@@ -42,7 +43,8 @@ class Command(BaseCommand):
 		BrokerageNote: permission_names_all,
 		AssetEvent: permission_names_all,
 		Position: permission_names_all,
-		Taxes: permission_names_all
+		Taxes: permission_names_all,
+		Statistic: permission_names_all,
 	}
 
 	def get_content_type(self, model, opts):
