@@ -4,22 +4,20 @@ from collections import OrderedDict
 from decimal import Decimal
 
 from django.conf import settings
-
+from irpf.report.base import Base
 from irpf.models import Asset, Statistic, Taxes
-from irpf.report.cache import Cache
 from irpf.report.utils import Stats, MoneyLC
 
 
-class StatsReport:
+class StatsReport(Base):
 	"""Estatísticas pode categoria de ativo"""
 	asset_model = Asset
 	statistic_model = Statistic
 	taxes_model = Taxes
 
-	def __init__(self, user):
-		self.user = user
+	def __init__(self, user, **options):
+		super().__init__(user, **options)
 		self.results = OrderedDict()
-		self.cache = Cache()
 
 	def _get_statistics(self, date: datetime.date, category: int, **options):
 		query = dict(
@@ -96,9 +94,6 @@ class StatsReport:
 			stats.cumulative_losses = stats_category.cumulative_losses
 			stats.patrimony = stats_category.patrimony
 		return stats
-
-	def get_results(self):
-		return self.results
 
 	def calc_profits(self, profits, stats: Stats):
 		"""Lucro com compensação de prejuízo"""
