@@ -400,6 +400,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	"""Gera dados estatísticos (compra, venda, etc)"""
 	stats_report_class = StatsReport
+	statistic_model = Statistic
 	position_model = Position
 	asset_model = Asset
 
@@ -414,7 +415,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		consolidation = report.get_opts('consolidation')
 		end_date = report.get_opts('end_date')
 		# remove registro acima da data
-		return Statistic.objects.filter(
+		return self.statistic_model.objects.filter(
 			user=self.user,
 			date__gt=end_date,
 			institution=institution,
@@ -436,9 +437,9 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			cumulative_losses += stats_category.compensated_losses
 			defaults = {'cumulative_losses': cumulative_losses}
 
-			instance, created = Statistic.objects.get_or_create(
+			instance, created = self.statistic_model.objects.get_or_create(
 				category=category,
-				consolidation=Statistic.CONSOLIDATION_MONTHLY,
+				consolidation=self.statistic_model.CONSOLIDATION_MONTHLY,
 				institution=institution,
 				date=date,
 				user=self.user,
