@@ -5,9 +5,8 @@ from irpf.report.cache import Cache
 
 
 class Base:
-	def __init__(self, user, model, **options):
+	def __init__(self, user, **options):
 		self.user = user
-		self.model = model
 		self.options = options
 		self.cache = Cache()
 		self.results = []
@@ -36,6 +35,9 @@ class Base:
 
 class BaseReport(Base):
 	"""Base report"""
+	def __init__(self, user, model, **option):
+		super().__init__(user, **option)
+		self.model = model
 
 	@staticmethod
 	def results_sorted(asset):
@@ -55,7 +57,8 @@ class BaseReportMonth(Base):
 	report_class: BaseReport = None
 
 	def __init__(self, user, model, **options):
-		super().__init__(user, model, **options)
+		super().__init__(user, **options)
+		self.model = model
 		self.start_date: datetime.date = None
 		self.end_date: datetime.date = None
 		self.results = OrderedDict()
