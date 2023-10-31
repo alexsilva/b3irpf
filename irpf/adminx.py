@@ -40,6 +40,9 @@ def _get_field_opts(name, model):
 
 @sites.register(AdminReportIrpfModelView)
 class AdminReportIrpfModelViewOptions:
+	# Configuração de permissão para cada model (as mesmas usadas no setup_permission)
+	# Utilizadas para configurar permissões de objeto
+	guardian_permissions_models = permissions.permission_models
 	models_report_class = {
 		Negotiation: NegotiationReportMonth,
 		Earnings: EarningsReportMonth
@@ -87,6 +90,10 @@ class BaseIRPFAdmin:
 	# AssignUserAdminPlugin
 	assign_current_user = True
 	horizontal_form_layout = True
+
+	# Configuração de permissão para cada model (as mesmas usadas no setup_permission)
+	# Utilizadas para configurar permissões de objeto
+	guardian_permissions_models = permissions.permission_models
 
 	def has_auth_permission(self, name: str, obj=None):
 		if isinstance(self, ModelFormAdminView) and obj is None:

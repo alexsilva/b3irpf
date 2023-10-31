@@ -32,6 +32,19 @@ from xadmin.views import BaseAdminPlugin
 
 
 class GuardianAdminPluginMixin(BaseAdminPlugin):
+	guardian_permissions_models = {}
+
+	def set_guardian_object_perms(self, obj, user=None):
+		model = type(obj)
+		if user is None:
+			user = self.user
+		for perm_name in self.guardian_permissions_models[model]:
+			permission_codename = self.get_model_perm(model, perm_name)
+			# tem que ter permissão de modelo para ter permissão de objeto
+			if user.has_perm(permission_codename):
+				assign_perm(permission_codename, user, obj)
+			else:
+				raise PermissionDenied(permission_codename)
 
 	def add_permission_for_object(self, obj, opts=None):
 		model_perms = self.admin_view.get_model_perms()
