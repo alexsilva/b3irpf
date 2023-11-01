@@ -2,3 +2,15 @@
 .irpf-card-sm {
   max-width: 55rem;
 }
+
+[data-toggle="collapse"] .fa:before {
+  content: "\f055";
+}
+
+[data-toggle="collapse"][aria-expanded="true"] .fa:before {
+  content: "\f056";
+}
+
+[data-toggle="collapse"].collapsed .fa:before {
+  content: "\f055";
+}
