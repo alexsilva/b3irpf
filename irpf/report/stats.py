@@ -4,6 +4,7 @@ from collections import OrderedDict
 from decimal import Decimal
 
 from django.conf import settings
+from django.utils.functional import cached_property
 from irpf.report.base import Base
 from irpf.models import Asset, Statistic, Taxes
 from irpf.report.utils import Stats, MoneyLC
@@ -94,6 +95,11 @@ class StatsReport(Base):
 			stats.cumulative_losses += stats_category.cumulative_losses
 			stats.patrimony += stats_category.patrimony
 		return stats
+
+	@cached_property
+	def stats_results(self):
+		"""Cache armazenado de 'stats' dos resultados"""
+		return self.compile_results()
 
 	def calc_profits(self, profits, stats: Stats):
 		"""Lucro com compensação de prejuízo"""
