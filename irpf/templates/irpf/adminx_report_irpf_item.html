@@ -1,15 +1,14 @@
 {% load irpf_tags %}
 <div class="card mt-1 mb-2 unsort irpfreport irpf-card-sm asset" data-ticker="{{ asset.ticker }}">
-  <div class="card-header">
-    <div class="row">
-      <div class="col-10 text-truncate">
+  <div class="card-header pl-2 pr-2">
+    <div class="d-flex flex-row justify-content-between">
+      <div class="text-truncate">
         <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
             aria-expanded="true" aria-controls="collapsebody-{{ forloop.counter }}">
             {{ asset.ticker }}{% if asset.instance %} - {{ asset.instance.name }} ({{ asset.instance.cnpj }}){% endif %}
         </button>
       </div>
-      <div class="col-2">
-        <div class="row justify-content-end">
+      <div class="d-flex flex-row justify-content-end">
         <button type="button" class="btn btn-link btn-sm mr-1" data-toggle="popover"
               data-content="
           {% if asset.instance %}
@@ -29,7 +28,6 @@
         <button type="button" class="btn btn-link btn-sm card-expand-md">
           <i class="fa fa-expand" aria-hidden="true"></i>
         </button>
-        </div>
       </div>
   </div>
 </div>
