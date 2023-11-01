@@ -212,9 +212,7 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 		if created:
 			self.set_guardian_object_perms(instance)
 		else:
-			for field_name in defaults:
-				setattr(instance, field_name, defaults[field_name])
-			instance.save()
+			self._update_defaults(instance, defaults)
 
 	def _remove_positions(self, report: BaseReport):
 		"""Remove todos os dados de posição a partir da data 'end_date' relatório"""
