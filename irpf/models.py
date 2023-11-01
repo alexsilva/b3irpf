@@ -722,14 +722,14 @@ class Taxes(BaseIRPFModel):
 
 	description = models.TextField(verbose_name="Descrição", blank=True)
 
-	pay_date = DateField(verbose_name="Período de apuração",
+	pay_date = DateField(verbose_name="Data do pagamento",
 	                     help_text="Informe o mês/ano de apuração do imposto (mês válido para o IRPF).",
 	                     blank=True, null=True)
 
 	paid = models.BooleanField(verbose_name="Pago", default=False,
 	                           help_text="Uma vez marcado, informa que o imposto já foi pago.")
 	created = models.DateTimeField(verbose_name="Data de registro", auto_now_add=True)
-	created_date = DateField(verbose_name="Data de inicial do registro",
+	created_date = DateField(verbose_name="Data inicial de apuração",
 	                         blank=True, null=True,
 	                         editable=False)
 	money_hex = models.CharField(max_length=32, editable=False, null=True, blank=True)
