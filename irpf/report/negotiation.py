@@ -583,7 +583,9 @@ class NegotiationReportMonth(BaseReportMonth):
 			# relatório do mês anterior (usado como posição para o mês atual)
 			last_month = start_date.month - 1
 			report.cache.set(f'report_month[{last_month}]', self.results.get(last_month))
-			report.generate(start_date, end_date, **self.options)
+
+			opts = dict(self.options, consolidation=self.report_class.position_model.CONSOLIDATION_MONTHLY)
+			report.generate(start_date, end_date, **opts)
 
 			self.results[start_date.month] = report
 		# datas inicial e final do range
