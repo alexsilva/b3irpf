@@ -230,9 +230,10 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 	@atomic
 	def save(self, reports: BaseReportMonth):
 		try:
+			if reports:
+				self._remove_positions(reports.get_first())
 			for month in reports:
 				report = reports[month]
-				self._remove_positions(report)
 				for asset in report.get_results():
 					# ativo não cadastrado
 					if asset.instance is None:
@@ -487,11 +488,10 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			if created:
 				self.set_guardian_object_perms(instance)
 
-	def report_generate(self, reports, form):
-		if self.is_save_position:
-			for month in reports:
-				# remove os dados salvos para o meses antes do recalculo.
-				self._remove_stats(reports[month])
+	def report_generate(self, reports: BaseReportMonth, form):
+		if self.is_save_position and reports:
+			# remove os dados salvos para o meses antes do recalculo.
+			self._remove_stats(reports.get_first())
 		self.admin_view.stats = self.get_stats(reports)
 		return super().report_generate(reports, form)
 
