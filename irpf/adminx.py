@@ -376,6 +376,7 @@ class TaxesAdmin(BaseIRPFAdmin):
 		"category",
 		"tax",
 		"taxes_to_pay",
+		"created_date",
 		"pay_date",
 		"paid"
 	)
