@@ -209,19 +209,12 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 			institution=institution,
 			consolidation=consolidation
 		)
-		if not created:
+		if created:
+			self.set_guardian_object_perms(instance)
+		else:
 			for field_name in defaults:
 				setattr(instance, field_name, defaults[field_name])
 			instance.save()
-		# permissões de objeto
-		for name in self.position_permission:
-			if not self.has_model_perm(self.position_model, name, self.user):
-				continue
-			try:
-				codename = self.get_model_perm(self.position_model, name)
-				assign_perm(codename, self.user, instance)
-			except Permission.DoesNotExist:
-				continue
 
 	def _remove_positions(self, report: BaseReport):
 		"""Remove todos os dados de posição a partir da data 'end_date' relatório"""
