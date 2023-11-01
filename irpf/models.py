@@ -704,7 +704,7 @@ class Taxes(BaseIRPFModel):
 	total = MoneyField(verbose_name="Valor",
 	                   max_digits=DECIMAL_MAX_DIGITS,
 	                   help_text="O valor deve ser bruto quando uma alíquota (taxa) for selecionada.",
-	                   decimal_places=2,
+	                   decimal_places=DECIMAL_PLACES,
 	                   amount_default=None)
 
 	category = models.IntegerField(verbose_name="Categoria",
