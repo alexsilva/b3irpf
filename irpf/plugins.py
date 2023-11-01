@@ -1,15 +1,20 @@
 import calendar
 import collections
 import datetime
+import hashlib
 import io
 import itertools
 import re
-from collections import OrderedDict
+
 import django.forms as django_forms
+from correpy.domain.entities.security import Security
+from correpy.domain.entities.transaction import Transaction
+from correpy.domain.enums import TransactionType
 from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from django.conf import settings
 from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
+from django.core.exceptions import PermissionDenied
 from django.core.management import get_commands
 from django.db.models import Count
 from django.db.models.functions import ExtractMonth
@@ -17,15 +22,12 @@ from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from guardian.shortcuts import get_objects_for_user, assign_perm
-from correpy.domain.entities.security import Security
-from correpy.domain.entities.transaction import Transaction
-from correpy.domain.enums import TransactionType
 from irpf.fields import CharCodeField
-from irpf.models import Negotiation, Earnings, Position, Asset, Statistic
+from irpf.models import Negotiation, Position, Asset, Statistic, Taxes
 from irpf.report import BaseReport
 from irpf.report.base import BaseReportMonth
-from irpf.report.utils import Assets, Stats, MoneyLC
 from irpf.report.stats import StatsReport
+from irpf.report.utils import Assets, Stats, MoneyLC
 from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
@@ -136,7 +138,7 @@ class ListActionModelPlugin(BaseAdminPlugin):
 		return media
 
 
-class ReportBaseAdminPlugin(BaseAdminPlugin):
+class ReportBaseAdminPlugin(GuardianAdminPluginMixin):
 	report_for_model = Negotiation
 
 	def init_request(self, *args, **kwargs):
@@ -415,6 +417,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	stats_report_class = StatsReport
 	statistic_model = Statistic
 	position_model = Position
+	taxes_model = Taxes
 	asset_model = Asset
 
 	def setup(self, *args, **kwargs):
@@ -427,6 +430,13 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		institution = report.get_opts('institution', None)
 		consolidation = report.get_opts('consolidation')
 		end_date = report.get_opts('end_date')
+		self.taxes_model.objects.filter(
+			category=self.asset_model.CATEGORY_OTHERS,
+			pay_date__gte=end_date,
+			money_hex__isnull=False,
+			tax__isnull=True,
+			user=self.user
+		)
 		# remove registro acima da data
 		return self.statistic_model.objects.filter(
 			user=self.user,
@@ -438,7 +448,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	def save_stats(self, report: BaseReport, stats: StatsReport):
 		"""Salva dados de estatística"""
 		institution = report.get_opts('institution', None)
-		date = report.get_opts('end_date')
+		end_date = report.get_opts('end_date')
 
 		stats_results = stats.get_results()
 		for category_name in stats_results:
@@ -454,13 +464,35 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 				category=category,
 				consolidation=self.statistic_model.CONSOLIDATION_MONTHLY,
 				institution=institution,
-				date=date,
+				date=end_date,
 				user=self.user,
 				defaults=defaults
 			)
-
-			if not created:
+			if created:
+				self.set_guardian_object_perms(instance)
+			else:
 				self._update_defaults(instance, defaults)
+
+		stats_results = stats.stats_results
+		darf_min_value = MoneyLC(settings.TAX_RATES['darf']['min_value'])
+
+		if stats_results.taxes and stats_results.taxes < darf_min_value:
+			taxes_total = stats_results.taxes - stats_results.residual_taxes
+			money_hex = hashlib.md5(f"{end_date.isoformat()}:{taxes_total}".encode('utf-8')).hexdigest()
+			defaults = dict(
+				description=f"Valor referente ao mês {end_date.month} não pago por estar abaixo de {darf_min_value}",
+				total=taxes_total
+			)
+			instance, created = self.taxes_model.objects.get_or_create(
+				money_hex=money_hex,
+				category=self.asset_model.CATEGORY_OTHERS,
+				pay_date=end_date,  # fica para o próximo mês
+				user=self.user,
+				tax=None,
+				defaults=defaults
+			)
+			if created:
+				self.set_guardian_object_perms(instance)
 
 	def report_generate(self, reports, form):
 		if self.is_save_position:
@@ -494,7 +526,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	                                stats_all: Stats,
 	                                stats_report: StatsReport):
 		"""stats: é o compilado de todos os meses"""
-		stats_compile = stats_report.compile_results()
 		taxes_qs = self.stats_report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
 		darf_min_value = settings.TAX_RATES['darf']['min_value']
 		# mantém o histórico de impostos pagos no período
@@ -512,14 +543,17 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		# incluindo valore pagos (readonly)
 		for taxes in taxes_paid_qs:
 			stats_all.taxes += taxes.taxes_to_pay
-			stats_compile.taxes += taxes.taxes_to_pay
+			stats_report.stats_results.residual_taxes += taxes.taxes_to_pay
+			stats_report.stats_results.taxes += taxes.taxes_to_pay
 
 		# incluindo os valore não pagos
 		for taxes in taxes_unpaid_qs:
 			taxes_unpaid += taxes.taxes_to_pay
 
-		if taxes_unpaid and (stats_compile.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
+		if taxes_unpaid and (stats_report.stats_results.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
 			stats_all.taxes += taxes_unpaid
+			stats_report.stats_results.taxes += taxes_unpaid
+			stats_report.stats_results.residual_taxes += taxes_unpaid
 			# os impostos residuais ficam congelados nessa data
 			taxes_unpaid_qs.update(
 				pay_date=end_date,
