@@ -82,6 +82,7 @@ class Stats:
 
 		# prejuízos compensados
 		self.compensated_losses = MoneyLC(0)
+		self.residual_taxes = MoneyLC(0)
 
 	def update(self, stats):
 		"""Acrescenta os dados de outro objeto stats"""
