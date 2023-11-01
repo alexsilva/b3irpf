@@ -89,6 +89,19 @@
       </div>
     </li>
   {% endif %}
+  {% if stats.residual_taxes %}
+    <li class="list-group-item py-2">
+      <div class="row">
+        <div class="col-sm-8 text-center text-sm-left text-danger">
+          Imposto acumulado
+          <span class="badge badge-light" title="Que vem dos meses e/ou anos anteriores">RESIDUAL</span>
+        </div>
+        <div class="col-sm-4 text-center text-sm-right">
+          <span class="text-muted">{{ stats.residual_taxes }}</span>
+        </div>
+      </div>
+    </li>
+  {% endif %}
   {% if stats.taxes %}
     <li class="list-group-item py-2">
       <div class="row">

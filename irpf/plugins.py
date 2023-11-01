@@ -534,6 +534,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			# se o imposto não vem do registro automático
 			if taxes.created_date is None or consolidation == self.position_model.CONSOLIDATION_MONTHLY:
 				stats_all.taxes += taxes.taxes_to_pay
+			stats_all.residual_taxes += taxes.taxes_to_pay
 			stats_report.stats_results.residual_taxes += taxes.taxes_to_pay
 			stats_report.stats_results.taxes += taxes.taxes_to_pay
 
