@@ -424,8 +424,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		end_date = report.get_opts('end_date')
 		self.taxes_model.objects.filter(
 			category=self.asset_model.CATEGORY_OTHERS,
-			pay_date__gte=end_date,
-			money_hex__isnull=False,
+			created_date__gt=end_date,
 			tax__isnull=True,
 			user=self.user
 		).delete()
@@ -470,19 +469,19 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 
 		if stats_results.taxes and stats_results.taxes < darf_min_value:
 			taxes_total = stats_results.taxes - stats_results.residual_taxes
-			money_hex = hashlib.md5(':'.join([
-				str(v) for v in (self.asset_model.CATEGORY_OTHERS, self.user.pk, taxes_total)
-			]).encode('utf-8')).hexdigest()
+			money_hex = hashlib.md5(str(taxes_total).encode('utf-8')).hexdigest()
 			defaults = dict(
+				total=taxes_total,
+				created_date=end_date,
 				description=f"Valor referente ao mês {end_date.month} não pago por estar abaixo de {darf_min_value}",
 				pay_date=end_date,  # fica para o próximo mês
-				total=taxes_total
 			)
 			instance, created = self.taxes_model.objects.get_or_create(
 				category=self.asset_model.CATEGORY_OTHERS,
+				created_date=end_date,
 				money_hex=money_hex,
 				user=self.user,
-				tax=None,
+				tax__isnull=True,
 				defaults=defaults
 			)
 			if created:

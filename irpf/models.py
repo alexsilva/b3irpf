@@ -729,7 +729,9 @@ class Taxes(BaseIRPFModel):
 	paid = models.BooleanField(verbose_name="Pago", default=False,
 	                           help_text="Uma vez marcado, informa que o imposto já foi pago.")
 	created = models.DateTimeField(verbose_name="Data de registro", auto_now_add=True)
-
+	created_date = DateField(verbose_name="Data de inicial do registro",
+	                         blank=True, null=True,
+	                         editable=False)
 	money_hex = models.CharField(max_length=32, editable=False, null=True, blank=True)
 
 	@classproperty
