@@ -2,12 +2,11 @@
 <div class="card mt-1 mb-2 unsort irpfreport irpf-card-sm asset" data-ticker="{{ asset.ticker }}">
   <div class="card-header pl-2 pr-2">
     <div class="d-flex flex-row justify-content-between">
-      <div class="text-truncate">
-        <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapsebody-{{ forloop.counter }}"
-            aria-expanded="true" aria-controls="collapsebody-{{ forloop.counter }}">
-            {{ asset.ticker }}{% if asset.instance %} - {{ asset.instance.name }} ({{ asset.instance.cnpj }}){% endif %}
-        </button>
-      </div>
+      <button class="btn btn-link btn-block text-left text-truncate" type="button" data-toggle="collapse"
+              data-target="#collapsebody-{{ forloop.counter }}"
+          aria-expanded="true" aria-controls="collapsebody-{{ forloop.counter }}">
+          {{ asset.ticker }}{% if asset.instance %} - {{ asset.instance.name }} ({{ asset.instance.cnpj }}){% endif %}
+      </button>
       <div class="d-flex flex-row justify-content-end">
         <button type="button" class="btn btn-link btn-sm mr-1" data-toggle="popover"
               data-content="
