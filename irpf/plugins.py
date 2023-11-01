@@ -468,7 +468,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		darf_min_value = MoneyLC(settings.TAX_RATES['darf']['min_value'])
 
 		if stats_results.taxes and stats_results.taxes < darf_min_value:
-			taxes_total = stats_results.taxes - stats_results.residual_taxes
+			taxes_total = stats_results.taxes
 			money_hex = hashlib.md5(str(taxes_total).encode('utf-8')).hexdigest()
 			defaults = dict(
 				total=taxes_total,
@@ -486,6 +486,8 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			)
 			if created:
 				self.set_guardian_object_perms(instance)
+			else:
+				self._update_defaults(instance, {'paid': False})
 
 	def report_generate(self, reports: BaseReportMonth, form):
 		if self.is_save_position and reports:
