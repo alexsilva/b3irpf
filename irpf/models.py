@@ -53,10 +53,12 @@ class Asset(models.Model):
 	CATEGORY_STOCK = 1
 	CATEGORY_FII = 2
 	CATEGORY_BDR = 3
+	CATEGORY_OTHERS = 4
 	CATEGORY_CHOICES = (
 		(CATEGORY_STOCK, "AÇÃO"),
 		(CATEGORY_FII, "FII"),
-		(CATEGORY_BDR, "BDR")
+		(CATEGORY_BDR, "BDR"),
+		(CATEGORY_OTHERS, "OUTROS")
 	)
 
 	code = models.CharField(verbose_name="Código de negociação",
