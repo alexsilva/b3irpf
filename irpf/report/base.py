@@ -78,6 +78,10 @@ class BaseReportMonth(Base):
 		"""Tem a função de juntar os dados de todos os meses calculados"""
 		raise NotImplementedError
 
+	def get_first(self) -> BaseReport:
+		"""Retorna o relatório do primeiro mês"""
+		return self.results[self.start_date.month]
+
 	def get_last(self) -> BaseReport:
 		"""Retorna o relatório do último mês"""
 		return self.results[self.end_date.month]
