@@ -1,4 +1,28 @@
-{% extends "irpf/adminx_report_irpf_asset_box.html" %}
+{% extends "irpf/adminx_report_irpf_asset_box.html" %}}
+
+{% block card_title_full %}{% endblock %}
+
+{% block card_header %}
+   <h5 class="card-header bg-transparent" id="card_header_asset_{{ asset.ticker|lower }}_movement">
+      <button class="btn btn-link btn-block text-left p-0 border-0" type="button" data-toggle="collapse"
+              data-target="#card_asset_{{ asset.ticker|lower }}_movement"
+              aria-controls="card_asset_{{ asset.ticker|lower }}_movement"
+              aria-expanded="{{ asset.buy|yesno:"false,true" }}">
+      {{ card_title }}
+      <span class="float-right">
+        <i class="fa"></i>
+      </span>
+      </button>
+    </h5>
+{% endblock %}
+
+{% block card_body %}
+  <div id="card_asset_{{ asset.ticker|lower }}_movement" class="collapse {{ asset.buy|yesno:"hide,show" }}"
+       aria-labelledby="card_asset_{{ asset.ticker|lower }}_movement">
+  {{ block.super }}
+  </div>
+{% endblock %}
+
 {% load irpf_tags %}
 {% block card_list_group %}
   {% for event in asset.credit.values %}
