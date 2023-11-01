@@ -427,7 +427,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			money_hex__isnull=False,
 			tax__isnull=True,
 			user=self.user
-		)
+		).delete()
 		# remove registro acima da data
 		return self.statistic_model.objects.filter(
 			user=self.user,
@@ -469,15 +469,17 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 
 		if stats_results.taxes and stats_results.taxes < darf_min_value:
 			taxes_total = stats_results.taxes - stats_results.residual_taxes
-			money_hex = hashlib.md5(f"{end_date.isoformat()}:{taxes_total}".encode('utf-8')).hexdigest()
+			money_hex = hashlib.md5(':'.join([
+				str(v) for v in (self.asset_model.CATEGORY_OTHERS, self.user.pk, taxes_total)
+			]).encode('utf-8')).hexdigest()
 			defaults = dict(
 				description=f"Valor referente ao mês {end_date.month} não pago por estar abaixo de {darf_min_value}",
+				pay_date=end_date,  # fica para o próximo mês
 				total=taxes_total
 			)
 			instance, created = self.taxes_model.objects.get_or_create(
-				money_hex=money_hex,
 				category=self.asset_model.CATEGORY_OTHERS,
-				pay_date=end_date,  # fica para o próximo mês
+				money_hex=money_hex,
 				user=self.user,
 				tax=None,
 				defaults=defaults
@@ -661,4 +663,5 @@ class BreadcrumbMonths(BaseAdminPlugin):
 				context['breadcrumb_months'] = months
 				nodes.append(render_to_string('irpf/blocks/blocks.adminx_report_irpf_breadcrumb_months.html',
 				                              context=context))
+
 	block_report.priority = 1000
