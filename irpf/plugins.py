@@ -520,6 +520,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	                                stats_all: Stats,
 	                                stats_report: StatsReport):
 		"""stats: é o compilado de todos os meses"""
+		consolidation = self.admin_view.reports.get_opts('consolidation')
 		taxes_qs = self.stats_report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
 		darf_min_value = settings.TAX_RATES['darf']['min_value']
 		# mantém o histórico de impostos pagos no período
@@ -528,26 +529,26 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			pay_date__gte=start_date,
 			pay_date__lte=end_date
 		)
-		taxes_unpaid = MoneyLC(0)
-		# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
-		taxes_unpaid_qs = taxes_qs.filter(
-			pay_date__lte=end_date,
-			paid=False
-		)
 		# incluindo valore pagos (readonly)
 		for taxes in taxes_paid_qs:
-			stats_all.taxes += taxes.taxes_to_pay
+			# se o imposto não vem do registro automático
+			if taxes.created_date is None or consolidation == self.position_model.CONSOLIDATION_MONTHLY:
+				stats_all.taxes += taxes.taxes_to_pay
 			stats_report.stats_results.residual_taxes += taxes.taxes_to_pay
 			stats_report.stats_results.taxes += taxes.taxes_to_pay
+
+		taxes_unpaid = MoneyLC(0)
+		# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
+		taxes_unpaid_qs = taxes_qs.filter(paid=False)
 
 		# incluindo os valore não pagos
 		for taxes in taxes_unpaid_qs:
 			taxes_unpaid += taxes.taxes_to_pay
+			stats_report.stats_results.residual_taxes += taxes.taxes_to_pay
 
 		if taxes_unpaid and (stats_report.stats_results.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
 			stats_all.taxes += taxes_unpaid
 			stats_report.stats_results.taxes += taxes_unpaid
-			stats_report.stats_results.residual_taxes += taxes_unpaid
 			# os impostos residuais ficam congelados nessa data
 			taxes_unpaid_qs.update(
 				pay_date=end_date,
