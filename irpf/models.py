@@ -754,3 +754,4 @@ class Taxes(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Imposto"
 		verbose_name_plural = verbose_name + "s"
+		ordering = ('created_date', 'category')
