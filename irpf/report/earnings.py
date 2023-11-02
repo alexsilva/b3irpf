@@ -27,8 +27,7 @@ class EarningsReport(BaseReport):
 	def get_queryset(self, start_date: datetime.date, end_date: datetime.date, **options):
 		qs_options = dict(
 			user=self.user,
-			date__gte=start_date,
-			date__lte=end_date,
+			date__range=[start_date, end_date]
 		)
 		institution = options.get('institution')
 		if institution:
