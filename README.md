@@ -8,7 +8,7 @@ python pip install -r requirements.txt
 ### Configuração
 
 Criar o arquivo `irpf.env` na raíz do projeto com as configurações do banco de dados
-* DATABASE_URL=engine://usr:pass@host:3306/dbname
+* DATABASE_URL=engine://usr:pass@host:port/dbname
 * DEBUG=ON
 
 python manage.py makemigrations
