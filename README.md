@@ -6,6 +6,11 @@ python pip install git+https://github.com/alexsilva/b3irpf.git@master
 ### Instalação de dependências
 python pip install -r requirements.txt
 ### Configuração
+
+Criar o arquivo `irpf.env` na raíz do projeto com as configurações do banco de dados
+* DATABASE_URL=engine://usr:pass@host:3306/dbname
+* DEBUG=ON
+
 python manage.py makemigrations
 
 python manage.py migrate
