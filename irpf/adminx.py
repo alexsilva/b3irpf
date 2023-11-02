@@ -236,7 +236,7 @@ class NegotiationAdmin(BaseIRPFAdmin):
 	list_display = (
 		"code",
 		"kind",
-		"institution",
+		"institution_name",
 		"quantity",
 		"price",
 		"total",
@@ -353,7 +353,7 @@ class EarningsAdmin(BaseIRPFAdmin):
 		"kind",
 		"code",
 		"name",
-		"institution",
+		"institution_name",
 		"quantity",
 		"total",
 		"date"

@@ -30,7 +30,7 @@ class EarningsReport(BaseReport):
 			date__range=[start_date, end_date]
 		)
 		if institution := options.get('institution'):
-			qs_options['institution'] = institution.name
+			qs_options['institution_name'] = institution.name
 		if asset := options.get('asset'):
 			qs_options['code'] = asset.code
 		if categories := options['categories']:

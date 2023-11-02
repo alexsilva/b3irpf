@@ -301,7 +301,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 			price=transaction.unit_price,
 			brokerage_note=instance,
 			irrf=transaction.source_withheld_taxes,
-			institution=instance.institution.name,
+			institution_name=instance.institution.name,
 			asset=self.get_asset(ticker),
 			user=self.user
 		)
@@ -369,7 +369,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 			transaction = transactions[ticker]
 			qs = queryset.filter(
 				date=instance.reference_date,
-				institution=instance.institution.name,
+				institution_name=instance.institution.name,
 				user=self.user)
 			kind = self._get_transaction_type(transaction)
 			if kind is None:

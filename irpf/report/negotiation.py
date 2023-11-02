@@ -403,7 +403,7 @@ class NegotiationReport(BaseReport):
 		qs_options['date__range'] = [options['start_date'],
 		                             options['end_date']]
 		if institution := options.get('institution'):
-			qs_options['institution'] = institution.name
+			qs_options['institution_name'] = institution.name
 		if assetft := qs_options.pop('asset', None):
 			qs_options['code__iexact'] = assetft.code
 		queryset = self.earnings_model.objects.filter(**qs_options)
@@ -520,7 +520,7 @@ class NegotiationReport(BaseReport):
 		if assetft := qs_options.pop('asset', None):  # Permite filtrar por empresa (ativo)
 			qs_options['code__iexact'] = assetft.code
 		if institution := self.options.get('institution'):
-			qs_options['institution'] = institution.name
+			qs_options['institution_name'] = institution.name
 
 		# cache
 		assets = self.get_assets_position(date=start_date, **self.options)

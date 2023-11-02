@@ -188,8 +188,8 @@ class Negotiation(ImportModelMixin, BaseIRPFModel):
 	                        choices=KIND_CHOICES,
 	                        max_length=16)
 
-	institution = models.CharField(verbose_name="Instituição",
-	                               max_length=512)
+	institution_name = models.CharField(verbose_name="Instituição",
+	                                    max_length=512)
 
 	code = CharCodeField(verbose_name="Código de negociação",
 	                     max_length=8)
@@ -231,7 +231,7 @@ class Negotiation(ImportModelMixin, BaseIRPFModel):
 	# relates the name of the headers with the fields.
 	date.sheet_header = "Data do Negócio"
 	kind.sheet_header = "Tipo de Movimentação"
-	institution.sheet_header = "Instituição"
+	institution_name.sheet_header = "Instituição"
 	code.sheet_header = "Código de Negociação"
 	quantity.sheet_header = "Quantidade"
 	price.amount_field.sheet_header = "Preço"
@@ -260,7 +260,7 @@ class Negotiation(ImportModelMixin, BaseIRPFModel):
 		return self.kind.lower() == self.KIND_BUY.lower()
 
 	def __str__(self):
-		return f'{self.code}:{self.kind[0]}/{self.quantity} ({self.institution})'
+		return f'{self.code}:{self.kind[0]}/{self.quantity} ({self.institution_name})'
 
 	class Meta:
 		verbose_name = "Negociação"
@@ -270,8 +270,8 @@ class Negotiation(ImportModelMixin, BaseIRPFModel):
 			models.Index(fields=['-date']),
 			models.Index(fields=['code']),
 			models.Index(fields=['kind']),
-			models.Index(fields=['institution']),
-			models.Index(fields=['-date', 'code', 'kind', 'institution'])
+			models.Index(fields=['institution_name']),
+			models.Index(fields=['-date', 'code', 'kind', 'institution_name'])
 		]
 
 
@@ -434,8 +434,8 @@ class Earnings(ImportModelMixin, BaseIRPFModel):
 	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
 	                          null=True)
-	institution = models.CharField(verbose_name="Instituição",
-	                               max_length=512)
+	institution_name = models.CharField(verbose_name="Instituição",
+	                                    max_length=512)
 	quantity = DecimalBRField(verbose_name="Quantidade",
 	                          max_digits=19,
 	                          decimal_places=2,
@@ -449,7 +449,7 @@ class Earnings(ImportModelMixin, BaseIRPFModel):
 	kind.sheet_header = "Movimentação"
 	code.sheet_header = "Produto"
 	name.sheet_header = "Produto"
-	institution.sheet_header = "Instituição"
+	institution_name.sheet_header = "Instituição"
 	quantity.sheet_header = "Quantidade"
 	total.amount_field.sheet_header = "Valor da Operação"
 
