@@ -58,8 +58,8 @@ class NegotiationReport(BaseReport):
 		except EmptyCacheError:
 			by_date = self.cache.set('bonus_registry_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date_com__gte'] = options['start_date']
-		qs_options['date_com__lte'] = options['end_date']
+		qs_options['date_com__range'] = [options['start_date'],
+		                                 options['end_date']]
 		for instance in self.bonus_model.objects.filter(**qs_options):
 			by_date.setdefault(instance.date_com, []).append(instance)
 		return by_date
@@ -71,8 +71,8 @@ class NegotiationReport(BaseReport):
 		except EmptyCacheError:
 			by_date = self.cache.set('bonus_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['bonus__date__gte'] = options['start_date']
-		qs_options['bonus__date__lte'] = options['end_date']
+		qs_options['bonus__date__range'] = [options['start_date'],
+		                                    options['end_date']]
 		if assetft := qs_options.pop('asset', None):
 			qs_options['bonus__asset'] = assetft
 		if categories := qs_options.pop('asset__category__in', None):
@@ -186,8 +186,7 @@ class NegotiationReport(BaseReport):
 		except EmptyCacheError:
 			by_date = self.cache.set('subscription_registry_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date_com__gte'] = options['start_date']
-		qs_options['date_com__lte'] = options['end_date']
+		qs_options['date_com__range'] = [options['start_date'], options['end_date']]
 		for instance in self.subscription_model.objects.filter(**qs_options):
 			by_date.setdefault(instance.date_com, []).append(instance)
 		return by_date
@@ -199,8 +198,8 @@ class NegotiationReport(BaseReport):
 		except EmptyCacheError:
 			by_date = self.cache.set('subscription_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['subscription__date__gte'] = options['start_date']
-		qs_options['subscription__date__lte'] = options['end_date']
+		qs_options['subscription__date__range'] = [options['start_date'],
+		                                           options['end_date']]
 		if assetft := qs_options.pop('asset', None):
 			qs_options['subscription__asset'] = assetft
 		if categories := qs_options.pop('asset__category__in', None):
@@ -316,8 +315,8 @@ class NegotiationReport(BaseReport):
 		except EmptyCacheError:
 			by_date = self.cache.set('events_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date_com__gte'] = options['start_date']
-		qs_options['date_com__lte'] = options['end_date']
+		qs_options['date_com__range'] = [options['start_date'],
+		                                 options['end_date']]
 		related_fields = []
 		if (field_name := 'asset') in qs_options:
 			related_fields.append(field_name)
@@ -401,8 +400,8 @@ class NegotiationReport(BaseReport):
 		except EmptyCacheError:
 			by_date = self.cache.set('earnings_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date__gte'] = options['start_date']
-		qs_options['date__lte'] = options['end_date']
+		qs_options['date__range'] = [options['start_date'],
+		                             options['end_date']]
 		if institution := options.get('institution'):
 			qs_options['institution'] = institution.name
 		if assetft := qs_options.pop('asset', None):
@@ -516,12 +515,13 @@ class NegotiationReport(BaseReport):
 		self.options.update(options)
 
 		qs_options = self.get_common_qs_options(**self.options)
+		qs_options['date__range'] = [start_date, end_date]
+
 		if assetft := qs_options.pop('asset', None):  # Permite filtrar por empresa (ativo)
 			qs_options['code__iexact'] = assetft.code
 		if institution := self.options.get('institution'):
 			qs_options['institution'] = institution.name
-		qs_options['date__gte'] = start_date
-		qs_options['date__lte'] = end_date
+
 		# cache
 		assets = self.get_assets_position(date=start_date, **self.options)
 		assets_queryset = self.get_queryset(**qs_options)
