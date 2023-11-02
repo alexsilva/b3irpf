@@ -6,7 +6,9 @@
   {% if report %}
     {% view_block 'report' %}
     {% for asset in report.results %}
-      {% include "irpf/adminx_report_irpf_item.html" %}
+      {% if asset %}
+        {% include "irpf/adminx_report_irpf_item.html" %}
+      {% endif %}
     {% endfor %}
   {% endif %}
 {% endblock %}

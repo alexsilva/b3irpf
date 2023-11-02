@@ -283,6 +283,14 @@ class Assets:
 			period.buy.tax += instance.tax
 		return period
 
+	def __bool__(self):
+		# compras vem do histós de todas as posições
+		# items tem do período apurado
+		return bool(self.buy or self.sell or
+		            self.credit or self.debit or
+		            self.events or self.bonus or
+		            self.items)
+
 	def __deepcopy__(self, memo):
 		memo[id(self)] = cpy = type(self)(
 			ticker=self.ticker,
