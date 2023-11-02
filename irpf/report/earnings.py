@@ -29,14 +29,11 @@ class EarningsReport(BaseReport):
 			user=self.user,
 			date__range=[start_date, end_date]
 		)
-		institution = options.get('institution')
-		if institution:
+		if institution := options.get('institution'):
 			qs_options['institution'] = institution.name
-		asset = options.get('asset')
-		if asset:
+		if asset := options.get('asset'):
 			qs_options['code'] = asset.code
-		categories = options['categories']
-		if categories:
+		if categories := options['categories']:
 			qs_options['asset__category__in'] = categories
 		queryset = self.model.objects.filter(**qs_options)
 		return queryset
