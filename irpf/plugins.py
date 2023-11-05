@@ -617,6 +617,14 @@ class BreadcrumbMonths(BaseAdminPlugin):
 	def setup(self, *args, **kwargs):
 		self.report_url = self.get_admin_url("reportirpf", self.report_for_model._meta.label_lower)
 
+	def get_media(self, media):
+		return media + django_forms.Media(js=(
+			"irpf/js/jquery-asBreadcrumbs.min.js",
+			"irpf/js/breadcrumbs.start.js",
+		), css={
+			'screen': ('irpf/css/asBreadcrumbs.min.css',)
+		})
+
 	def _get_report_url(self, date):
 		query_string = self._get_query_string(date)
 		return self.report_url + query_string
