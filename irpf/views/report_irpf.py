@@ -85,9 +85,9 @@ class AdminReportIrpfModelView(AdminFormView):
 	def get_site_title(self):
 		title = super().get_site_title()
 		if self.reports:
-			start = date_format(self.reports.start_date, "j N")
-			end = date_format(self.reports.end_date, "j N Y")
-			title = f"{title} - {start} Até {end}"
+			start = date_format(self.reports.start_date, "j b.")
+			end = date_format(self.reports.end_date, "j b. Y")
+			title = f"{title} - {start} até {end}"
 			if self.ts:
 				title += f" - TS({self.ts})"
 			title = mark_safe(title)
