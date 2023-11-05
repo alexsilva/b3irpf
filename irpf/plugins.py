@@ -13,7 +13,6 @@ from correpy.domain.enums import TransactionType
 from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from django.conf import settings
 from django.contrib.auth import get_permission_codename
-from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
 from django.core.management import get_commands
 from django.db.models import Count
@@ -185,7 +184,6 @@ class ReportBaseAdminPlugin(GuardianAdminPluginMixin):
 class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 	"""Salva os dados de posição do relatório"""
 	position_model = Position
-	position_permission = list(auth.ACTION_NAME)
 
 	def block_form_buttons(self, context, nodes):
 		if self.admin_view.reports:
