@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from datetime import date
 from datetime import datetime
 
@@ -6,6 +5,7 @@ import django.forms as django_forms
 import time
 from django.apps import apps
 from django.http import Http404
+from django.utils.datastructures import MultiValueDict
 from django.utils.formats import date_format
 from django.utils.safestring import mark_safe
 from xadmin.views import filter_hook
@@ -143,11 +143,11 @@ class AdminReportIrpfModelView(AdminFormView):
 		self.reports = self.report_generate(form)
 		if form.cleaned_data['ts']:  # tempo da operação
 			self.ts = time.time() - ts
-		form.data = self._get_form_data(form, self.reports.start_date, self.reports.end_date)
+		form.data = self.get_form_data(form, self.reports.start_date, self.reports.end_date)
 		return self.render_to_response(self.get_context_data(form=form))
 
-	@staticmethod
-	def _get_form_data(form, start_date: date, end_date: date):
+	@filter_hook
+	def get_form_data(self, form, start_date: date, end_date: date) -> MultiValueDict:
 		data = form.data.copy()
 		dates_widget = form.fields['dates'].widget
 		prefix = f"{form.prefix}-" if form.prefix else ""
