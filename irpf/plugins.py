@@ -27,7 +27,6 @@ from irpf.report import BaseReport
 from irpf.report.base import BaseReportMonth
 from irpf.report.stats import StatsReport
 from irpf.report.utils import Assets, Stats, MoneyLC
-from xadmin.plugins import auth
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
@@ -36,6 +35,7 @@ class GuardianAdminPluginMixin(BaseAdminPlugin):
 	guardian_permissions_models = {}
 
 	def set_guardian_object_perms(self, obj, user=None):
+		"""Configura permissões de objeto para o usuário da seção"""
 		model = type(obj)
 		if user is None:
 			user = self.user
@@ -46,16 +46,6 @@ class GuardianAdminPluginMixin(BaseAdminPlugin):
 				assign_perm(permission_codename, user, obj)
 			else:
 				raise PermissionDenied(permission_codename)
-
-	def add_permission_for_object(self, obj, opts=None):
-		model_perms = self.admin_view.get_model_perms()
-		if opts is None:
-			opts = self.opts
-		for perm_name in model_perms:
-			# atribuição das permissões de objeto
-			if model_perms[perm_name]:
-				permission_codename = get_permission_codename(perm_name, opts)
-				assign_perm(permission_codename, self.user, obj)
 
 
 class GuardianAdminPlugin(GuardianAdminPluginMixin):
@@ -81,7 +71,7 @@ class GuardianAdminPlugin(GuardianAdminPluginMixin):
 	def save_models(self):
 		new_obj = getattr(self.admin_view, "new_obj", None)
 		if new_obj and new_obj.pk:
-			self.add_permission_for_object(new_obj)
+			self.set_guardian_object_perms(new_obj)
 
 
 class AssignUserAdminPlugin(BaseAdminPlugin):
@@ -306,10 +296,9 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		)
 		defaults = options.setdefault('defaults', {})
 		defaults['total'] = transaction.amount * transaction.unit_price
-		model = self.brokerage_note_negotiation
-		opts = model._meta
-		obj, created = model.objects.get_or_create(**options)
-		self.add_permission_for_object(obj, opts=opts)
+		obj, created = self.brokerage_note_negotiation.objects.get_or_create(**options)
+		if created:
+			self.set_guardian_object_perms(obj)
 		return obj
 
 	def _get_transaction_type(self, transaction: Transaction) -> str:
