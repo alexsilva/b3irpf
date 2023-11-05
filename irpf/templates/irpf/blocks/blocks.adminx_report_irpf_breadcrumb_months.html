@@ -1,6 +1,6 @@
 {% load irpf_tags %}
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
+<nav aria-label="breadcrumb" id="breadcrumb_months">
+  <ol class="breadcrumb always-visible">
     {% for month in breadcrumb_months %}
       <li class="breadcrumb-item{% if month.active %} active{% endif %}"
               {% if month.active %}aria-current="page"{% endif %}>
