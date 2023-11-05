@@ -167,7 +167,8 @@ class ReportBaseAdminPlugin(GuardianAdminPluginMixin):
 	def is_save_position(self):
 		field = django_forms.BooleanField(initial=False)
 		try:
-			value = field.to_python(self.request.GET.get('position'))
+			opts = getattr(self.request, 'POST' if self.admin_view.request_method == 'post' else 'GET')
+			value = field.to_python(opts.get('position'))
 		except django_forms.ValidationError:
 			value = field.initial
 		return value
