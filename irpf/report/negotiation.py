@@ -100,11 +100,9 @@ class NegotiationReport(BaseReport):
 		bonus_by_date = self.get_bonus_by_date(**options)
 		for bonus_info in bonus_by_date.get(date, ()):
 			bonus = bonus_info.bonus
-			ticker = bonus.asset.code
-			try:
-				asset = assets[ticker]
-			except KeyError:
-				continue
+			asset = self.get_assets(bonus.asset.code, assets,
+			                        instance=bonus.asset,
+			                        institution=options.get('institution'))
 			# ignora os registros que já foram contabilizados na posição
 			if asset.is_position_interval(bonus.date):
 				continue
@@ -145,11 +143,9 @@ class NegotiationReport(BaseReport):
 		"""Adiciona ações bonificadas na data considerando o histórico"""
 		bonus_by_date = self.get_bonus_registry_by_date(**options)
 		for bonus in bonus_by_date.get(date, ()):
-			ticker = bonus.asset.code
-			try:
-				asset = assets[ticker]
-			except KeyError:
-				continue
+			asset = self.get_assets(bonus.asset.code, assets,
+			                        instance=bonus.asset,
+			                        institution=options.get('institution'))
 			# ignora os registros que já foram contabilizados na posição
 			if asset.is_position_interval(bonus.date):
 				continue
@@ -227,11 +223,9 @@ class NegotiationReport(BaseReport):
 		subscription_by_date = self.get_subscription_by_date(**options)
 		for subscription_info in subscription_by_date.get(date, ()):
 			subscription = subscription_info.subscription
-			ticker = subscription.asset.code
-			try:
-				asset = assets[ticker]
-			except KeyError:
-				continue
+			asset = self.get_assets(subscription.asset.code, assets,
+			                        instance=subscription.asset,
+			                        institution=options.get('institution'))
 			# ignora os registros que já foram contabilizados na posição
 			if asset.is_position_interval(subscription.date):
 				continue
@@ -269,11 +263,9 @@ class NegotiationReport(BaseReport):
 		"""Registra subscrições na 'data com'"""
 		get_subscription_by_date = self.get_subscription_registry_by_date(**options)
 		for subscription in get_subscription_by_date.get(date, ()):
-			ticker = subscription.asset.code
-			try:
-				asset = assets[ticker]
-			except KeyError:
-				continue
+			asset = self.get_assets(subscription.asset.code, assets,
+			                        instance=subscription.asset,
+			                        institution=options.get('institution'))
 			# ignora os registros que já foram contabilizados na posição
 			if asset.is_position_interval(subscription.date):
 				continue
