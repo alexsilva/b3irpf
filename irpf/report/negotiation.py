@@ -19,12 +19,24 @@ class NegotiationReport(BaseReport):
 	bonus_model = Bonus
 	bonus_info_model = BonusInfo
 
-	def get_asset(self, code):
-		"""A empresa"""
+	def get_asset(self, code: str):
+		"""Retorna o registro do ativo (vindo do banco de dados)"""
 		try:
 			asset = self.asset_model.objects.get(code__iexact=code)
 		except self.asset_model.DoesNotExist:
 			asset = None
+		return asset
+
+	def get_assets(self, ticker: str, assets: dict,  instance: Asset = None, institution=None, **options):
+		"""Retorna o registro de asset (agrupamentos de todas as negociações)"""
+		try:
+			asset = assets[ticker]
+		except KeyError:
+			asset = Assets(ticker=ticker,
+			               institution=institution,
+			               instance=(instance or self.get_asset(ticker)),
+			               **options)
+			assets[ticker] = asset
 		return asset
 
 	def get_queryset(self, *args, **kwargs):
@@ -534,20 +546,14 @@ class NegotiationReport(BaseReport):
 
 			queryset = assets_queryset.filter(date=date)
 			for instance in queryset:
-				# cálculo de compra e venda
-				ticker = instance.code
-				try:
-					asset = assets[ticker]
-				except KeyError:
-					asset = Assets(ticker=ticker,
-					               institution=institution,
-					               instance=(instance.asset or assetft or
-					                         self.get_asset(ticker)))
-					assets[ticker] = asset
+				asset = self.get_assets(instance.code, assets,
+				                        institution=institution,
+				                        instance=instance.asset or assetft)
 				# ignora os registros que já foram contabilizados na posição
 				if asset.is_position_interval(instance.date):
 					continue
 				asset.items.append(instance)
+				# cálculo de compra e venda
 				self.consolidate(instance, asset)
 
 			self.apply_earnings(date, assets, **self.options)
