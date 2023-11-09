@@ -227,8 +227,8 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 			for month in reports:
 				report = reports[month]
 				for asset in report.get_results():
-					# ativo não cadastrado
-					if asset.instance is None:
+					# ignora ativo não cadastrado ou com posição zerada
+					if asset.buy.quantity == 0 or asset.instance is None:
 						continue
 					self.save_position(report, asset)
 		except Exception as exc:
