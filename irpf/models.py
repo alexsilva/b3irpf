@@ -615,6 +615,9 @@ class Position(BaseIRPFModel):
 	                                            default=CONSOLIDATION_YEARLY)
 	date = DateField(verbose_name="Data")
 
+	# ao invés de deletar posições, apenas marcamos como inválida
+	is_valid = models.BooleanField(verbose_name="Valída", default=True)
+
 	@classproperty
 	def consolidation_choices(cls):
 		return dict(cls.CONSOLIDATION_CHOICES)
