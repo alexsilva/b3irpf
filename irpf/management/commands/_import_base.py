@@ -32,7 +32,7 @@ class Command(BaseCommand):
 	help = """imports data from the xlsx file with information on the earnings."""
 	permission_models = permission_models
 	storage_model = None
-	storage_ops = None
+	storage_opts = None
 
 	def add_arguments(self, parser):
 		parser.add_argument("--filepath", type=argparse.FileType('rb'), required=True)
@@ -41,7 +41,7 @@ class Command(BaseCommand):
 
 	def get_fields_map(self):
 		fields = {}
-		for field in self.storage_ops.get_fields():
+		for field in self.storage_opts.get_fields():
 			if hasattr(field, "sheet_header"):
 				fields.setdefault(field.sheet_header, []).append(field)
 		return fields
@@ -49,7 +49,7 @@ class Command(BaseCommand):
 	def _assign_perm(self, instance, user):
 		"""Adiciona permissões padrão para a instância x usuário"""
 		for name in self.permission_models[self.storage_model]:
-			permission_codename = get_permission_codename(name, self.storage_ops)
+			permission_codename = get_permission_codename(name, self.storage_opts)
 			assign_perm(permission_codename, user, instance)
 
 	@atomic

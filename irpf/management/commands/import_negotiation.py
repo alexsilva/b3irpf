@@ -7,4 +7,4 @@ class Command(_import_base.Command):
 	help = """imports data from the xlsx file with information on the year's negotiations."""
 
 	storage_model = Negotiation
-	storage_ops = storage_model._meta
+	storage_opts = storage_model._meta
