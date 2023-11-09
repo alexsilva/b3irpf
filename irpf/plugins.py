@@ -635,12 +635,14 @@ class BreadcrumbMonths(BaseAdminPlugin):
 		start_date = datetime.date(end_date.year, 1, 1)
 		qs_options = dict(
 			quantity__gt=0,
+			consolidation=self.position_model.CONSOLIDATION_MONTHLY,
 			date__range=[start_date, end_date],
 			user=self.user
 		)
 		if asset := report.get_opts('asset', None):
 			qs_options['asset'] = asset
-
+		if institution := report.get_opts('institution', None):
+			qs_options['institution'] = institution
 		queryset = self.position_model.objects.filter(
 			**qs_options
 		).annotate(
