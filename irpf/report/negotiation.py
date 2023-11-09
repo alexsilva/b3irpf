@@ -481,33 +481,35 @@ class NegotiationReport(BaseReport):
 	def get_assets_position(self, date: datetime.date, **options) -> dict:
 		"""Retorna dados de posição para caculo do período"""
 		positions = {}
-		queryset = self.get_position_queryset(date, **options)
-		for position in queryset:
-			assets = Assets(
-				ticker=position.asset.code,
-				institution=position.institution,
-				instance=position.asset,
-				position=position,
-				buy=Buy(
-					quantity=position.quantity,
-					total=position.total,
-					tax=position.tax
-				))
-			positions[assets.ticker] = assets
-		# se não tem uma posição determinada tenta buscar no histórico do mês anterior
+		# usa a posição do mês anterior em cache (sempre calculada para relatório anual).
 		if report_month := self.cache.get(f'report_month[{date.month - 1}]', None):
 			for asset in report_month.get_results():
-				if asset.ticker in positions:
-					continue
 				assets = Assets(
 					ticker=asset.ticker,
 					institution=asset.institution,
 					instance=asset.instance,
 					position=asset.position,
-					buy=Buy(quantity=asset.buy.quantity,
-					        total=asset.buy.total,
-					        tax=asset.buy.tax)
+					buy=Buy(
+						quantity=asset.buy.quantity,
+						total=asset.buy.total,
+						tax=asset.buy.tax
+					)
 				)
+				positions[assets.ticker] = assets
+		else:
+			# usa posições salvas para relatórios mensais
+			queryset = self.get_position_queryset(date, **options)
+			for position in queryset:
+				assets = Assets(
+					ticker=position.asset.code,
+					institution=position.institution,
+					instance=position.asset,
+					position=position,
+					buy=Buy(
+						quantity=position.quantity,
+						total=position.total,
+						tax=position.tax
+					))
 				positions[assets.ticker] = assets
 		return positions
 
