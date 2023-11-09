@@ -278,7 +278,7 @@ class Negotiation(ImportModelMixin, BaseIRPFModel):
 class Bonus(BaseIRPFModel):
 	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
-	                          null=True, blank=False)
+	                          null=False)
 	date_com = DateField(verbose_name="Data com")
 	date_ex = DateField(verbose_name="Data ex")
 	date = DateField(verbose_name="Data de incorporação")
@@ -347,7 +347,7 @@ class Subscription(BaseIRPFModel):
 	"""
 	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
-	                          null=True, blank=False)
+	                          null=False)
 
 	date_com = DateField(verbose_name="Data com", null=True, blank=False)
 	date_ex = DateField(verbose_name="Data ex", null=True, blank=False)
@@ -552,7 +552,7 @@ class AssetEvent(BaseIRPFModel):
 	)
 	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
-	                          null=True, blank=False)
+	                          null=False)
 	date = models.DateField(verbose_name="Data do anúncio")
 	date_com = models.DateField(verbose_name="Data com")
 	factor_from = models.IntegerField(verbose_name="Fator de")
@@ -592,7 +592,7 @@ class Position(BaseIRPFModel):
 	]
 	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
 	                          verbose_name="Ativo",
-	                          null=True, blank=False)
+	                          null=False)
 	institution = models.ForeignKey(Institution,
 	                                on_delete=models.SET_NULL,
 	                                verbose_name="Instituição",
