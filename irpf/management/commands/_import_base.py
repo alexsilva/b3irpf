@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
 from guardian.shortcuts import assign_perm
 from openpyxl import load_workbook
+from irpf.permissions import permission_models
 
 User = get_user_model()
 
@@ -29,8 +30,7 @@ class UserType:
 
 class Command(BaseCommand):
 	help = """imports data from the xlsx file with information on the earnings."""
-	model_permissions = ["view", "add", "change", "delete"]
-
+	permission_models = permission_models
 	storage_model = None
 	storage_ops = None
 
@@ -46,13 +46,10 @@ class Command(BaseCommand):
 				fields.setdefault(field.sheet_header, []).append(field)
 		return fields
 
-	def _assign_perm(self, instance, user=None):
+	def _assign_perm(self, instance, user):
 		"""Adiciona permissões padrão para a instância x usuário"""
-		opts = instance._meta
-		if user is None:
-			user = instance.user
-		for name in self.model_permissions:
-			permission_codename = get_permission_codename(name, opts)
+		for name in self.permission_models[self.storage_model]:
+			permission_codename = get_permission_codename(name, self.storage_ops)
 			assign_perm(permission_codename, user, instance)
 
 	@atomic
@@ -61,7 +58,7 @@ class Command(BaseCommand):
 			data = self.storage_model.import_before_save_data(**data)
 		instance, created = self.storage_model.objects.get_or_create(**data)
 		if created:
-			self._assign_perm(instance)
+			self._assign_perm(instance, instance.user)
 
 	def process_sheet(self, ws, options):
 		verbosity, level = options.get('verbosity', 0), 2
