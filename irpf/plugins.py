@@ -633,10 +633,16 @@ class BreadcrumbMonths(BaseAdminPlugin):
 		if end_date.month == 1:  # janeiro
 			return ()
 		start_date = datetime.date(end_date.year, 1, 1)
-		queryset = self.position_model.objects.filter(
+		qs_options = dict(
 			quantity__gt=0,
 			date__range=[start_date, end_date],
 			user=self.user
+		)
+		if asset := report.get_opts('asset', None):
+			qs_options['asset'] = asset
+
+		queryset = self.position_model.objects.filter(
+			**qs_options
 		).annotate(
 			month=ExtractMonth('date')
 		).values('month').annotate(
