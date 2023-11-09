@@ -146,7 +146,7 @@ class BaseIRPFModel(models.Model):
 	                         verbose_name="Usuário",
 	                         on_delete=models.CASCADE,
 	                         editable=False,
-	                         null=True, blank=False)
+	                         null=False)
 
 	class Meta:
 		abstract = True
