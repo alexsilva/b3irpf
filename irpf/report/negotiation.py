@@ -472,7 +472,7 @@ class NegotiationReport(BaseReport):
 			max_day = calendar.monthrange(date.year - 1, 12)[1]
 			qs_options['date'] = datetime.date(date.year - 1, 12, max_day)
 
-		queryset = self.position_model.objects.filter(**qs_options)
+		queryset = self.position_model.objects.filter(is_valid=True, **qs_options)
 		queryset = queryset.exclude(quantity=0)
 		if related_fields:
 			queryset = queryset.select_related(*related_fields)

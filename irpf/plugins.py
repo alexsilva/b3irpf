@@ -188,7 +188,8 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 			'quantity': asset.buy.quantity,
 			'avg_price': asset.buy.avg_price,
 			'total': asset.buy.total,
-			'tax': asset.buy.tax
+			'tax': asset.buy.tax,
+			'is_valid': True
 		}
 		instance, created = self.position_model.objects.get_or_create(
 			defaults=defaults,
@@ -203,7 +204,7 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 		else:
 			self._update_defaults(instance, defaults)
 
-	def _remove_positions(self, report: BaseReport):
+	def _invalidate_positions(self, report: BaseReport):
 		"""Remove todos os dados de posição a partir da data 'end_date' relatório"""
 		institution = report.get_opts('institution', None)
 		consolidation = report.get_opts('consolidation')
@@ -214,13 +215,13 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 			date__gt=end_date,
 			institution=institution,
 			consolidation=consolidation
-		).delete()
+		).update(is_valid=False)
 
 	@atomic
 	def save(self, reports: BaseReportMonth):
 		try:
 			if reports:
-				self._remove_positions(reports.get_first())
+				self._invalidate_positions(reports.get_first())
 			for month in reports:
 				report = reports[month]
 				for asset in report.get_results():
@@ -634,6 +635,7 @@ class BreadcrumbMonths(BaseAdminPlugin):
 			return ()
 		start_date = datetime.date(end_date.year, 1, 1)
 		qs_options = dict(
+			is_valid=True,
 			quantity__gt=0,
 			consolidation=self.position_model.CONSOLIDATION_MONTHLY,
 			date__range=[start_date, end_date],
