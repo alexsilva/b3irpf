@@ -208,10 +208,12 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 		"""Remove todos os dados de posição a partir da data 'end_date' relatório"""
 		institution = report.get_opts('institution', None)
 		consolidation = report.get_opts('consolidation')
+		asset = report.get_opts('asset', None)
 		end_date = report.get_opts('end_date')
 		# remove registro acima da data
 		return self.position_model.objects.filter(
 			user=self.user,
+			asset=asset,
 			date__gt=end_date,
 			institution=institution,
 			consolidation=consolidation
