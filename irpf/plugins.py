@@ -635,8 +635,7 @@ class BreadcrumbMonths(BaseAdminPlugin):
 		start_date = datetime.date(end_date.year, 1, 1)
 		queryset = self.position_model.objects.filter(
 			quantity__gt=0,
-			date__gte=start_date,
-			date__lte=end_date,
+			date__range=[start_date, end_date],
 			user=self.user
 		).annotate(
 			month=ExtractMonth('date')
