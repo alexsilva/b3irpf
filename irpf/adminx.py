@@ -148,6 +148,7 @@ class PositionAdmin(BaseIRPFAdmin):
 		"asset__code",
 		'consolidation',
 		'institution',
+		'is_valid',
 		'date'
 	)
 	search_fields = (
@@ -163,6 +164,7 @@ class PositionAdmin(BaseIRPFAdmin):
 		'institution',
 		'quantity',
 		'avg_price',
+		'is_valid',
 		'date'
 	)
 
