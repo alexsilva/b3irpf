@@ -82,7 +82,8 @@ class AssignUserAdminPlugin(BaseAdminPlugin):
 		return self.assign_current_user
 
 	def save_forms(self):
-		if self.admin_view.new_obj and self.admin_view.new_obj.user is None:
+		new_obj = getattr(self.admin_view, "new_obj", None)
+		if new_obj and new_obj.user_id is None:
 			self.admin_view.new_obj.user = self.user
 
 
