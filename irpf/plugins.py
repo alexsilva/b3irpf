@@ -219,6 +219,8 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 		)
 		if asset := report.get_opts('asset', None):
 			qs_options['asset'] = asset
+		if categories := report.get_opts('categories', None):
+			qs_options['asset__category__in'] = categories
 		self.position_model.objects.filter(**qs_options).update(is_valid=False)
 
 	@atomic
@@ -649,6 +651,8 @@ class BreadcrumbMonths(BaseAdminPlugin):
 			qs_options['asset'] = asset
 		if institution := report.get_opts('institution', None):
 			qs_options['institution'] = institution
+		if categories := report.get_opts('categories', None):
+			qs_options['asset__category__in'] = categories
 		queryset = self.position_model.objects.filter(
 			**qs_options
 		).annotate(
