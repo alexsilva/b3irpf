@@ -84,7 +84,7 @@ class AssignUserAdminPlugin(BaseAdminPlugin):
 	def save_forms(self):
 		new_obj = getattr(self.admin_view, "new_obj", None)
 		if new_obj and new_obj.user_id is None:
-			self.admin_view.new_obj.user = self.user
+			new_obj.user = self.user
 
 
 class ListActionModelPlugin(BaseAdminPlugin):
