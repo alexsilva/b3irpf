@@ -100,7 +100,7 @@ class AdminReportIrpfModelView(AdminFormView):
 
 	@filter_hook
 	def report_generate(self, form):
-		now = datetime.now()
+		now = datetime.now().date()
 
 		form_data = form.cleaned_data
 		dates: MonthYearDates = form_data['dates']

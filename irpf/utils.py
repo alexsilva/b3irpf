@@ -31,23 +31,24 @@ class MonthYearDates:
 		return start, end
 
 	def get_year_months(self, now: date):
-		"""Retorna intervalos que representam os meses do ano
-		dt: é um limitado para o ano corrente
+		"""Retorna intervalos que representam os meses do ano.
+		@type now: É um limitador para o ano corrente.
 		"""
 		months = []
 		year = now.year if self.year > now.year else self.year
 		if year < now.year:
+			# mês de dezembro do ano anterior
 			year_month = 12
-		elif year >= now.year:
-			year_month = now.month
 		else:
 			year_month = self.month
 		for month in range(1, year_month + 1):
 			max_day = calendar.monthrange(year, month)[1]
-			months.append([
-				date(year, month, 1),
-				date(year, month, max_day)
-			])
+			start_date = date(year, month, 1)
+			end_date = date(year, month, max_day)
+			# nunca ir além da data presente
+			if end_date > now:
+				end_date = now
+			months.append([start_date, end_date])
 		return months
 
 	@property
