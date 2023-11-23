@@ -30,7 +30,7 @@ class MonthYearDates:
 			start, end = self.year_interval
 		return start, end
 
-	def get_year_months(self, now: date):
+	def get_year_month_range(self, now: date):
 		"""Retorna intervalos que representam os meses do ano.
 		@type now: É um limitador para o ano corrente.
 		"""
