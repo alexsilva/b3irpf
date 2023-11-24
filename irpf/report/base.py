@@ -2,6 +2,7 @@ import datetime
 from collections import OrderedDict
 
 from irpf.report.cache import Cache
+from irpf.utils import MonthYearDates
 
 
 class Base:
@@ -51,6 +52,15 @@ class BaseReport(Base):
 	def generate(self, start_date: datetime.date, end_date: datetime.date, **options):
 		raise NotImplementedError
 
+	@property
+	def is_closed(self):
+		"""Se o relatório está fechado o 'end date' representa o final deste mês"""
+		if end_date := self.get_opts('end_date', None):
+			dates = MonthYearDates(end_date.month,
+			                       end_date.year)
+			return end_date == dates.month_range[1]
+		return False
+
 
 class BaseReportMonth(Base):
 	"""Um conjunto de relatório dentro de vários meses"""
@@ -85,3 +95,4 @@ class BaseReportMonth(Base):
 	def get_last(self) -> BaseReport:
 		"""Retorna o relatório do último mês"""
 		return self.results[self.end_date.month]
+
