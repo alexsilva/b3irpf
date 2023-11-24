@@ -16,8 +16,9 @@
             try {
                 navigator.clipboard.writeText(text);
             } catch (e) {
-                var $input = $('<textarea>', {
-                    class: 'd-none'
+                var $input = $('<textarea>').css({
+                    position: "absolute",
+                    left: "-9999px"
                 }).appendTo($('body'));
                 $input.val(text).select();
                 document.execCommand('copy');
