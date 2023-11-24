@@ -24,7 +24,7 @@ class MonthYearDates:
 	@property
 	def month_interval(self):
 		"""Data inicial e final do mês no ano"""
-		start_date = date.min.replace(year=self.year, month=self.month)
+		start_date = date(year=self.year, month=self.month, day=1)
 		max_day = calendar.monthrange(start_date.year, start_date.month)[1]
 		end_date = date(year=self.year, month=self.month, day=max_day)
 		return start_date, end_date
