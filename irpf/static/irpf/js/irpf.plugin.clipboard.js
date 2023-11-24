@@ -12,7 +12,17 @@
         }
         // Copy the text inside the text field
         if (text) {
-            navigator.clipboard.writeText(text.replace(/\s+/g, ' ').trim());
+            text = text.replace(/\s+/g, ' ').trim();
+            try {
+                navigator.clipboard.writeText(text);
+            } catch (e) {
+                var $input = $('<textarea>', {
+                    class: 'd-none'
+                }).appendTo($('body'));
+                $input.val(text).select();
+                document.execCommand('copy');
+                $input.remove();
+            }
         }
     }
 })();
