@@ -55,10 +55,10 @@ class MonthYearDates:
 
 	def get_month_range(self, now: date):
 		"""now: limite date"""
-		start_date = date.min.replace(year=self.year, month=self.month)
+		if (start_date := date(year=self.year, month=self.month, day=1)) > now:
+			start_date = date(year=now.year, month=now.month, day=1)
 		max_day = calendar.monthrange(start_date.year, start_date.month)[1]
-		end_date = date(year=start_date.year, month=start_date.month, day=max_day)
-		if end_date > now:
+		if (end_date := date(year=start_date.year, month=start_date.month, day=max_day)) > now:
 			end_date = now
 		return start_date, end_date
 
