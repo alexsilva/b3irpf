@@ -229,7 +229,10 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 			if reports:
 				self._invalidate_positions(reports.get_first())
 			for month in reports:
-				report = reports[month]
+				report: BaseReport = reports[month]
+				# só salva para relatório fechado (mês completo)
+				if not report.is_closed:
+					continue
 				for asset in report.get_results():
 					# ignora ativo não cadastrado ou com posição zerada
 					if asset.buy.quantity == 0 or asset.instance is None:
@@ -494,7 +497,10 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	@atomic
 	def save(self, reports: BaseReportMonth):
 		for month in reports:
-			report = reports[month]
+			report: BaseReport = reports[month]
+			# só salva para relatório fechado (mês completo)
+			if not report.is_closed:
+				continue
 			stats = self.admin_view.stats[month]
 			self.save_stats(report, stats)
 
@@ -511,13 +517,15 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			stats_months[month] = stats
 		return stats_months
 
-	def update_residual_taxes_month(self, start_date, end_date,
+	def update_residual_taxes_month(self, report: BaseReport,
 	                                stats_all: Stats,
-	                                stats_report: StatsReport):
-		"""stats: é o compilado de todos os meses"""
+	                                stats_month: StatsReport):
+		"""stats_all: é o compilado de todos os meses"""
 		consolidation = self.admin_view.reports.get_opts('consolidation')
 		taxes_qs = self.stats_report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
 		darf_min_value = settings.TAX_RATES['darf']['min_value']
+		start_date = report.get_opts('start_date')
+		end_date = report.get_opts('end_date')
 		# mantém o histórico de impostos pagos no período
 		taxes_paid_qs = taxes_qs.filter(
 			paid=True,
@@ -530,8 +538,8 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			if taxes.created_date is None or consolidation == self.position_model.CONSOLIDATION_MONTHLY:
 				stats_all.taxes += taxes.taxes_to_pay
 			stats_all.residual_taxes += taxes.taxes_to_pay
-			stats_report.stats_results.residual_taxes += taxes.taxes_to_pay
-			stats_report.stats_results.taxes += taxes.taxes_to_pay
+			stats_month.stats_results.residual_taxes += taxes.taxes_to_pay
+			stats_month.stats_results.taxes += taxes.taxes_to_pay
 
 		taxes_unpaid = MoneyLC(0)
 		# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
@@ -540,16 +548,18 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		# incluindo os valore não pagos
 		for taxes in taxes_unpaid_qs:
 			taxes_unpaid += taxes.taxes_to_pay
-			stats_report.stats_results.residual_taxes += taxes.taxes_to_pay
+			stats_month.stats_results.residual_taxes += taxes.taxes_to_pay
 
-		if taxes_unpaid and (stats_report.stats_results.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
+		if taxes_unpaid and (stats_month.stats_results.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
 			stats_all.taxes += taxes_unpaid
-			stats_report.stats_results.taxes += taxes_unpaid
+			stats_month.stats_results.taxes += taxes_unpaid
 			# os impostos residuais ficam congelados nessa data
-			taxes_unpaid_qs.update(
-				pay_date=end_date,
-				paid=True
-			)
+			# # só salva para relatório fechado (mês completo)
+			if report.is_closed:
+				taxes_unpaid_qs.update(
+					pay_date=end_date,
+					paid=True
+				)
 
 	def update_residual_taxes(self, stats_all: Stats):
 		"""Tem que ser feito quando os impostos já foram calculados
@@ -557,11 +567,9 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		# for maior ou igual a R$ 10,00
 		"""
 		for month in self.admin_view.stats:
-			stats_month = self.admin_view.stats[month]
 			report = self.admin_view.reports[month]
-			start_date = report.get_opts('start_date')
-			end_date = report.get_opts('end_date')
-			self.update_residual_taxes_month(start_date, end_date, stats_all, stats_month)
+			stats_month = self.admin_view.stats[month]
+			self.update_residual_taxes_month(report, stats_all, stats_month)
 
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.reports:
