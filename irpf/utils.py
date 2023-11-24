@@ -4,7 +4,7 @@ from typing import Sequence
 
 
 class MonthYearDates:
-	def __init__(self, month, year):
+	def __init__(self, month: int, year: int):
 		self.month = month
 		self.year = year
 
