@@ -123,7 +123,7 @@ class AdminReportIrpfModelView(AdminFormView):
 		if consolidation == Position.CONSOLIDATION_YEARLY:
 			months = dates.get_year_month_range(now)
 		elif consolidation == Position.CONSOLIDATION_MONTHLY:
-			months = [dates.get_month_interval(now)]
+			months = [dates.get_month_range(now)]
 		else:
 			months = []
 
