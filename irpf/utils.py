@@ -38,6 +38,9 @@ class MonthYearDates:
 		if year < now.year:
 			# mês de dezembro do ano anterior
 			year_month = 12
+		elif year >= now.year:
+			# usa o mês atual porque estamos tentando passar para um ano ainda no futuro
+			year_month = now.month
 		else:
 			year_month = self.month
 		for month in range(1, year_month + 1):
