@@ -16,19 +16,16 @@ class MonthYearDates:
 
 	@property
 	def year_interval(self):
-		start = date.min.replace(year=self.year)
-		end = date.max.replace(year=start.year)
-		return start, end
+		start_date = date.min.replace(year=self.year)
+		end_date = date.max.replace(year=start_date.year)
+		return start_date, end_date
 
-	def get_year_interval(self, dt: date = None):
-		"""dt: limite date"""
-		if dt and self.year >= dt.year and dt.month < 12:
-			start = date.min.replace(year=dt.year)
-			max_day = calendar.monthrange(dt.year, dt.month)[1]
-			end = date(year=dt.year, month=dt.month, day=max_day)
-		else:
-			start, end = self.year_interval
-		return start, end
+	@property
+	def month_interval(self):
+		start_date = date.min.replace(year=self.year, month=self.month)
+		max_day = calendar.monthrange(start_date.year, start_date.month)[1]
+		end_date = date(year=self.year, month=self.month, day=max_day)
+		return start_date, end_date
 
 	def get_year_month_range(self, now: date):
 		"""Retorna intervalos que representam os meses do ano.
@@ -59,23 +56,6 @@ class MonthYearDates:
 		if end_date > now:
 			end_date = now
 		return start_date, end_date
-
-	@property
-	def month_interval(self):
-		start = date.min.replace(year=self.year, month=self.month)
-		max_day = calendar.monthrange(start.year, start.month)[1]
-		end = date(year=self.year, month=self.month, day=max_day)
-		return start, end
-
-	def get_month_interval(self, dt: date = None):
-		"""dt: limite date"""
-		if dt and self.year >= dt.year and self.month > dt.month:
-			start = date.min.replace(year=dt.year, month=dt.month)
-			max_day = calendar.monthrange(start.year, start.month)[1]
-			end = date(year=dt.year, month=dt.month, day=max_day)
-		else:
-			start, end = self.month_interval
-		return start, end
 
 
 def range_dates(start_of_range: date, end_of_range: date) -> Sequence[date]:
