@@ -40,7 +40,9 @@
 {% endblock %}
 
 {% block card_footer %}
-  <div class="card-footer bg-transparent">
-    {% view_block 'bonus_stats' %}
-  </div>
+  {% if asset.bonus %}
+    <div class="card-footer bg-transparent">
+      {% view_block 'bonus_stats' %}
+    </div>
+  {% endif %}
 {% endblock %}
