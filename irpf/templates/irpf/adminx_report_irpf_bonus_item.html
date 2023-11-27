@@ -16,21 +16,28 @@
     <ul class="list-group list-group-flush">
       <li class="list-group-item py-2">
         <div class="row">
-          <div class="col-sm-8 text-center text-sm-left">
-            {{ bonus.event.title }}
-            <span class="p-2" title="Se foi incorporada à carteira">
-              {{ bonus.active|boolean_icon }}
-            </span>
-            <button type="button" class="btn btn-link mb-1" data-toggle="popover"
-                    data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações.">
-              <i class="fa fa-info-circle text-success"></i>
-            </button>
+          <div class="col-sm-4 text-center text-sm-left">
+            <div class="d-flex flex-row align-items-center">
+              <span class="text-nowrap text-truncate flex-fill">
+                {{ bonus.event.title }}
+              </span>
+              <button type="button" class="btn btn-link" data-toggle="popover" data-placement="top"
+                      data-content="Se foi incorporada à carteira">
+                {{ bonus.active|boolean_icon }}
+              </button>
+            </div>
           </div>
-          <div class="col-sm-4 text-center text-sm-right btn btn-link" data-toggle="popover"
-               data-content="{{ bonus.event.value }}">
-            <span class="text-muted">
-              {{ bonus.event.quantity|smart_desc|floatformat:4 }} ativo{{ bonus.event.quantity|pluralize }}, {{ bonus.event.value }}
-            </span>
+          <div class="col-sm-8">
+            <div class="d-flex flex-row align-items-center">
+              <button type="button" class="text-muted btn btn-link btn-block text-nowrap text-truncate text-center text-sm-right" data-toggle="popover" data-placement="top"
+                  data-content="{{ bonus.bonus_info.quantity|smart_desc }} ativo{{ bonus.event.quantity|pluralize }}, {{ bonus.event.value }}">
+                {{ bonus.event.quantity|smart_desc|floatformat:4 }} ativo{{ bonus.event.quantity|pluralize }}, {{ bonus.event.value }}
+              </button>
+              <button type="button" class="btn btn-link" data-toggle="popover" data-placement="top"
+                      data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações.">
+                <i class="fa fa-info-circle text-success"></i>
+              </button>
+            </div>
           </div>
         </div>
       </li>
