@@ -16,17 +16,22 @@
     <ul class="list-group list-group-flush">
       <li class="list-group-item py-2">
         <div class="row">
-          <div class="col-sm-8 text-center text-sm-left">
-            {{ subscription.event.title }}
-            <span title="Se foi incorporada à carteira">
-              {{ subscription.active|boolean_icon }}
-            </span>
+          <div class="col-sm-6">
+            <div class="d-flex flex-row align-items-center">
+              <span class="text-nowrap text-truncate text-center text-sm-left flex-fill flex-sm-grow-0">
+                {{ subscription.event.title }}
+              </span>
+              <button type="button" class="btn btn-link" data-toggle="popover" data-placement="top"
+                      data-content="{% if subscription.active %}Já incorporada à carteira{% else %}Incoporação pendente{% endif %}">
+                {{ subscription.active|boolean_icon }}
+              </button>
+            </div>
           </div>
-          <div class="col-sm-4 text-center text-sm-right btn btn-link" data-toggle="popover"
-               data-content="{{ subscription.event.value }}">
-            <span class="text-muted">
+          <div class="col-sm-6">
+            <button type="button" class="text-muted btn btn-link btn-block text-nowrap text-truncate text-center text-sm-right"  data-toggle="popover" data-placement="top"
+                    data-content="{{ subscription.event.quantity|smart_desc }} ativo{{ subscription.event.quantity|pluralize }}, {{ subscription.event.value }}">
               {{ subscription.event.quantity|smart_desc }} de {{ subscription.subscription_info.quantity_proportional|smart_desc }} ativo{{ subscription.event.quantity|pluralize }}, {{ subscription.event.value }}
-            </span>
+            </button>
           </div>
         </div>
       </li>
