@@ -41,7 +41,7 @@ class DateField(models.DateField):
 class CharCodeField(models.CharField):
 	TICKER_PATTERN = (
 		re.compile(BDR_TICKER_PATTERN),
-		re.compile("([A-Z-0-9]{4})(2|3|4|5|6|10|11|12)")
+		re.compile("([A-Z-0-9]{4})(1|2|3|4|5|6|10|11|12)")
 	)
 
 	@classmethod
