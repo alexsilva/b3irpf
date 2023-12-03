@@ -219,7 +219,7 @@ class StatsReports(Base):
 				stats_all.residual_taxes += taxes_to_pay
 				stats.stats_results.residual_taxes += taxes_to_pay
 				# se o imposto não vem do registro automático
-				if taxes.created_date is None or consolidation_monthly:
+				if not taxes.auto_created or consolidation_monthly:
 					stats.stats_results.taxes += taxes.taxes_to_pay
 					stats_all.taxes += taxes.taxes_to_pay
 
@@ -232,7 +232,7 @@ class StatsReports(Base):
 			# incluindo os valore não pagos
 			for taxes in taxes_unpaid_qs:
 				taxes_to_pay = taxes.taxes_to_pay
-				if taxes.created_date is None or consolidation_monthly:
+				if not taxes.auto_created or consolidation_monthly:
 					taxes_unpaid += taxes_to_pay
 				stats_all.residual_taxes += taxes_to_pay
 				stats.stats_results.residual_taxes += taxes_to_pay
