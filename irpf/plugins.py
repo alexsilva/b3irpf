@@ -421,7 +421,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		consolidation = report.get_opts('consolidation')
 		end_date = report.get_opts('end_date')
 		self.taxes_model.objects.filter(
-			category=self.asset_model.CATEGORY_OTHERS,
 			created_date__gt=end_date,
 			auto_created=True,
 			tax__isnull=True,
@@ -467,26 +466,30 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		darf_min_value = MoneyLC(settings.TAX_RATES['darf']['min_value'])
 
 		if stats_results.taxes and stats_results.taxes < darf_min_value:
-			taxes_total = stats_results.taxes
-			money_hex = hashlib.md5(str(taxes_total).encode('utf-8')).hexdigest()
-			defaults = dict(
-				total=taxes_total,
-				description=f"Valor referente ao mês {end_date.month} não pago por estar abaixo de {darf_min_value}",
-				pay_date=end_date,  # fica para o próximo mês
-			)
-			instance, created = self.taxes_model.objects.get_or_create(
-				category=self.asset_model.CATEGORY_OTHERS,
-				created_date=end_date,
-				money_hex=money_hex,
-				user=self.user,
-				auto_created=True,
-				tax__isnull=True,
-				defaults=defaults
-			)
-			if created:
-				self.set_guardian_object_perms(instance)
-			else:
-				self._update_defaults(instance, {'paid': False})
+			for category_name in stats:
+				taxes_total = stats[category_name].taxes
+				if taxes_total == MoneyLC(0):
+					continue
+				money_hex = hashlib.md5(str(taxes_total).encode('utf-8')).hexdigest()
+				category = stats.asset_model.get_category_by_name(category_name)
+				defaults = dict(
+					total=taxes_total,
+					description=f"Valor referente ao mês {end_date.month} não pago por estar abaixo de {darf_min_value}",
+					pay_date=end_date,  # fica para o próximo mês
+				)
+				instance, created = self.taxes_model.objects.get_or_create(
+					category=category,
+					created_date=end_date,
+					money_hex=money_hex,
+					user=self.user,
+					auto_created=True,
+					tax__isnull=True,
+					defaults=defaults
+				)
+				if created:
+					self.set_guardian_object_perms(instance)
+				else:
+					self._update_defaults(instance, {'paid': False})
 
 	def report_generate(self, reports: BaseReportMonth, form):
 		if self.is_save_position and reports:
