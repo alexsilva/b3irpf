@@ -63,16 +63,7 @@ class StatsReport(Base):
 					stats.cumulative_losses = cumulative_losses
 		return stats
 
-	@staticmethod
-	def compile(stats_categories: OrderedDict[int]) -> Stats:
-		stats = Stats()
-		for stats_category in stats_categories.values():
-			stats.update(stats_category)
-			stats.cumulative_losses += stats_category.cumulative_losses
-			stats.patrimony += stats_category.patrimony
-		return stats
-
-	def compile_results(self) -> Stats:
+	def compile(self) -> Stats:
 		"""Compilado de todas as categorias do relatório (mês)"""
 		stats = Stats()
 		for category_name in self.results:
@@ -85,7 +76,7 @@ class StatsReport(Base):
 	@cached_property
 	def stats_results(self):
 		"""Cache armazenado de 'stats' dos resultados"""
-		return self.compile_results()
+		return self.compile()
 
 	def calc_profits(self, profits, stats: Stats):
 		"""Lucro com compensação de prejuízo"""
@@ -140,7 +131,6 @@ class StatsReport(Base):
 		start_date = report.get_opts('start_date')
 		options.setdefault('consolidation', consolidation)
 		self.options.update(options)
-
 		self.results.clear()
 
 		# cache de todas as categorias (permite a compensação de posições finalizadas)
@@ -181,19 +171,20 @@ class StatsReports(Base):
 	"""Um conjunto de relatório dentro de vários meses"""
 	report_class = StatsReport
 
-	def __init__(self, user, **options):
+	def __init__(self, user, reports, **options):
 		super().__init__(user, **options)
 		self.start_date: datetime.date = None
 		self.end_date: datetime.date = None
+		self.reports: BaseReportMonth = reports
 		self.results = OrderedDict()
 
-	def generate(self, reports: BaseReportMonth, **options) -> OrderedDict[int]:
+	def generate(self, **options) -> OrderedDict[int]:
 		"""Gera dados de estatística para cada mês de relatório"""
-		self.start_date = reports.start_date
-		self.end_date = reports.end_date
+		self.start_date = self.reports.start_date
+		self.end_date = self.reports.end_date
 
-		for month in reports:
-			report = reports[month]
+		for month in self.reports:
+			report = self.reports[month]
 			stats = self.report_class(self.user, **options)
 
 			last_month = month - 1
@@ -203,8 +194,55 @@ class StatsReports(Base):
 			self.results[month] = stats
 		return self.results
 
-	def compile(self) -> list:
-		"""Une os resultados de cada mês para cada categoria em um único objeto 'stats'"""
+	def update_residual_taxes(self, stats_all: Stats):
+		"""Atualiza impostos residuais (aqueles abaixo de R$ 10,00 que devem ser pagos posteriormente)
+		"""
+		for month in self.reports:
+			report = self.reports[month]
+			stats = self.results[month]
+
+			consolidation = self.reports.get_opts('consolidation')
+			taxes_qs = self.report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
+			darf_min_value = settings.TAX_RATES['darf']['min_value']
+			start_date = report.get_opts('start_date')
+			end_date = report.get_opts('end_date')
+			# mantém o histórico de impostos pagos no período
+			taxes_paid_qs = taxes_qs.filter(
+				paid=True,
+				pay_date__gte=start_date,
+				pay_date__lte=end_date
+			)
+			# incluindo valore pagos (readonly)
+			for taxes in taxes_paid_qs:
+				# se o imposto não vem do registro automático
+				if taxes.created_date is None or consolidation == self.report_class.statistic_model.CONSOLIDATION_MONTHLY:
+					stats_all.taxes += taxes.taxes_to_pay
+				stats_all.residual_taxes += taxes.taxes_to_pay
+				stats.stats_results.residual_taxes += taxes.taxes_to_pay
+				stats.stats_results.taxes += taxes.taxes_to_pay
+
+			taxes_unpaid = MoneyLC(0)
+			# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
+			taxes_unpaid_qs = taxes_qs.filter(paid=False)
+
+			# incluindo os valore não pagos
+			for taxes in taxes_unpaid_qs:
+				taxes_unpaid += taxes.taxes_to_pay
+				stats.stats_results.residual_taxes += taxes.taxes_to_pay
+
+			if taxes_unpaid and (stats.stats_results.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
+				stats_all.taxes += taxes_unpaid
+				stats.stats_results.taxes += taxes_unpaid
+				# os impostos residuais ficam congelados nessa data
+				# # só salva para relatório fechado (mês completo)
+				if report.is_closed:
+					taxes_unpaid_qs.update(
+						pay_date=end_date,
+						paid=True
+					)
+
+	def compile(self) -> OrderedDict[str]:
+		"""Une os resultados de cada mês para cada categoria em um único objeto 'Stats' por categoria"""
 		stats_categories = OrderedDict()
 		for month in self.results:
 			# cada resultado representa uma categoria de ativo (stock, fii, bdr, etc)
@@ -216,12 +254,22 @@ class StatsReports(Base):
 				stats.update(stats_category)
 				stats.cumulative_losses = stats_category.cumulative_losses
 				stats.patrimony = stats_category.patrimony
-			return stats_categories
+		return stats_categories
 
-	def get_first(self) -> StatsReport:
+	@staticmethod
+	def compile_all(stats_categories: OrderedDict[str]) -> Stats:
+		"""Une todas as categorias em um único objeto 'Stats'"""
+		stats_all = Stats()
+		for stats in stats_categories.values():
+			stats_all.update(stats)
+			stats_all.cumulative_losses += stats.cumulative_losses
+			stats_all.patrimony += stats.patrimony
+		return stats_all
+
+	def get_first(self) -> Stats:
 		"""Retorna o relatório do primeiro mês"""
 		return self.results[self.start_date.month]
 
-	def get_last(self) -> StatsReport:
+	def get_last(self) -> Stats:
 		"""Retorna o relatório do último mês"""
 		return self.results[self.end_date.month]
