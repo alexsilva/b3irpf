@@ -72,21 +72,6 @@ class StatsReport(Base):
 			stats.patrimony += stats_category.patrimony
 		return stats
 
-	@classmethod
-	def compile_months(cls, stats_months: OrderedDict[int], **options) -> OrderedDict:
-		stats_category = OrderedDict()
-		for month in stats_months:
-			stats_month = stats_months[month]
-			stats_results = stats_month.get_results()
-			for category_name in stats_results:
-				value: Stats = stats_results[category_name]
-				if (stats := stats_category.get(category_name)) is None:
-					stats_category[category_name] = stats = Stats()
-				stats.update(value)
-				stats.cumulative_losses = value.cumulative_losses
-				stats.patrimony = value.patrimony
-		return stats_category
-
 	def compile_results(self) -> Stats:
 		"""Compilado de todas as categorias do relatório (mês)"""
 		stats = Stats()
@@ -219,8 +204,19 @@ class StatsReports(Base):
 		return self.results
 
 	def compile(self) -> list:
-		"""Tem a função de juntar os dados de todos os meses calculados"""
-		raise NotImplementedError
+		"""Une os resultados de cada mês para cada categoria em um único objeto 'stats'"""
+		stats_categories = OrderedDict()
+		for month in self.results:
+			# cada resultado representa uma categoria de ativo (stock, fii, bdr, etc)
+			stats_results = self.results[month].get_results()
+			for category_name in stats_results:
+				stats_category: Stats = stats_results[category_name]
+				if (stats := stats_categories.get(category_name)) is None:
+					stats_categories[category_name] = stats = Stats()
+				stats.update(stats_category)
+				stats.cumulative_losses = stats_category.cumulative_losses
+				stats.patrimony = stats_category.patrimony
+			return stats_categories
 
 	def get_first(self) -> StatsReport:
 		"""Retorna o relatório do primeiro mês"""
