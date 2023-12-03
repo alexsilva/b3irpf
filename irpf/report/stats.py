@@ -202,37 +202,44 @@ class StatsReports(Base):
 			stats = self.results[month]
 
 			consolidation = self.reports.get_opts('consolidation')
-			taxes_qs = self.report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
 			darf_min_value = settings.TAX_RATES['darf']['min_value']
 			start_date = report.get_opts('start_date')
 			end_date = report.get_opts('end_date')
+			consolidation_monthly = consolidation == self.report_class.statistic_model.CONSOLIDATION_MONTHLY
+
+			taxes_qs = self.report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
 			# mantém o histórico de impostos pagos no período
 			taxes_paid_qs = taxes_qs.filter(
-				paid=True,
-				pay_date__gte=start_date,
-				pay_date__lte=end_date
+				pay_date__range=[start_date, end_date],
+				paid=True
 			)
-			# incluindo valore pagos (readonly)
+			# incluindo valores pagos (readonly)
 			for taxes in taxes_paid_qs:
+				taxes_to_pay = taxes.taxes_to_pay
+				stats_all.residual_taxes += taxes_to_pay
+				stats.stats_results.residual_taxes += taxes_to_pay
 				# se o imposto não vem do registro automático
-				if taxes.created_date is None or consolidation == self.report_class.statistic_model.CONSOLIDATION_MONTHLY:
+				if taxes.created_date is None or consolidation_monthly:
+					stats.stats_results.taxes += taxes.taxes_to_pay
 					stats_all.taxes += taxes.taxes_to_pay
-				stats_all.residual_taxes += taxes.taxes_to_pay
-				stats.stats_results.residual_taxes += taxes.taxes_to_pay
-				stats.stats_results.taxes += taxes.taxes_to_pay
 
-			taxes_unpaid = MoneyLC(0)
 			# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
-			taxes_unpaid_qs = taxes_qs.filter(paid=False)
+			taxes_unpaid_qs = taxes_qs.filter(
+				created_date__lte=end_date,
+				paid=False)
+			taxes_unpaid = MoneyLC(0)
 
 			# incluindo os valore não pagos
 			for taxes in taxes_unpaid_qs:
-				taxes_unpaid += taxes.taxes_to_pay
-				stats.stats_results.residual_taxes += taxes.taxes_to_pay
+				taxes_to_pay = taxes.taxes_to_pay
+				if taxes.created_date is None or consolidation_monthly:
+					taxes_unpaid += taxes_to_pay
+				stats_all.residual_taxes += taxes_to_pay
+				stats.stats_results.residual_taxes += taxes_to_pay
 
-			if taxes_unpaid and (stats.stats_results.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
-				stats_all.taxes += taxes_unpaid
+			if (stats.stats_results.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
 				stats.stats_results.taxes += taxes_unpaid
+				stats_all.taxes += taxes_unpaid
 				# os impostos residuais ficam congelados nessa data
 				# # só salva para relatório fechado (mês completo)
 				if report.is_closed:

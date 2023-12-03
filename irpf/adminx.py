@@ -363,6 +363,10 @@ class EarningsAdmin(BaseIRPFAdmin):
 
 
 class TaxesMoneyModelForm(ModelForm):
+	def clean_created_date(self):
+		created_date: MonthYearDates = self.cleaned_data['created_date']
+		return created_date.to_date
+
 	def clean_pay_date(self):
 		pay_date: MonthYearDates = self.cleaned_data['pay_date']
 		return pay_date.to_date
@@ -383,9 +387,11 @@ class TaxesAdmin(BaseIRPFAdmin):
 		"paid"
 	)
 	formfield_classes = {
+		'created_date': MonthYearField,
 		'pay_date': MonthYearField
 	}
 	formfield_widgets = {
+		'created_date': MonthYearWidget(attrs={'class': "form-control my-1"}),
 		'pay_date': MonthYearWidget(attrs={'class': "form-control my-1"})
 	}
 
@@ -400,6 +406,7 @@ class TaxesAdmin(BaseIRPFAdmin):
 		if self.request_method == 'get' and data.get('instance') is None:
 			initial = data.setdefault('initial', {})
 			current_date = datetime.now()
+			initial.setdefault('created_date', (current_date.month, current_date.year))
 			initial.setdefault('pay_date', (current_date.month, current_date.year))
 		return data
 

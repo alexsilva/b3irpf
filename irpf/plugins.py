@@ -423,6 +423,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		self.taxes_model.objects.filter(
 			category=self.asset_model.CATEGORY_OTHERS,
 			created_date__gt=end_date,
+			auto_created=True,
 			tax__isnull=True,
 			user=self.user
 		).delete()
@@ -470,7 +471,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			money_hex = hashlib.md5(str(taxes_total).encode('utf-8')).hexdigest()
 			defaults = dict(
 				total=taxes_total,
-				created_date=end_date,
 				description=f"Valor referente ao mês {end_date.month} não pago por estar abaixo de {darf_min_value}",
 				pay_date=end_date,  # fica para o próximo mês
 			)
@@ -479,6 +479,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 				created_date=end_date,
 				money_hex=money_hex,
 				user=self.user,
+				auto_created=True,
 				tax__isnull=True,
 				defaults=defaults
 			)
