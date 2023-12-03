@@ -25,7 +25,7 @@ from irpf.fields import CharCodeField
 from irpf.models import Negotiation, Position, Asset, Statistic, Taxes
 from irpf.report import BaseReport
 from irpf.report.base import BaseReportMonth
-from irpf.report.stats import StatsReport
+from irpf.report.stats import StatsReport, StatsReports
 from irpf.report.utils import Assets, Stats, MoneyLC
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
@@ -404,7 +404,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 
 class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	"""Gera dados estatísticos (compra, venda, etc)"""
-	stats_report_class = StatsReport
+	stats_reports_class = StatsReports
 	statistic_model = Statistic
 	position_model = Position
 	taxes_model = Taxes
@@ -506,90 +506,31 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 
 	def get_stats(self, reports: BaseReportMonth):
 		"""Gera dados estatísticos"""
-		stats_months = collections.OrderedDict()
-		for month in reports:
-			report = reports[month]
-			date = report.get_opts('start_date')
-			stats = self.stats_report_class(self.user)
-			last_month = month - 1
-			stats.cache.set(f'stats_month[{last_month}]', stats_months.get(last_month))
-			stats.generate(date=date, results=report.get_results())
-			stats_months[month] = stats
-		return stats_months
-
-	def update_residual_taxes_month(self, report: BaseReport,
-	                                stats_all: Stats,
-	                                stats_month: StatsReport):
-		"""stats_all: é o compilado de todos os meses"""
-		consolidation = self.admin_view.reports.get_opts('consolidation')
-		taxes_qs = self.stats_report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
-		darf_min_value = settings.TAX_RATES['darf']['min_value']
-		start_date = report.get_opts('start_date')
-		end_date = report.get_opts('end_date')
-		# mantém o histórico de impostos pagos no período
-		taxes_paid_qs = taxes_qs.filter(
-			paid=True,
-			pay_date__gte=start_date,
-			pay_date__lte=end_date
-		)
-		# incluindo valore pagos (readonly)
-		for taxes in taxes_paid_qs:
-			# se o imposto não vem do registro automático
-			if taxes.created_date is None or consolidation == self.position_model.CONSOLIDATION_MONTHLY:
-				stats_all.taxes += taxes.taxes_to_pay
-			stats_all.residual_taxes += taxes.taxes_to_pay
-			stats_month.stats_results.residual_taxes += taxes.taxes_to_pay
-			stats_month.stats_results.taxes += taxes.taxes_to_pay
-
-		taxes_unpaid = MoneyLC(0)
-		# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
-		taxes_unpaid_qs = taxes_qs.filter(paid=False)
-
-		# incluindo os valore não pagos
-		for taxes in taxes_unpaid_qs:
-			taxes_unpaid += taxes.taxes_to_pay
-			stats_month.stats_results.residual_taxes += taxes.taxes_to_pay
-
-		if taxes_unpaid and (stats_month.stats_results.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
-			stats_all.taxes += taxes_unpaid
-			stats_month.stats_results.taxes += taxes_unpaid
-			# os impostos residuais ficam congelados nessa data
-			# # só salva para relatório fechado (mês completo)
-			if report.is_closed:
-				taxes_unpaid_qs.update(
-					pay_date=end_date,
-					paid=True
-				)
-
-	def update_residual_taxes(self, stats_all: Stats):
-		"""Tem que ser feito quando os impostos já foram calculados
-		# por se tratar de imposto residual, deve ser pago quando o total dos impostos
-		# for maior ou igual a R$ 10,00
-		"""
-		for month in self.admin_view.stats:
-			report = self.admin_view.reports[month]
-			stats_month = self.admin_view.stats[month]
-			self.update_residual_taxes_month(report, stats_all, stats_month)
+		stats = self.stats_reports_class(self.user, reports)
+		# gera dados de estatística para cada relatório mensal
+		stats.generate()
+		return stats
 
 	def get_context_data(self, context, **kwargs):
-		if self.admin_view.reports:
-			stats_months = self.stats_report_class.compile_months(
-				self.admin_view.stats
-			)
-			stats_category = collections.OrderedDict([
-				('TODOS', stats_all := self.stats_report_class.compile(stats_months))
-			])
+		if self.admin_view.stats:
+			# compila os meses de estatística em um conjunto de categorias
+			stats_categories = self.admin_view.stats.compile()
+			# compilas as categorias de estatística em um objeto 'Stats'
+			stats_all = self.admin_view.stats.compile_all(stats_categories)
 			# impostos residuais
-			self.update_residual_taxes(stats_all)
+			self.admin_view.stats.update_residual_taxes(stats_all)
+
+			stats_category = collections.OrderedDict([('TODOS', stats_all)])
+
 			category_choices = self.asset_model.category_choices
 			category_stocks_name = category_choices[self.asset_model.CATEGORY_STOCK]
 			category_fiis_name = category_choices[self.asset_model.CATEGORY_FII]
 			# ordenação dos ativos mais importantes manualmente
-			if stocks := stats_months.pop(category_stocks_name, None):
+			if stocks := stats_categories.pop(category_stocks_name, None):
 				stats_category[category_stocks_name] = stocks
-			if fiis := stats_months.pop(category_fiis_name, None):
+			if fiis := stats_categories.pop(category_fiis_name, None):
 				stats_category[category_fiis_name] = fiis
-			stats_category.update(stats_months)
+			stats_category.update(stats_categories)
 
 			context['report']['stats_category'] = stats_category
 			context['report']['stock_exempt_profit'] = MoneyLC(settings.TAX_RATES['stocks']['exempt_profit'])
