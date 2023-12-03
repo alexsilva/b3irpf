@@ -5,8 +5,9 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.utils.functional import cached_property
-from irpf.report.base import Base
+
 from irpf.models import Asset, Statistic, Taxes
+from irpf.report.base import Base, BaseReportMonth, BaseReport
 from irpf.report.utils import Stats, MoneyLC
 
 
@@ -53,7 +54,7 @@ class StatsReport(Base):
 			if statistics:
 				stats.cumulative_losses = statistics.cumulative_losses
 			# quando os dados de prejuízo ainda não estão salvos usamos o último mês processado
-			elif stats_last_month := self.cache.get(f'stats_month[{date.month -  1}]', None):
+			elif stats_last_month := self.cache.get(f'stats_month[{date.month - 1}]', None):
 				stats_results = stats_last_month.get_results()
 				if category_name in stats_results:
 					st = stats_results[category_name]
@@ -149,21 +150,26 @@ class StatsReport(Base):
 					# paga 20% sobre o lucro no swing trade / day trade
 					stats.taxes += profits * Decimal(fiis_rates['swing_trade'])
 
-	def generate(self, date: datetime.date, results: list, **options) -> dict:
-		options.setdefault('consolidation', self.statistic_model.CONSOLIDATION_MONTHLY)
+	def generate(self, report: BaseReport, **options) -> dict:
+		consolidation = report.get_opts("consolidation", None)
+		start_date = report.get_opts('start_date')
+		options.setdefault('consolidation', consolidation)
+		self.options.update(options)
+
 		self.results.clear()
 
 		# cache de todas as categorias (permite a compensação de posições finalizadas)
 		for category_name in self.asset_model.category_by_name_choices:
-			self.results[category_name] = self._get_stats(category_name, date=date, **options)
+			self.results[category_name] = self._get_stats(category_name, date=start_date, **self.options)
 
-		for asset in results:
+		report_results = report.get_results()
+		for asset in report_results:
 			# não cadastrado
 			instance: Asset = asset.instance
 			if instance is None:
 				continue
 
-			stats = self._get_stats(instance.category_name, date=date, **options)
+			stats = self._get_stats(instance.category_name, date=start_date, **self.options)
 
 			asset_period = asset.period
 			stats.buy += asset_period.buy.total
@@ -184,3 +190,42 @@ class StatsReport(Base):
 		self.generate_taxes()
 		self.cache.clear()
 		return self.results
+
+
+class StatsReports(Base):
+	"""Um conjunto de relatório dentro de vários meses"""
+	report_class = StatsReport
+
+	def __init__(self, user, **options):
+		super().__init__(user, **options)
+		self.start_date: datetime.date = None
+		self.end_date: datetime.date = None
+		self.results = OrderedDict()
+
+	def generate(self, reports: BaseReportMonth, **options) -> OrderedDict[int]:
+		"""Gera dados de estatística para cada mês de relatório"""
+		self.start_date = reports.start_date
+		self.end_date = reports.end_date
+
+		for month in reports:
+			report = reports[month]
+			stats = self.report_class(self.user, **options)
+
+			last_month = month - 1
+			stats.cache.set(f'stats_month[{last_month}]', self.results.get(last_month))
+			stats.generate(report)
+
+			self.results[month] = stats
+		return self.results
+
+	def compile(self) -> list:
+		"""Tem a função de juntar os dados de todos os meses calculados"""
+		raise NotImplementedError
+
+	def get_first(self) -> StatsReport:
+		"""Retorna o relatório do primeiro mês"""
+		return self.results[self.start_date.month]
+
+	def get_last(self) -> StatsReport:
+		"""Retorna o relatório do último mês"""
+		return self.results[self.end_date.month]
