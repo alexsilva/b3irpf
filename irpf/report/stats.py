@@ -255,6 +255,7 @@ class StatsReports(Base):
 					if taxes_unpaid:
 						stats_all.taxes += taxes_unpaid
 						stats.stats_results.taxes += taxes_unpaid
+						stats_all.residual_taxes += taxes_unpaid
 
 						for category_name in stats.get_results():
 							stats_category: Stats = stats[category_name]
