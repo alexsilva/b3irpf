@@ -421,19 +421,20 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		consolidation = report.get_opts('consolidation')
 		end_date = report.get_opts('end_date')
 		self.taxes_model.objects.filter(
-			created_date__gt=end_date,
+			created_date__gte=end_date,
 			auto_created=True,
 			tax__isnull=True,
 			user=self.user
-		).delete()
+		).update(valid=False)
 		# remove registro acima da data
 		return self.statistic_model.objects.filter(
 			user=self.user,
 			date__gt=end_date,
 			institution=institution,
 			consolidation=consolidation,
-		).delete()
+		).update(valid=False)
 
+	@atomic
 	def save_stats(self, report: BaseReport, stats: StatsReport):
 		"""Salva dados de estatística"""
 		institution = report.get_opts('institution', None)
@@ -447,8 +448,10 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			# perdas do ano anterior com o mês
 			cumulative_losses = stats_category.cumulative_losses
 			cumulative_losses += stats_category.compensated_losses
-			defaults = {'cumulative_losses': cumulative_losses}
-
+			defaults = {
+				'cumulative_losses': cumulative_losses,
+				'valid': True
+			}
 			instance, created = self.statistic_model.objects.get_or_create(
 				category=category,
 				consolidation=self.statistic_model.CONSOLIDATION_MONTHLY,
@@ -459,37 +462,8 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			)
 			if created:
 				self.set_guardian_object_perms(instance)
-			else:
-				self._update_defaults(instance, defaults)
-
-		stats_results = stats.stats_results
-		darf_min_value = MoneyLC(settings.TAX_RATES['darf']['min_value'])
-
-		if stats_results.taxes and stats_results.taxes < darf_min_value:
-			for category_name in stats:
-				taxes_total = stats[category_name].taxes
-				if taxes_total == MoneyLC(0):
-					continue
-				money_hex = hashlib.md5(str(taxes_total).encode('utf-8')).hexdigest()
-				category = stats.asset_model.get_category_by_name(category_name)
-				defaults = dict(
-					total=taxes_total,
-					description=f"Valor referente ao mês {end_date.month} não pago por estar abaixo de {darf_min_value}",
-					pay_date=end_date,  # fica para o próximo mês
-				)
-				instance, created = self.taxes_model.objects.get_or_create(
-					category=category,
-					created_date=end_date,
-					money_hex=money_hex,
-					user=self.user,
-					auto_created=True,
-					tax__isnull=True,
-					defaults=defaults
-				)
-				if created:
-					self.set_guardian_object_perms(instance)
-				else:
-					self._update_defaults(instance, {'paid': False})
+			elif self._update_defaults(instance, defaults):
+				stats_category.instance = instance
 
 	def report_generate(self, reports: BaseReportMonth, form):
 		if self.is_save_position and reports:
@@ -498,7 +472,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		self.admin_view.stats = self.get_stats(reports)
 		return super().report_generate(reports, form)
 
-	@atomic
 	def save(self, reports: BaseReportMonth):
 		for month in reports:
 			report: BaseReport = reports[month]

@@ -670,7 +670,13 @@ class Statistic(BaseIRPFModel):
 	                               decimal_places=DECIMAL_PLACES,
 	                               amount_default=Decimal(0),
 	                               blank=True)
+	residual_taxes = MoneyField(verbose_name="Impostos residuais",
+	                            max_digits=DECIMAL_MAX_DIGITS,
+	                            decimal_places=DECIMAL_PLACES,
+	                            amount_default=Decimal(0),
+	                            blank=True)
 	date = DateField(verbose_name="Data")
+	valid = models.BooleanField(verbose_name="Válido", editable=False, default=True)
 
 	def __str__(self):
 		msg = []
@@ -722,7 +728,6 @@ class Taxes(BaseIRPFModel):
 	asset = models.ForeignKey(Asset, on_delete=models.SET_NULL,
 	                          verbose_name="Ativo",
 	                          null=True, blank=True)
-
 	description = models.TextField(verbose_name="Descrição", blank=True)
 
 	created_date = DateField(verbose_name="Data inicial de apuração",
@@ -736,6 +741,7 @@ class Taxes(BaseIRPFModel):
 	                           help_text="Uma vez marcado, informa que o imposto já foi pago.")
 	created = models.DateTimeField(verbose_name="Data de registro", auto_now_add=True)
 	money_hex = models.CharField(max_length=32, editable=False, null=True, blank=True)
+	valid = models.BooleanField(verbose_name="Válido", editable=False, default=True)
 
 	@classproperty
 	def taxes_choices(cls):

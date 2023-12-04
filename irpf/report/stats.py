@@ -53,6 +53,7 @@ class StatsReport(Base):
 			# prejuízos acumulados no ano continuam contando em datas futuras
 			if statistics:
 				stats.cumulative_losses = statistics.cumulative_losses
+				stats.residual_taxes = statistics.residual_taxes
 			# quando os dados de prejuízo ainda não estão salvos usamos o último mês processado
 			elif stats_last_month := self.cache.get(f'stats_month[{date.month - 1}]', None):
 				stats_results = stats_last_month.get_results()
@@ -61,6 +62,7 @@ class StatsReport(Base):
 					cumulative_losses = st.cumulative_losses
 					cumulative_losses += st.compensated_losses
 					stats.cumulative_losses = cumulative_losses
+					stats.residual_taxes = st.residual_taxes
 		return stats
 
 	def compile(self) -> Stats:
@@ -69,6 +71,7 @@ class StatsReport(Base):
 		for category_name in self.results:
 			stats_category: Stats = self.results[category_name]
 			stats.update(stats_category)
+			stats.residual_taxes += stats_category.residual_taxes
 			stats.cumulative_losses += stats_category.cumulative_losses
 			stats.patrimony += stats_category.patrimony
 		return stats
@@ -194,18 +197,34 @@ class StatsReports(Base):
 			self.results[month] = stats
 		return self.results
 
+	def _get_statistics_month(self, date: datetime.date, category: int, **options):
+		qs_options = dict(
+			consolidation=Statistic.CONSOLIDATION_MONTHLY,
+			category=category,
+			user=self.user
+		)
+		max_day = calendar.monthrange(date.year, date.month)[1]
+		qs_options['date'] = datetime.date(date.year, date.month, max_day)
+
+		if institution := options.get('institution'):
+			qs_options['institution'] = institution
+		try:
+			instance = self.report_class.statistic_model.objects.get(**qs_options)
+		except self.report_class.statistic_model.DoesNotExist:
+			instance = None
+		return instance
+
 	def update_residual_taxes(self, stats_all: Stats):
 		"""Atualiza impostos residuais (aqueles abaixo de R$ 10,00 que devem ser pagos posteriormente)
 		"""
 		for month in self.reports:
-			report = self.reports[month]
-			stats = self.results[month]
+			report: BaseReport = self.reports[month]
+			stats: StatsReport = self.results[month]
 
 			consolidation = self.reports.get_opts('consolidation')
 			darf_min_value = settings.TAX_RATES['darf']['min_value']
 			start_date = report.get_opts('start_date')
 			end_date = report.get_opts('end_date')
-			consolidation_monthly = consolidation == self.report_class.statistic_model.CONSOLIDATION_MONTHLY
 
 			taxes_qs = self.report_class.taxes_model.objects.filter(user=self.user, total__gt=0)
 			# mantém o histórico de impostos pagos no período
@@ -216,37 +235,50 @@ class StatsReports(Base):
 			# incluindo valores pagos (readonly)
 			for taxes in taxes_paid_qs:
 				taxes_to_pay = taxes.taxes_to_pay
+				stats_all.taxes += taxes_to_pay
 				stats_all.residual_taxes += taxes_to_pay
+				stats.stats_results.taxes += taxes_to_pay
 				stats.stats_results.residual_taxes += taxes_to_pay
-				# se o imposto não vem do registro automático
-				if not taxes.auto_created or consolidation_monthly:
-					stats.stats_results.taxes += taxes.taxes_to_pay
-					stats_all.taxes += taxes.taxes_to_pay
 
 			# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
-			taxes_unpaid_qs = taxes_qs.filter(
-				created_date__lte=end_date,
-				paid=False)
-			taxes_unpaid = MoneyLC(0)
+			taxes_unpaid_qs = taxes_qs.filter(created_date__lte=end_date, paid=False)
 
 			# incluindo os valore não pagos
+			taxes_unpaid = MoneyLC(0)
 			for taxes in taxes_unpaid_qs:
-				taxes_to_pay = taxes.taxes_to_pay
-				if not taxes.auto_created or consolidation_monthly:
+				if taxes_to_pay := taxes.taxes_to_pay:
 					taxes_unpaid += taxes_to_pay
-				stats_all.residual_taxes += taxes_to_pay
-				stats.stats_results.residual_taxes += taxes_to_pay
 
-			if (stats.stats_results.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
-				stats.stats_results.taxes += taxes_unpaid
-				stats_all.taxes += taxes_unpaid
-				# os impostos residuais ficam congelados nessa data
-				# # só salva para relatório fechado (mês completo)
-				if report.is_closed:
-					taxes_unpaid_qs.update(
-						pay_date=end_date,
-						paid=True
-					)
+			if report.is_closed:
+				stats.stats_results.residual_taxes += taxes_unpaid
+				if (stats.stats_results.taxes + taxes_unpaid) >= MoneyLC(darf_min_value):
+					if taxes_unpaid:
+						stats_all.taxes += taxes_unpaid
+						stats.stats_results.taxes += taxes_unpaid
+
+						for category_name in stats.get_results():
+							stats_category: Stats = stats[category_name]
+							category = self.report_class.asset_model.get_category_by_name(category_name)
+							if statistics := self._get_statistics_month(start_date, category, **stats.options):
+								statistics.residual_taxes = Decimal(0)
+								stats_category.residual_taxes = Decimal(0)
+								statistics.save()
+
+					# os impostos residuais ficam congelados nessa data
+					# # só salva para relatório fechado (mês completo)
+					taxes_unpaid_qs.update(pay_date=end_date, paid=True)
+				else:
+					for category_name in stats.get_results():
+						stats_category: Stats = stats[category_name]
+						category = self.report_class.asset_model.get_category_by_name(category_name)
+						statistics = self._get_statistics_month(start_date, category, **stats.options)
+						if statistics:
+							stats.stats_results.residual_taxes += stats_category.taxes
+							stats_all.residual_taxes += stats_category.taxes
+							statistics.residual_taxes = stats_category.taxes
+							if stats_category.instance:
+								statistics.residual_taxes += stats_category.residual_taxes
+							statistics.save()
 
 	def compile(self) -> OrderedDict[str]:
 		"""Une os resultados de cada mês para cada categoria em um único objeto 'Stats' por categoria"""
@@ -259,6 +291,7 @@ class StatsReports(Base):
 				if (stats := stats_categories.get(category_name)) is None:
 					stats_categories[category_name] = stats = Stats()
 				stats.update(stats_category)
+				stats.residual_taxes = stats_category.residual_taxes
 				stats.cumulative_losses = stats_category.cumulative_losses
 				stats.patrimony = stats_category.patrimony
 		return stats_categories
@@ -269,6 +302,8 @@ class StatsReports(Base):
 		stats_all = Stats()
 		for stats in stats_categories.values():
 			stats_all.update(stats)
+			stats_all.taxes += stats.residual_taxes
+			stats_all.residual_taxes += stats.residual_taxes
 			stats_all.cumulative_losses += stats.cumulative_losses
 			stats_all.patrimony += stats.patrimony
 		return stats_all
