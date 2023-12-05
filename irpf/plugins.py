@@ -463,7 +463,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			if created:
 				self.set_guardian_object_perms(instance)
 			elif self._update_defaults(instance, defaults):
-				stats_category.instance = instance
+				...
 
 	def report_generate(self, reports: BaseReportMonth, form):
 		if self.is_save_position and reports:
