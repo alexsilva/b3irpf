@@ -82,6 +82,7 @@ class Stats:
 
 		# prejuízos compensados
 		self.compensated_losses = MoneyLC(0)
+		self.residual_taxes_paid = MoneyLC(0)
 		self.residual_taxes = MoneyLC(0)
 
 	def update(self, stats):
@@ -102,6 +103,7 @@ class Stats:
 		# exibe o resultados enquanto tiver patrimonio investido
 		return bool(self.buy or self.sell or
 		            self.cumulative_losses or
+					self.residual_taxes or
 		            self.patrimony)
 
 

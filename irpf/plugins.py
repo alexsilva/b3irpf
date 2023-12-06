@@ -494,8 +494,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			stats_categories = self.admin_view.stats.compile()
 			# compilas as categorias de estatística em um objeto 'Stats'
 			stats_all = self.admin_view.stats.compile_all(stats_categories)
-			# impostos residuais
-			self.admin_view.stats.update_residual_taxes(stats_all)
 
 			stats_category = collections.OrderedDict([('TODOS', stats_all)])
 
