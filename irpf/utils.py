@@ -77,3 +77,16 @@ def ticker_validator(ticker: str):
 	"""Faz a validação ticker (formato e tamanho)"""
 	from irpf.fields import CharCodeField
 	return CharCodeField().to_python(ticker)
+
+
+def update_defaults(instance, defaults):
+	"""Atualiza, se necessário a instância com valores padrão"""
+	updated = False
+	for key in defaults:
+		value = defaults[key]
+		if not updated and getattr(instance, key) != value:
+			updated = True
+		setattr(instance, key, value)
+	if updated:
+		instance.save(update_fields=list(defaults))
+	return updated
