@@ -77,17 +77,16 @@ class StatsReport(Base):
 		taxes_unpaid_qs = taxes_qs.filter(
 			created_date__range=[start_date, end_date]
 		)
-		if self.stats_results.taxes < MoneyLC(darf_min_value):
-			for category_name in self.results:
-				category = self.asset_model.get_category_by_name(category_name)
-				stats_category: Stats = self.results[category_name]
+		for category_name in self.results:
+			category = self.asset_model.get_category_by_name(category_name)
+			stats_category: Stats = self.results[category_name]
 
-				# impostos cadastrados pelo usuário
-				for taxes in taxes_unpaid_qs.filter(category=category):
-					taxes_to_pay = taxes.taxes_to_pay
+			# impostos cadastrados pelo usuário
+			for taxes in taxes_unpaid_qs.filter(category=category):
+				taxes_to_pay = taxes.taxes_to_pay
 
-					self.stats_results.taxes += taxes_to_pay
-					stats_category.residual_taxes += taxes_to_pay
+				self.stats_results.taxes += taxes_to_pay
+				stats_category.residual_taxes += taxes_to_pay
 
 		# Se o imposto do mês é maior ou igual ao limite para pagamento (R$ 10)
 		if (self.stats_results.taxes + self.stats_results.residual_taxes) >= MoneyLC(darf_min_value):
