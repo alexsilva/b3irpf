@@ -15,8 +15,12 @@ $(function () {
         }
 
     $form.find("#position_locked").click(function () {
-        var is_checked = $(this).is(":checked"),
+        var $el = $(this),
+            is_checked = $el.is(":checked"),
             $btn = $form.find("button[name='position']");
+        $el.parent().find("i")
+            .toggleClass('fa-square')
+            .toggleClass('fa-check-square');
         $btn.prop("disabled", !is_checked);
     });
     $form.submit(function (evt) {

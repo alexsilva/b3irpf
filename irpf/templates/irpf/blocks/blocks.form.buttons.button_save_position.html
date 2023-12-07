@@ -1,10 +1,13 @@
 <div class="input-group row justify-content-sm-center justify-content-md-end">
-  <div class="input-group-prepend">
-    <div class="input-group-text">
-      <input type="checkbox" id="position_locked" aria-label="Ativa o botão salvar posição">
-    </div>
-  </div>
   <button type="submit" class="btn btn-success" name="position" value="1" disabled>
     <i class="fa fa-save"></i> Gravar posição
   </button>
+  <div class="input-group-append">
+    <div class="btn-group-toggle" data-toggle="buttons">
+      <label class="btn btn-secondary">
+        <i class="fas fa-square" aria-hidden="true"></i>
+        <input type="checkbox" id="position_locked" aria-label="Ativa o botão salvar posição">
+      </label>
+    </div>
+  </div>
 </div>
