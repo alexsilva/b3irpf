@@ -327,7 +327,7 @@ class SubscriptionAdmin(BaseIRPFAdmin):
 @sites.register(AssetEvent)
 class AssetEventAdmin(BaseIRPFAdmin):
 	form = ModelForm
-	model_icon = "fa fa-sticky-note-o"
+	model_icon = "fa fa-sticky-note"
 	list_display = (
 		'date',
 		'asset_name',
