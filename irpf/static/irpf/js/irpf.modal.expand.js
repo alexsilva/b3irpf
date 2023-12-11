@@ -21,6 +21,8 @@ $(function () {
             $$parent.remove();
             $el.show();
             modal.$el().remove();
+            // reposiciona a scrollbar em relacão ao card
+            $('html,body').scrollTop($el.offset().top - $parent.outerHeight(true) * 0.25);
         });
         $el.hide();
         $parent.detach()
