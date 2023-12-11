@@ -235,7 +235,7 @@ class SaveReportPositionPlugin(ReportBaseAdminPlugin):
 					continue
 				for asset in report.get_results():
 					# ignora ativo não cadastrado ou com posição zerada
-					if asset.buy.quantity == 0 or asset.instance is None:
+					if asset.buy.quantity <= 0 and not asset.position or asset.instance is None:
 						continue
 					self.save_position(report, asset)
 		except Exception as exc:
