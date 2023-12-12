@@ -86,7 +86,7 @@ class StatsReport(Base):
 				taxes_to_pay = taxes.taxes_to_pay
 
 				self.stats_results.taxes += taxes_to_pay
-				stats_category.residual_taxes += taxes_to_pay
+				stats_category.taxes += taxes_to_pay
 
 		# Se o imposto do mês é maior ou igual ao limite para pagamento (R$ 10)
 		if (self.stats_results.taxes + self.stats_results.residual_taxes) >= MoneyLC(darf_min_value):
