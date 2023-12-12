@@ -3,11 +3,12 @@
     <i class="fa fa-save"></i> Gravar posição
   </button>
   <div class="input-group-append">
-    <div class="btn-group-toggle" data-toggle="buttons">
-      <label class="btn btn-secondary">
-        <i class="fas fa-square" aria-hidden="true"></i>
-        <input type="checkbox" id="position_locked" aria-label="Ativa o botão salvar posição">
-      </label>
+    <div class="d-flex flex-column p-2 bg-light rounded-right">
+     <div class="custom-control custom-switch align-self-center">
+      <input class="custom-control-input" type="checkbox" id="position_locked"
+             aria-label="Ativa o botão salvar posição">
+      <label class="custom-control-label" for="position_locked"></label>
+    </div>
     </div>
   </div>
 </div>
