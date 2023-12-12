@@ -18,9 +18,6 @@ $(function () {
         var $el = $(this),
             is_checked = $el.is(":checked"),
             $btn = $form.find("button[name='position']");
-        $el.parent().find("i")
-            .toggleClass('fa-square')
-            .toggleClass('fa-check-square');
         $btn.prop("disabled", !is_checked);
     });
     $form.submit(function (evt) {
