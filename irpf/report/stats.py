@@ -97,10 +97,10 @@ class StatsReport(Base):
 
 				stats_category: Stats = self.results[category_name]
 				stats_category.taxes += stats_category.residual_taxes
-				stats_category.residual_taxes_paid = stats_category.residual_taxes
+				stats_category.residual_taxes = Decimal(0)
 
 				if statistics := self._get_statistics_month(start_date, category, **options):
-					update_defaults(statistics, {'residual_taxes': Decimal(0)})
+					update_defaults(statistics, {'residual_taxes': stats_category.residual_taxes})
 		else:
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
@@ -121,10 +121,7 @@ class StatsReport(Base):
 					cumulative_losses = st.cumulative_losses
 					cumulative_losses += st.compensated_losses
 					stats.cumulative_losses = cumulative_losses
-
-					residual_taxes = st.residual_taxes
-					residual_taxes -= st.residual_taxes_paid
-					stats.residual_taxes = residual_taxes
+					stats.residual_taxes = st.residual_taxes
 			else:
 				# busca dados no histórico
 				statistics: Statistic = self._get_statistics(
@@ -281,8 +278,7 @@ class StatsReports(Base):
 				if (stats := stats_categories.get(category_name)) is None:
 					stats_categories[category_name] = stats = Stats()
 				stats.update(stats_category)
-				if stats_category.residual_taxes:
-					stats.residual_taxes = stats_category.residual_taxes
+				stats.residual_taxes = stats_category.residual_taxes
 				if stats_category.cumulative_losses:
 					stats.cumulative_losses = stats_category.cumulative_losses
 				stats.patrimony = stats_category.patrimony

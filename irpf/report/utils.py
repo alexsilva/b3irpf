@@ -82,7 +82,6 @@ class Stats:
 
 		# prejuízos compensados
 		self.compensated_losses = MoneyLC(0)
-		self.residual_taxes_paid = MoneyLC(0)
 		self.residual_taxes = MoneyLC(0)
 
 	def update(self, stats):
