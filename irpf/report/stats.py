@@ -288,7 +288,7 @@ class StatsReports(Base):
 		ações - direitos de subscrição de ações.
 		fiis - direitos de subscrição de fiis.
 		"""
-		if subscription_stats := stats_categories.get(subscription_category_name):
+		if (subscription_stats := stats_categories.get(subscription_category_name)) is not None:
 			try:
 				stats = stats_categories[category_name]
 				stats.update(subscription_stats)
