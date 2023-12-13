@@ -101,8 +101,8 @@ class Stats:
 	def __bool__(self):
 		# exibe o resultados enquanto tiver patrimonio investido
 		return bool(self.buy or self.sell or
-		            self.cumulative_losses or
-					self.residual_taxes or
+					self.taxes or self.residual_taxes or
+					self.cumulative_losses or self.compensated_losses or
 		            self.patrimony)
 
 
