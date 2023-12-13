@@ -168,6 +168,9 @@ class StatsReport(Base):
 		bdrs_rates = settings.TAX_RATES['bdrs']
 		fiis_rates = settings.TAX_RATES['fiis']
 
+		subscription_stocks_rates = settings.TAX_RATES['subscription_stocks']
+		subscription_fiis = settings.TAX_RATES['subscription_fiis']
+
 		category_bdr_name = self.asset_model.category_choices[self.asset_model.CATEGORY_BDR]
 		category_stock_name = self.asset_model.category_choices[self.asset_model.CATEGORY_STOCK]
 
@@ -186,6 +189,11 @@ class StatsReport(Base):
 					# lucro isento no swing trade
 					stats.exempt_profit += stats.profits
 					stats.profits = MoneyLC(0)
+			elif category == self.asset_model.CATEGORY_SUBSCRIPTION_STOCK:
+				# não tem isenção e não pode compensar com outras categorias
+				if profits := self.calc_profits(stats.profits, stats):
+					# paga 15% sobre o lucro no swing trade
+					stats.taxes += profits * Decimal(subscription_stocks_rates['swing_trade'])
 			elif category == self.asset_model.CATEGORY_BDR:
 				# compensação de prejuízos da categoria
 				if profits := self.calc_profits(stats.profits, stats):
@@ -197,6 +205,11 @@ class StatsReport(Base):
 				if profits := self.calc_profits(stats.profits, stats):
 					# paga 20% sobre o lucro no swing trade / day trade
 					stats.taxes += profits * Decimal(fiis_rates['swing_trade'])
+			elif category == self.asset_model.CATEGORY_SUBSCRIPTION_FII:
+				# não tem isenção e não pode compensar com outras categorias
+				if profits := self.calc_profits(stats.profits, stats):
+					# paga 20% sobre o lucro no swing trade
+					stats.taxes += profits * Decimal(subscription_fiis['swing_trade'])
 
 	def generate(self, report: BaseReport, **options) -> dict:
 		consolidation = report.get_opts("consolidation", None)
