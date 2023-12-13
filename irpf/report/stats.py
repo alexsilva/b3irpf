@@ -267,6 +267,26 @@ class StatsReports(Base):
 			self.results[month] = stats
 		return self.results
 
+	@staticmethod
+	def _compile_subscription(stats_categories: OrderedDict[str],
+	                          subscription_category_name: str,
+	                          category_name: str):
+		"""Junta direitos de subscrições vendidos aos ativos correspondentes.
+		ações - direitos de subscrição de ações.
+		fiis - direitos de subscrição de fiis.
+		"""
+		if subscription_stats := stats_categories.get(subscription_category_name):
+			try:
+				stats = stats_categories[category_name]
+				stats.update(subscription_stats)
+				stats.residual_taxes += subscription_stats.residual_taxes
+				stats.cumulative_losses += subscription_stats.cumulative_losses
+				stats.patrimony += subscription_stats.patrimony
+
+				del stats_categories[subscription_category_name]
+			except KeyError:
+				...
+
 	def compile(self) -> OrderedDict[str]:
 		"""Une os resultados de cada mês para cada categoria em um único objeto 'Stats' por categoria"""
 		stats_categories = OrderedDict()
@@ -282,6 +302,14 @@ class StatsReports(Base):
 				if stats_category.cumulative_losses:
 					stats.cumulative_losses = stats_category.cumulative_losses
 				stats.patrimony = stats_category.patrimony
+		asset_model = self.report_class.asset_model
+		category_choices = asset_model.category_choices
+		self._compile_subscription(stats_categories,
+		                           category_choices[asset_model.CATEGORY_SUBSCRIPTION_STOCK],
+		                           category_choices[asset_model.CATEGORY_STOCK])
+		self._compile_subscription(stats_categories,
+		                           category_choices[asset_model.CATEGORY_SUBSCRIPTION_FII],
+		                           category_choices[asset_model.CATEGORY_FII])
 		return stats_categories
 
 	@staticmethod
