@@ -94,11 +94,19 @@ TAX_RATES = {
         'swing_trade': '0.15',  # 15%
         'day_trade': '0.2'  # 20%
     },
+    'subscription_stocks': {
+        'swing_trade': '0.15',  # 15%
+        'day_trade': '0.2'  # 20%
+    },
     'bdrs': {
         'swing_trade': '0.15',  # 15%
         'day_trade': '0.2'  # 20%
     },
     'fiis': {
+        'swing_trade': '0.2',  # 20%
+        'day_trade': '0.2'  # 20%
+    },
+    'subscription_fiis': {
         'swing_trade': '0.2',  # 20%
         'day_trade': '0.2'  # 20%
     },
