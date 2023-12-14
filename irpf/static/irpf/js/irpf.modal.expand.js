@@ -4,6 +4,7 @@ $(function () {
     $(".card button.card-expand-md").click(function () {
         var $el = $(this),
             $parent = $el.parents(".card.asset"),
+            scrollTop = $(document).scrollTop(),
             modal = xadmin.bs_modal({
                 modal: {
                     size: "modal-lg"
@@ -22,7 +23,7 @@ $(function () {
             $el.show();
             modal.$el().remove();
             // reposiciona a scrollbar em relacão ao card
-            $('html,body').scrollTop($el.offset().top - $parent.outerHeight(true) * 0.25);
+            $('html,body').scrollTop(scrollTop);
         });
         $el.hide();
         $parent.detach()
