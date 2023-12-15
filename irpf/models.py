@@ -745,8 +745,6 @@ class Taxes(BaseIRPFModel):
 	paid = models.BooleanField(verbose_name="Pago", default=False,
 	                           help_text="Uma vez marcado, informa que o imposto já foi pago.")
 	created = models.DateTimeField(verbose_name="Data de registro", auto_now_add=True)
-	money_hex = models.CharField(max_length=32, editable=False, null=True, blank=True)
-	valid = models.BooleanField(verbose_name="Válido", editable=False, default=True)
 
 	@classproperty
 	def taxes_choices(cls):

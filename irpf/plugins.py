@@ -407,7 +407,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 	stats_reports_class = StatsReports
 	statistic_model = Statistic
 	position_model = Position
-	taxes_model = Taxes
 	asset_model = Asset
 
 	def setup(self, *args, **kwargs):
@@ -420,12 +419,6 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		institution = report.get_opts('institution', None)
 		consolidation = report.get_opts('consolidation')
 		end_date = report.get_opts('end_date')
-		self.taxes_model.objects.filter(
-			created_date__gte=end_date,
-			auto_created=True,
-			tax__isnull=True,
-			user=self.user
-		).update(valid=False)
 		# remove registro acima da data
 		return self.statistic_model.objects.filter(
 			user=self.user,
