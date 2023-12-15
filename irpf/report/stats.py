@@ -93,22 +93,14 @@ class StatsReport(Base):
 			if not report.is_closed:
 				return
 			for category_name in self.results:
-				category = self.asset_model.get_category_by_name(category_name)
-
 				stats_category: Stats = self.results[category_name]
 				stats_category.taxes += stats_category.residual_taxes
 				stats_category.residual_taxes = Decimal(0)
-
-				if statistics := self._get_statistics_month(start_date, category, **options):
-					update_defaults(statistics, {'residual_taxes': stats_category.residual_taxes})
 		else:
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
 				stats_category.residual_taxes += stats_category.taxes
 				stats_category.taxes = Decimal(0)
-				category = self.asset_model.get_category_by_name(category_name)
-				if statistics := self._get_statistics_month(start_date, category, **options):
-					update_defaults(statistics, {'residual_taxes': stats_category.residual_taxes})
 
 	def _get_stats(self, category_name: str, date: datetime.date, **options) -> Stats:
 		if (stats := self.results.get(category_name)) is None:

@@ -449,6 +449,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			cumulative_losses = stats_category.cumulative_losses
 			cumulative_losses += stats_category.compensated_losses
 			defaults = {
+				'residual_taxes': stats_category.residual_taxes,
 				'cumulative_losses': cumulative_losses,
 				'valid': True
 			}
