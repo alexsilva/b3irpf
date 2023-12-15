@@ -264,7 +264,9 @@ class BonusAdmin(BaseIRPFAdmin):
 	list_display = (
 		'asset',
 		'base_value',
-		'proportion'
+		'proportion',
+		'date_com',
+		'date'
 	)
 
 	@property
