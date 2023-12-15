@@ -442,7 +442,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			cumulative_losses = stats_category.cumulative_losses
 			cumulative_losses += stats_category.compensated_losses
 			defaults = {
-				'residual_taxes': stats_category.residual_taxes,
+				'residual_taxes': stats_category.taxes.residual,
 				'cumulative_losses': cumulative_losses,
 				'valid': True
 			}
@@ -458,6 +458,17 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 				self.set_guardian_object_perms(instance)
 			elif self._update_defaults(instance, defaults):
 				...
+			if stats_category.taxes.paid:
+				# configura a data do pagamento do valor de imposto cadastrado pelo usuário
+				for taxes in stats_category.taxes.paid_items:
+					taxes.pay_date = end_date
+					taxes.paid = True
+					taxes.save()
+				stats_category.taxes.paid_items.clear()
+				instance.taxes_set.clear()
+			else:
+				# imposto cadastrado pelo usuário
+				instance.taxes_set.add(*stats_category.taxes.items)
 
 	def report_generate(self, reports: BaseReportMonth, form):
 		if self.is_save_position and reports:
