@@ -378,6 +378,7 @@ class Subscription(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Subscrição"
 		verbose_name_plural = "Subscrições"
+		ordering = ("date", "date_com")
 		indexes = [
 			models.Index(fields=['-date'])
 		]
