@@ -57,6 +57,23 @@ class Event:
 		return self.title
 
 
+class TaxesStats:
+	"""Statísticas de impostos"""
+	def __init__(self, value=MoneyLC(0), residual=MoneyLC(0)):
+		self.value = value
+		# impostos residuais
+		self.residual = residual
+		# instâncias de registros do usuário
+		self.items = set()
+
+	@property
+	def total(self) -> MoneyLC:
+		return self.value + self.residual
+
+	def __bool__(self):
+		return bool(self.value or self.residual or self.items)
+
+
 class Stats:
 	def __init__(self, buy: MoneyLC = MoneyLC(0),
 	             sell: MoneyLC = MoneyLC(0),
