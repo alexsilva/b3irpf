@@ -89,17 +89,16 @@ class Stats:
 		self.sell = sell
 		self.profits = profits  # lucros
 		self.losses = losses  # prejuízos
-		self.exempt_profit = exempt_profit  # lucro isento (no caso de ações venda de até 20mil)
-		self.cumulative_losses = cumulative_losses  # prejuízos acumulados
 		self.patrimony = patrimony
 		self.tax = tax
 		self.bonus = Event("Bonificação") if bonus is None else bonus
-		self.taxes = MoneyLC(0)
 		self.instance = instance
-
+		self.taxes = TaxesStats()
+		# lucro isento (no caso de ações venda de até 20mil)
+		self.exempt_profit = exempt_profit
 		# prejuízos compensados
 		self.compensated_losses = MoneyLC(0)
-		self.residual_taxes = MoneyLC(0)
+		self.cumulative_losses = cumulative_losses  # prejuízos acumulados
 
 	def update(self, stats):
 		"""Acrescenta os dados de outro objeto stats"""
@@ -110,15 +109,15 @@ class Stats:
 		self.losses += stats.losses
 		self.tax += stats.tax
 		self.bonus.update(stats.bonus)
-		self.taxes += stats.taxes
+		self.taxes.value += stats.taxes.value
+		self.taxes.items.update(stats.taxes.items)
 		self.exempt_profit += stats.exempt_profit
 		self.compensated_losses += stats.compensated_losses
 		return self
 
 	def __bool__(self):
 		# exibe o resultados enquanto tiver patrimonio investido
-		return bool(self.buy or self.sell or
-					self.taxes or self.residual_taxes or
+		return bool(self.buy or self.sell or self.taxes or
 					self.cumulative_losses or self.compensated_losses or
 		            self.patrimony)
 

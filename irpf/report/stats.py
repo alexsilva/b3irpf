@@ -9,7 +9,6 @@ from django.utils.functional import cached_property
 from irpf.models import Asset, Statistic, Taxes
 from irpf.report.base import Base, BaseReportMonth, BaseReport
 from irpf.report.utils import Stats, MoneyLC
-from irpf.utils import update_defaults
 
 
 class StatsReport(Base):
@@ -85,22 +84,22 @@ class StatsReport(Base):
 			for taxes in taxes_unpaid_qs.filter(category=category):
 				taxes_to_pay = taxes.taxes_to_pay
 
-				self.stats_results.taxes += taxes_to_pay
-				stats_category.taxes += taxes_to_pay
+				self.stats_results.taxes.value += taxes_to_pay
+				stats_category.taxes.value += taxes_to_pay
 
 		# Se o imposto do mês é maior ou igual ao limite para pagamento (R$ 10)
-		if (self.stats_results.taxes + self.stats_results.residual_taxes) >= MoneyLC(darf_min_value):
+		if self.stats_results.taxes.total >= MoneyLC(darf_min_value):
 			if not report.is_closed:
 				return
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
-				stats_category.taxes += stats_category.residual_taxes
-				stats_category.residual_taxes = Decimal(0)
+				stats_category.taxes.value += stats_category.taxes.residual
+				stats_category.taxes.residual = Decimal(0)
 		else:
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
-				stats_category.residual_taxes += stats_category.taxes
-				stats_category.taxes = Decimal(0)
+				stats_category.taxes.residual += stats_category.taxes.value
+				stats_category.taxes.value = Decimal(0)
 
 	def _get_stats(self, category_name: str, date: datetime.date, **options) -> Stats:
 		if (stats := self.results.get(category_name)) is None:
@@ -109,11 +108,11 @@ class StatsReport(Base):
 			if stats_last_month := self.cache.get(f'stats_month[{date.month - 1}]', None):
 				stats_results = stats_last_month.get_results()
 				if category_name in stats_results:
-					st = stats_results[category_name]
+					st: Stats = stats_results[category_name]
 					cumulative_losses = st.cumulative_losses
 					cumulative_losses += st.compensated_losses
 					stats.cumulative_losses = cumulative_losses
-					stats.residual_taxes = st.residual_taxes
+					stats.taxes.residual = st.taxes.residual
 			else:
 				# busca dados no histórico
 				statistics: Statistic = self._get_statistics(
@@ -123,7 +122,7 @@ class StatsReport(Base):
 				if statistics:
 					stats.instance = statistics
 					stats.cumulative_losses = statistics.cumulative_losses
-					stats.residual_taxes = statistics.residual_taxes
+					stats.taxes.residual = statistics.residual_taxes
 		return stats
 
 	def compile(self) -> Stats:
@@ -132,7 +131,7 @@ class StatsReport(Base):
 		for category_name in self.results:
 			stats_category: Stats = self.results[category_name]
 			stats.update(stats_category)
-			stats.residual_taxes += stats_category.residual_taxes
+			stats.taxes.residual += stats_category.taxes.residual
 			stats.cumulative_losses += stats_category.cumulative_losses
 			stats.patrimony += stats_category.patrimony
 		return stats
@@ -176,7 +175,7 @@ class StatsReport(Base):
 						# compensação de prejuízos de bdrs
 						if profits := self.calc_profits(profits, self.results[category_bdr_name]):
 							# paga 15% sobre o lucro no swing trade
-							stats.taxes += profits * Decimal(stocks_rates['swing_trade'])
+							stats.taxes.value += profits * Decimal(stocks_rates['swing_trade'])
 				else:
 					# lucro isento no swing trade
 					stats.exempt_profit += stats.profits
@@ -185,23 +184,23 @@ class StatsReport(Base):
 				# não tem isenção e não pode compensar com outras categorias
 				if profits := self.calc_profits(stats.profits, stats):
 					# paga 15% sobre o lucro no swing trade
-					stats.taxes += profits * Decimal(subscription_stocks_rates['swing_trade'])
+					stats.taxes.value += profits * Decimal(subscription_stocks_rates['swing_trade'])
 			elif category == self.asset_model.CATEGORY_BDR:
 				# compensação de prejuízos da categoria
 				if profits := self.calc_profits(stats.profits, stats):
 					# compensação de prejuízos de ações
 					if profits := self.calc_profits(profits, self.results[category_stock_name]):
 						# paga 15% sobre o lucro no swing trade
-						stats.taxes += profits * Decimal(bdrs_rates['swing_trade'])
+						stats.taxes.value += profits * Decimal(bdrs_rates['swing_trade'])
 			elif category == self.asset_model.CATEGORY_FII:
 				if profits := self.calc_profits(stats.profits, stats):
 					# paga 20% sobre o lucro no swing trade / day trade
-					stats.taxes += profits * Decimal(fiis_rates['swing_trade'])
+					stats.taxes.value += profits * Decimal(fiis_rates['swing_trade'])
 			elif category == self.asset_model.CATEGORY_SUBSCRIPTION_FII:
 				# não tem isenção e não pode compensar com outras categorias
 				if profits := self.calc_profits(stats.profits, stats):
 					# paga 20% sobre o lucro no swing trade
-					stats.taxes += profits * Decimal(subscription_fiis['swing_trade'])
+					stats.taxes.value += profits * Decimal(subscription_fiis['swing_trade'])
 
 	def generate(self, report: BaseReport, **options) -> dict:
 		consolidation = report.get_opts("consolidation", None)
@@ -289,7 +288,7 @@ class StatsReports(Base):
 			try:
 				stats = stats_categories[category_name]
 				stats.update(subscription_stats)
-				stats.residual_taxes += subscription_stats.residual_taxes
+				stats.taxes.residual += subscription_stats.taxes.residual
 				stats.cumulative_losses += subscription_stats.cumulative_losses
 				stats.patrimony += subscription_stats.patrimony
 
@@ -308,7 +307,7 @@ class StatsReports(Base):
 				if (stats := stats_categories.get(category_name)) is None:
 					stats_categories[category_name] = stats = Stats()
 				stats.update(stats_category)
-				stats.residual_taxes = stats_category.residual_taxes
+				stats.taxes.residual = stats_category.taxes.residual
 				if stats_category.cumulative_losses:
 					stats.cumulative_losses = stats_category.cumulative_losses
 				stats.patrimony = stats_category.patrimony
@@ -328,7 +327,7 @@ class StatsReports(Base):
 		stats_all = Stats()
 		for stats in stats_categories.values():
 			stats_all.update(stats)
-			stats_all.residual_taxes += stats.residual_taxes
+			stats_all.taxes.residual += stats.taxes.residual
 			stats_all.cumulative_losses += stats.cumulative_losses
 			stats_all.patrimony += stats.patrimony
 		return stats_all
