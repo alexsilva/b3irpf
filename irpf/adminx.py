@@ -305,7 +305,9 @@ class SubscriptionAdmin(BaseIRPFAdmin):
 	list_display = (
 		'asset',
 		'price',
-		'proportion'
+		'proportion',
+		'date_com',
+		'date'
 	)
 
 	@property
