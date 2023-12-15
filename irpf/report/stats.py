@@ -79,6 +79,9 @@ class StatsReport(Base):
 
 			# impostos cadastrados pelo usuário
 			for taxes in taxes_qs.filter(category=category):
+				# nesse caso o imposto é só uma anotação para o usuário
+				if taxes.paid and not taxes.stats.exists():
+					continue
 				taxes_to_pay = taxes.taxes_to_pay
 
 				self.stats_results.taxes.value += taxes_to_pay
