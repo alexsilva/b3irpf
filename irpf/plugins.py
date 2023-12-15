@@ -460,13 +460,12 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 				...
 			if stats_category.taxes.paid:
 				# configura a data do pagamento do valor de imposto cadastrado pelo usuário
-				for taxes in stats_category.taxes.paid_items:
+				for taxes in stats_category.taxes.items:
 					taxes.pay_date = end_date
 					taxes.paid = True
 					taxes.save()
-				stats_category.taxes.paid_items.clear()
-				instance.taxes_set.clear()
-			else:
+				stats_category.taxes.items.clear()
+			elif stats_category.taxes.items:
 				# imposto cadastrado pelo usuário
 				instance.taxes_set.add(*stats_category.taxes.items)
 

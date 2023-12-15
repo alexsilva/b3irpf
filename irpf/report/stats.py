@@ -67,21 +67,18 @@ class StatsReport(Base):
 		start_date = report.get_opts('start_date')
 		end_date = report.get_opts('end_date')
 
+		# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
 		taxes_qs = self.taxes_model.objects.filter(
+			created_date__range=[start_date, end_date],
 			user=self.user,
 			total__gt=0
-		)
-
-		# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
-		taxes_unpaid_qs = taxes_qs.filter(
-			created_date__range=[start_date, end_date]
 		)
 		for category_name in self.results:
 			category = self.asset_model.get_category_by_name(category_name)
 			stats_category: Stats = self.results[category_name]
 
 			# impostos cadastrados pelo usuário
-			for taxes in taxes_unpaid_qs.filter(category=category):
+			for taxes in taxes_qs.filter(category=category):
 				taxes_to_pay = taxes.taxes_to_pay
 
 				self.stats_results.taxes.value += taxes_to_pay
@@ -97,9 +94,7 @@ class StatsReport(Base):
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
 				stats_category.taxes.value += stats_category.taxes.residual
-				stats_category.taxes.paid_items.update(stats_category.taxes.items)
 				stats_category.taxes.residual = Decimal(0)
-				stats_category.taxes.items.clear()
 				stats_category.taxes.paid = True
 		else:
 			for category_name in self.results:
@@ -119,7 +114,8 @@ class StatsReport(Base):
 					cumulative_losses += st.compensated_losses
 					stats.cumulative_losses = cumulative_losses
 					stats.taxes.residual = st.taxes.residual
-					stats.taxes.items.update(st.taxes.items)
+					if not st.taxes.paid:
+						stats.taxes.items.update(st.taxes.items)
 			else:
 				# busca dados no histórico
 				statistics: Statistic = self._get_statistics(
