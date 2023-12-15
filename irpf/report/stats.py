@@ -87,6 +87,9 @@ class StatsReport(Base):
 				self.stats_results.taxes.value += taxes_to_pay
 				stats_category.taxes.value += taxes_to_pay
 
+				self.stats_results.taxes.items.add(taxes)
+				stats_category.taxes.items.add(taxes)
+
 		# Se o imposto do mês é maior ou igual ao limite para pagamento (R$ 10)
 		if self.stats_results.taxes.total >= MoneyLC(darf_min_value):
 			if not report.is_closed:
@@ -94,7 +97,10 @@ class StatsReport(Base):
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
 				stats_category.taxes.value += stats_category.taxes.residual
+				stats_category.taxes.paid_items.update(stats_category.taxes.items)
 				stats_category.taxes.residual = Decimal(0)
+				stats_category.taxes.items.clear()
+				stats_category.taxes.paid = True
 		else:
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
@@ -113,6 +119,7 @@ class StatsReport(Base):
 					cumulative_losses += st.compensated_losses
 					stats.cumulative_losses = cumulative_losses
 					stats.taxes.residual = st.taxes.residual
+					stats.taxes.items.update(st.taxes.items)
 			else:
 				# busca dados no histórico
 				statistics: Statistic = self._get_statistics(
@@ -123,6 +130,7 @@ class StatsReport(Base):
 					stats.instance = statistics
 					stats.cumulative_losses = statistics.cumulative_losses
 					stats.taxes.residual = statistics.residual_taxes
+					stats.taxes.items.update(list(statistics.taxes_set.all()))
 		return stats
 
 	def compile(self) -> Stats:

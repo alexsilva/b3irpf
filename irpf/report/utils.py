@@ -65,6 +65,8 @@ class TaxesStats:
 		self.residual = residual
 		# instâncias de registros do usuário
 		self.items = set()
+		self.paid_items = set()
+		self.paid = False
 
 	@property
 	def total(self) -> MoneyLC:

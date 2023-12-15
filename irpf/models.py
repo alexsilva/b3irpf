@@ -746,6 +746,8 @@ class Taxes(BaseIRPFModel):
 	                           help_text="Uma vez marcado, informa que o imposto já foi pago.")
 	created = models.DateTimeField(verbose_name="Data de registro", auto_now_add=True)
 
+	stats = models.ManyToManyField(Statistic, verbose_name="Statísticas", editable=False)
+
 	@classproperty
 	def taxes_choices(cls):
 		return dict(cls.TAX_CHOICES)
