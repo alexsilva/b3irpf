@@ -306,7 +306,7 @@ class Bonus(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Bonificação"
 		verbose_name_plural = "Bonificações"
-		ordering = ("date",)
+		ordering = ("-date", "-date_com")
 
 
 class BonusInfo(BaseIRPFModel):
