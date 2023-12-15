@@ -213,13 +213,18 @@ class StatsReport(Base):
 
 	def generate(self, report: BaseReport, **options) -> dict:
 		consolidation = report.get_opts("consolidation", None)
-		start_date = report.get_opts('start_date')
 		options.setdefault('consolidation', consolidation)
+		categories: tuple[int] = report.get_opts('categories', ())
+		start_date = report.get_opts('start_date')
 		self.options.update(options)
 		self.results.clear()
 
 		# cache de todas as categorias (permite a compensação de posições finalizadas)
-		for category_name in self.asset_model.category_by_name_choices:
+		category_name_choices = self.asset_model.category_by_name_choices
+		for category_name in category_name_choices:
+			# quando o filtro por categorias está ativado, considera somente as categoria do filtro.
+			if categories and category_name_choices[category_name] not in categories:
+				continue
 			self.results[category_name] = self._get_stats(category_name, date=start_date, **self.options)
 
 		report_results = report.get_results()
