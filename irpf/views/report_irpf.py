@@ -36,10 +36,11 @@ class ReportIRPFForm(django_forms.Form):
 	                                      label=Asset._meta.verbose_name,
 	                                      widget=AdminSelectWidget,
 	                                      required=False)
-	categories = django_forms.MultipleChoiceField(choices=Asset.CATEGORY_CHOICES,
-	                                              widget=AdminSelectMultiple,
-	                                              label="Categorias",
-	                                              required=False)
+	categories = django_forms.TypedMultipleChoiceField(choices=Asset.CATEGORY_CHOICES,
+	                                                   widget=AdminSelectMultiple,
+	                                                   label="Categorias",
+	                                                   coerce=int,
+	                                                   required=False)
 	institution = django_forms.ModelChoiceField(Institution.objects.all(),
 	                                            label=Institution._meta.verbose_name,
 	                                            widget=AdminSelectWidget,
