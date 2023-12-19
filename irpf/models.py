@@ -802,7 +802,7 @@ class TaxRate(BaseIRPFModel):
 		return f"{self.valid_start}-{self.valid_until}"
 
 	@classmethod
-	def create_instance(cls):
+	def create_instance(cls, start_date: datetime.date, end_date: datetime.date):
 		"""Cria um objeto tax rate se pk"""
 		stock = settings.TAX_RATE['stock']
 		fii = settings.TAX_RATE['fii']
@@ -810,7 +810,9 @@ class TaxRate(BaseIRPFModel):
 		stock_subscription = settings.TAX_RATE['stock_subscription']
 		fii_subscription = settings.TAX_RATE['fii_subscription']
 		tax_rate = cls(darf=Decimal(settings.TAX_RATE['darf_min_value']),
-		               stock_exempt_profit=Decimal(stock['exempt_profit']))
+		               stock_exempt_profit=Decimal(stock['exempt_profit']),
+		               valid_start=start_date,
+		               valid_until=end_date)
 		tax_rate.daytrade = DayTrade(stock=Decimal(stock['day_trade']),
 		                             fii=Decimal(fii['day_trade']),
 		                             bdr=Decimal(bdr['day_trade']),
@@ -828,7 +830,7 @@ class TaxRate(BaseIRPFModel):
 		if (tax_rate := cls.valid_ranges[user].get((start_date, end_date))) is None:
 			qs = cls.objects.filter(valid_start__lte=start_date, valid_until__gte=end_date)
 			if (tax_rate := qs.first()) is None:
-				tax_rate = cls.create_instance()
+				tax_rate = cls.create_instance(start_date, end_date)
 			cls.valid_ranges[user][(start_date, end_date)] = tax_rate
 		return tax_rate
 
