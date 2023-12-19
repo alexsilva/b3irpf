@@ -112,12 +112,22 @@ class BaseIRPFAdmin:
 		return readonly_fields
 
 
+class TradeModelForm(ModelForm):
+	def has_changed(self, *args, **kwargs):
+		# sempre cria uma nova instância para o inline
+		if self.instance.pk is None:
+			return True
+		return super().has_changed(*args, **kwargs)
+
+
 class DayTradeInline:
+	form = TradeModelForm
 	model = DayTrade
 	style = "one"
 
 
 class SwingTradeInline:
+	form = TradeModelForm
 	model = SwingTrade
 	style = "one"
 
