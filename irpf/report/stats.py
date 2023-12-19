@@ -256,6 +256,7 @@ class StatsReports(Base):
 
 	def __init__(self, user, reports: BaseReportMonth, **options):
 		super().__init__(user, **options)
+		self.tax_rate_model.cache_clear(user)
 		self.start_date: datetime.date = reports.start_date
 		self.end_date: datetime.date = reports.end_date
 		self.tax_rate: TaxRate = self.tax_rate_model.get_from_date(user, reports.start_date, reports.end_date)
