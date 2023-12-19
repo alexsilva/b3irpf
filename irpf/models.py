@@ -792,6 +792,9 @@ class TaxRate(BaseIRPFModel):
 		verbose_name = "Alíquota"
 		verbose_name_plural = verbose_name + "s"
 
+	def __str__(self):
+		return f"{self.valid_until}"
+
 
 class AbstractTaxRate(BaseIRPFModel):
 	stock = MoneyField(verbose_name="Ações",
