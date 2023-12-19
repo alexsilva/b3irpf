@@ -74,8 +74,8 @@ class GuardianAdminPlugin(GuardianAdminPluginMixin):
 			self.set_guardian_object_perms(new_obj)
 
 
-class AssignUserAdminPlugin(BaseAdminPlugin):
-	"""Salva o usuário da sessão junto a instância do modelo recém criada"""
+class AssignUserAdminPlugin(GuardianAdminPluginMixin):
+	"""Salva o usuário da sessão junto a instância do modelo recém-criada"""
 	assign_current_user = False
 
 	def init_request(self, *args, **kwargs):
@@ -85,6 +85,18 @@ class AssignUserAdminPlugin(BaseAdminPlugin):
 		new_obj = getattr(self.admin_view, "new_obj", None)
 		if new_obj and new_obj.user_id is None:
 			new_obj.user = self.user
+
+	def save_related(self, __):
+		if (new_obj := getattr(self.admin_view, "new_obj", None)) is None:
+			return
+		for formset in getattr(self.admin_view, "formsets", ()):
+			formset.instance = new_obj
+			for instance in formset.save(commit=False):
+				if instance and hasattr(instance, 'user_id') and instance.user_id is None:
+					instance.user = self.user
+				instance.save()
+				self.set_guardian_object_perms(instance)
+			formset.save_m2m()
 
 
 class ListActionModelPlugin(BaseAdminPlugin):
