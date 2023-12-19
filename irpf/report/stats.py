@@ -3,10 +3,9 @@ import datetime
 from collections import OrderedDict
 from decimal import Decimal
 
-from django.conf import settings
 from django.utils.functional import cached_property
 
-from irpf.models import Asset, Statistic, Taxes
+from irpf.models import Asset, Statistic, Taxes, TaxRate
 from irpf.report.base import Base, BaseReportMonth, BaseReport
 from irpf.report.utils import Stats, MoneyLC
 
@@ -17,8 +16,9 @@ class StatsReport(Base):
 	statistic_model = Statistic
 	taxes_model = Taxes
 
-	def __init__(self, user, **options):
+	def __init__(self, user, tax_rate, **options):
 		super().__init__(user, **options)
+		self.tax_rate: TaxRate = tax_rate
 		self.results = OrderedDict()
 
 	def _get_statistics(self, date: datetime.date, category: int, **options):
@@ -63,7 +63,6 @@ class StatsReport(Base):
 	def generate_residual_taxes(self, report: BaseReport, **options):
 		"""Atualiza impostos residuais (aqueles abaixo de R$ 10,00 que devem ser pagos posteriormente)
 		"""
-		darf_min_value = settings.TAX_RATES['darf']['min_value']
 		start_date = report.get_opts('start_date')
 		end_date = report.get_opts('end_date')
 
@@ -91,7 +90,7 @@ class StatsReport(Base):
 				stats_category.taxes.items.add(taxes)
 
 		# Se o imposto do mês é maior ou igual ao limite para pagamento (R$ 10)
-		if self.stats_results.taxes.total >= MoneyLC(darf_min_value):
+		if self.stats_results.taxes.total >= self.tax_rate.darf:
 			if not report.is_closed:
 				return
 			for category_name in self.results:
@@ -162,27 +161,21 @@ class StatsReport(Base):
 
 	def generate_taxes(self):
 		"""Calcula os impostos a se serem pagos (quando aplicável)"""
-		stocks_rates = settings.TAX_RATES['stocks']
-		bdrs_rates = settings.TAX_RATES['bdrs']
-		fiis_rates = settings.TAX_RATES['fiis']
-
-		subscription_stocks_rates = settings.TAX_RATES['subscription_stocks']
-		subscription_fiis = settings.TAX_RATES['subscription_fiis']
-
 		category_bdr_name = self.asset_model.category_choices[self.asset_model.CATEGORY_BDR]
 		category_stock_name = self.asset_model.category_choices[self.asset_model.CATEGORY_STOCK]
+		tax_rate = self.tax_rate
 
 		for category_name in self.results:
 			stats: Stats = self.results[category_name]
 			category = self.asset_model.get_category_by_name(category_name)
 			if category == self.asset_model.CATEGORY_STOCK:
 				# vendeu mais que R$ 20.000,00 e teve lucro?
-				if stats.sell > MoneyLC(stocks_rates['exempt_profit']):
+				if stats.sell > tax_rate.stock_exempt_profit:
 					if profits := self.calc_profits(stats.profits, stats):
 						# compensação de prejuízos de bdrs
 						if profits := self.calc_profits(profits, self.results[category_bdr_name]):
 							# paga 15% sobre o lucro no swing trade
-							stats.taxes.value += profits * Decimal(stocks_rates['swing_trade'])
+							stats.taxes.value += profits * tax_rate.swingtrade.stock_percent
 				else:
 					# lucro isento no swing trade
 					stats.exempt_profit += stats.profits
@@ -191,23 +184,23 @@ class StatsReport(Base):
 				# não tem isenção e não pode compensar com outras categorias
 				if profits := self.calc_profits(stats.profits, stats):
 					# paga 15% sobre o lucro no swing trade
-					stats.taxes.value += profits * Decimal(subscription_stocks_rates['swing_trade'])
+					stats.taxes.value += profits * tax_rate.swingtrade.stock_subscription_percent
 			elif category == self.asset_model.CATEGORY_BDR:
 				# compensação de prejuízos da categoria
 				if profits := self.calc_profits(stats.profits, stats):
 					# compensação de prejuízos de ações
 					if profits := self.calc_profits(profits, self.results[category_stock_name]):
 						# paga 15% sobre o lucro no swing trade
-						stats.taxes.value += profits * Decimal(bdrs_rates['swing_trade'])
+						stats.taxes.value += profits * tax_rate.swingtrade.bdr_percent
 			elif category == self.asset_model.CATEGORY_FII:
 				if profits := self.calc_profits(stats.profits, stats):
 					# paga 20% sobre o lucro no swing trade / day trade
-					stats.taxes.value += profits * Decimal(fiis_rates['swing_trade'])
+					stats.taxes.value += profits * tax_rate.swingtrade.fii_percent
 			elif category == self.asset_model.CATEGORY_SUBSCRIPTION_FII:
 				# não tem isenção e não pode compensar com outras categorias
 				if profits := self.calc_profits(stats.profits, stats):
 					# paga 20% sobre o lucro no swing trade
-					stats.taxes.value += profits * Decimal(subscription_fiis['swing_trade'])
+					stats.taxes.value += profits * tax_rate.swingtrade.fii_subscription_percent
 
 	def generate(self, report: BaseReport, **options) -> dict:
 		consolidation = report.get_opts("consolidation", None)
@@ -259,22 +252,22 @@ class StatsReport(Base):
 class StatsReports(Base):
 	"""Um conjunto de relatório dentro de vários meses"""
 	report_class = StatsReport
+	tax_rate_model = TaxRate
 
-	def __init__(self, user, reports, **options):
+	def __init__(self, user, reports: BaseReportMonth, **options):
 		super().__init__(user, **options)
-		self.start_date: datetime.date = None
-		self.end_date: datetime.date = None
+		self.start_date: datetime.date = reports.start_date
+		self.end_date: datetime.date = reports.end_date
+		self.tax_rate: TaxRate = self.tax_rate_model.get_from_date(reports.end_date)
 		self.reports: BaseReportMonth = reports
 		self.results = OrderedDict()
 
 	def generate(self, **options) -> OrderedDict[int]:
 		"""Gera dados de estatística para cada mês de relatório"""
-		self.start_date = self.reports.start_date
-		self.end_date = self.reports.end_date
 
 		for month in self.reports:
 			report = self.reports[month]
-			stats = self.report_class(self.user, **options)
+			stats = self.report_class(self.user, self.tax_rate, **options)
 
 			last_month = month - 1
 			stats.cache.set(f'stats_month[{last_month}]', self.results.get(last_month))

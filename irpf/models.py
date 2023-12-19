@@ -795,6 +795,31 @@ class TaxRate(BaseIRPFModel):
 	def __str__(self):
 		return f"{self.valid_until}"
 
+	@classmethod
+	def get_from_date(cls, end_date):
+		key = f"__current_tax_rate[{end_date}]"
+		if (tax_rate := getattr(cls, key, None)) is None:
+			if (tax_rate := cls.objects.filter(valid_until__gte=end_date).last()) is None:
+				stock = settings.TAX_RATE['stock']
+				fii = settings.TAX_RATE['fii']
+				bdr = settings.TAX_RATE['bdr']
+				stock_subscription = settings.TAX_RATE['stock_subscription']
+				fii_subscription = settings.TAX_RATE['fii_subscription']
+				tax_rate = cls(darf=Decimal(settings.TAX_RATE['darf_min_value']),
+				               stock_exempt_profit=Decimal(stock['exempt_profit']))
+				tax_rate.daytrade = DayTrade(stock=Decimal(stock['day_trade']),
+				                             fii=Decimal(fii['day_trade']),
+				                             bdr=Decimal(bdr['day_trade']),
+				                             stock_subscription=Decimal(stock_subscription['day_trade']),
+				                             fii_subscription=Decimal(fii_subscription['day_trade']))
+				tax_rate.swingtrade = SwingTrade(stock=Decimal(stock['swing_trade']),
+				                                 fii=Decimal(fii['swing_trade']),
+				                                 bdr=Decimal(bdr['swing_trade']),
+				                                 stock_subscription=Decimal(stock_subscription['swing_trade']),
+				                                 fii_subscription=Decimal(fii_subscription['swing_trade']))
+				setattr(cls, key, tax_rate)
+		return tax_rate
+
 
 class AbstractTaxRate(BaseIRPFModel):
 	stock = models.DecimalField(verbose_name="Ações",
