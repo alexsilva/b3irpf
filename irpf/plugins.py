@@ -524,7 +524,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			stats_category.update(stats_categories)
 
 			context['report']['stats_category'] = stats_category
-			context['report']['stock_exempt_profit'] = self.admin_view.stats.tax_rate.darf
+			context['report']['stock_exempt_profit'] = self.admin_view.stats.tax_rate.stock_exempt_profit
 		return context
 
 	def block_bonus_stats(self, context, nodes):
