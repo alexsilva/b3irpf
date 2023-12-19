@@ -834,7 +834,7 @@ class TaxRate(BaseIRPFModel):
 
 	@classmethod
 	def cache_clear(cls, user, forced=False):
-		if forced or len(cls.valid_ranges[user]) > 24:
+		if forced or len(cls.valid_ranges[user]) >= 24:
 			cls.valid_ranges[user].clear()
 
 	def save(self, *args, **kwargs):
