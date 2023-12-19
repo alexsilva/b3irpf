@@ -786,7 +786,10 @@ class TaxRate(BaseIRPFModel):
 		decimal_places=2
 	)
 
+	valid_start = models.DateField(verbose_name="Começa em", default=timezone.now)
 	valid_until = models.DateField(verbose_name="Válido até", default=timezone.now)
+
+	valid_ranges = {}
 
 	class Meta:
 		verbose_name = "Alíquota"
@@ -794,7 +797,7 @@ class TaxRate(BaseIRPFModel):
 		ordering = ('-valid_until',)
 
 	def __str__(self):
-		return f"{self.valid_until}"
+		return f"{self.valid_start}-{self.valid_until}"
 
 	@classmethod
 	def create_instance(cls):
@@ -819,12 +822,12 @@ class TaxRate(BaseIRPFModel):
 		return tax_rate
 
 	@classmethod
-	def get_from_date(cls, end_date):
-		key = f"__current_tax_rate[{end_date}]"
-		if (tax_rate := getattr(cls, key, None)) is None:
-			if (tax_rate := cls.objects.filter(valid_until__gte=end_date).first()) is None:
+	def get_from_date(cls, start_date, end_date):
+		if (tax_rate := cls.valid_ranges.get((start_date, end_date))) is None:
+			qs = cls.objects.filter(valid_start__lte=start_date, valid_until__gte=end_date)
+			if (tax_rate := qs.first()) is None:
 				tax_rate = cls.create_instance()
-			setattr(cls, key, tax_rate)
+			cls.valid_ranges[(start_date, end_date)] = tax_rate
 		return tax_rate
 
 

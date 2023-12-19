@@ -125,7 +125,7 @@ class SwingTradeInline:
 @sites.register(TaxRate)
 class TaxRateAdmin(BaseIRPFAdmin):
 	inlines = [DayTradeInline, SwingTradeInline]
-	list_display = ['valid_until']
+	list_display = ['valid_start', 'valid_until']
 
 
 @sites.register(Asset)

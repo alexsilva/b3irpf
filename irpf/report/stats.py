@@ -15,11 +15,15 @@ class StatsReport(Base):
 	asset_model = Asset
 	statistic_model = Statistic
 	taxes_model = Taxes
+	tax_rate_model = TaxRate
 
-	def __init__(self, user, tax_rate, **options):
+	def __init__(self, user, report: BaseReport, **options):
 		super().__init__(user, **options)
-		self.tax_rate: TaxRate = tax_rate
+		self.report = report
 		self.results = OrderedDict()
+		self.start_date = self.report.get_opts('start_date')
+		self.end_date = self.report.get_opts('end_date')
+		self.tax_rate = self.tax_rate_model.get_from_date(self.start_date, self.end_date)
 
 	def _get_statistics(self, date: datetime.date, category: int, **options):
 		query = dict(
@@ -60,15 +64,12 @@ class StatsReport(Base):
 			instance = None
 		return instance
 
-	def generate_residual_taxes(self, report: BaseReport, **options):
+	def generate_residual_taxes(self, **options):
 		"""Atualiza impostos residuais (aqueles abaixo de R$ 10,00 que devem ser pagos posteriormente)
 		"""
-		start_date = report.get_opts('start_date')
-		end_date = report.get_opts('end_date')
-
 		# impostos não pagos aparecem no mês para pagamento(repeita o mínimo de R$ 10)
 		taxes_qs = self.taxes_model.objects.filter(
-			created_date__range=[start_date, end_date],
+			created_date__range=[self.start_date, self.end_date],
 			user=self.user,
 			total__gt=0
 		)
@@ -91,7 +92,7 @@ class StatsReport(Base):
 
 		# Se o imposto do mês é maior ou igual ao limite para pagamento (R$ 10)
 		if self.stats_results.taxes.total >= self.tax_rate.darf:
-			if not report.is_closed:
+			if not self.report.is_closed:
 				return
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
@@ -202,11 +203,10 @@ class StatsReport(Base):
 					# paga 20% sobre o lucro no swing trade
 					stats.taxes.value += profits * tax_rate.swingtrade.fii_subscription_percent
 
-	def generate(self, report: BaseReport, **options) -> dict:
-		consolidation = report.get_opts("consolidation", None)
+	def generate(self, **options) -> dict:
+		consolidation = self.report.get_opts("consolidation", None)
 		options.setdefault('consolidation', consolidation)
-		categories: tuple[int] = report.get_opts('categories', ())
-		start_date = report.get_opts('start_date')
+		categories: tuple[int] = self.report.get_opts('categories', ())
 		self.options.update(options)
 		self.results.clear()
 
@@ -216,16 +216,16 @@ class StatsReport(Base):
 			# quando o filtro por categorias está ativado, considera somente as categoria do filtro.
 			if categories and category_name_choices[category_name] not in categories:
 				continue
-			self.results[category_name] = self._get_stats(category_name, date=start_date, **self.options)
+			self.results[category_name] = self._get_stats(category_name, date=self.start_date, **self.options)
 
-		report_results = report.get_results()
+		report_results = self.report.get_results()
 		for asset in report_results:
 			# não cadastrado
 			instance: Asset = asset.instance
 			if instance is None:
 				continue
 
-			stats = self._get_stats(instance.category_name, date=start_date, **self.options)
+			stats = self._get_stats(instance.category_name, date=self.start_date, **self.options)
 
 			asset_period = asset.period
 			stats.buy += asset_period.buy.total
@@ -244,7 +244,7 @@ class StatsReport(Base):
 			stats.patrimony += asset.buy.total
 		# taxas de período
 		self.generate_taxes()
-		self.generate_residual_taxes(report, **self.options)
+		self.generate_residual_taxes(**self.options)
 		self.cache.clear()
 		return self.results
 
@@ -258,7 +258,7 @@ class StatsReports(Base):
 		super().__init__(user, **options)
 		self.start_date: datetime.date = reports.start_date
 		self.end_date: datetime.date = reports.end_date
-		self.tax_rate: TaxRate = self.tax_rate_model.get_from_date(reports.end_date)
+		self.tax_rate: TaxRate = self.tax_rate_model.get_from_date(reports.start_date, reports.end_date)
 		self.reports: BaseReportMonth = reports
 		self.results = OrderedDict()
 
@@ -267,11 +267,11 @@ class StatsReports(Base):
 
 		for month in self.reports:
 			report = self.reports[month]
-			stats = self.report_class(self.user, self.tax_rate, **options)
+			stats = self.report_class(self.user, report)
 
 			last_month = month - 1
 			stats.cache.set(f'stats_month[{last_month}]', self.results.get(last_month))
-			stats.generate(report)
+			stats.generate(**options)
 
 			self.results[month] = stats
 		return self.results
