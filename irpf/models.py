@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property, classproperty
 from django.utils.text import slugify
@@ -784,6 +785,8 @@ class TaxRate(BaseIRPFModel):
 		amount_default=Decimal('20000'),
 		decimal_places=2
 	)
+
+	valid_until = models.DateField(verbose_name="Válido até", default=timezone.now)
 
 	class Meta:
 		verbose_name = "Alíquota"
