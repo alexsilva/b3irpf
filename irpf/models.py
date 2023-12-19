@@ -846,7 +846,7 @@ class TaxRate(BaseIRPFModel):
 			type(self).cache_clear(self.user, forced=True)
 
 
-class AbstractTaxRate(BaseIRPFModel):
+class AbstractTradeRate(BaseIRPFModel):
 	stock = models.DecimalField(verbose_name="Ações",
 	                            max_digits=DECIMAL_MAX_DIGITS,
 	                            decimal_places=2)
@@ -912,7 +912,7 @@ class AbstractTaxRate(BaseIRPFModel):
 		abstract = True
 
 
-class DayTrade(AbstractTaxRate):
+class DayTrade(AbstractTradeRate):
 	tax_rate = models.OneToOneField(TaxRate, on_delete=models.CASCADE)
 	alias = 'day_trade'
 
@@ -921,7 +921,7 @@ class DayTrade(AbstractTaxRate):
 		verbose_name_plural = verbose_name
 
 
-class SwingTrade(AbstractTaxRate):
+class SwingTrade(AbstractTradeRate):
 	tax_rate = models.OneToOneField(TaxRate, on_delete=models.CASCADE)
 	alias = 'swing_trade'
 
