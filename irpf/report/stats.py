@@ -15,15 +15,14 @@ class StatsReport(Base):
 	asset_model = Asset
 	statistic_model = Statistic
 	taxes_model = Taxes
-	tax_rate_model = TaxRate
 
-	def __init__(self, user, report: BaseReport, **options):
+	def __init__(self, user, report: BaseReport, tax_rate: TaxRate, **options):
 		super().__init__(user, **options)
 		self.report = report
 		self.results = OrderedDict()
 		self.start_date = self.report.get_opts('start_date')
 		self.end_date = self.report.get_opts('end_date')
-		self.tax_rate = self.tax_rate_model.get_from_date(user, self.start_date, self.end_date)
+		self.tax_rate = tax_rate
 
 	def _get_statistics(self, date: datetime.date, category: int, **options):
 		query = dict(
@@ -268,7 +267,7 @@ class StatsReports(Base):
 
 		for month in self.reports:
 			report = self.reports[month]
-			stats = self.report_class(self.user, report)
+			stats = self.report_class(self.user, report, self.tax_rate)
 
 			last_month = month - 1
 			stats.cache.set(f'stats_month[{last_month}]', self.results.get(last_month))
