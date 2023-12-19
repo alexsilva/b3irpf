@@ -1,15 +1,14 @@
-from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from datetime import datetime
+
 from django.contrib.auth import get_permission_codename
 from django.core.management import call_command
 from django.forms import ModelForm
-from moneyfield import MoneyModelForm
-from xadmin import sites, site
-from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
-from irpf import permissions
 
+from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
+from irpf import permissions
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
-	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, SubscriptionInfo
+	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, SubscriptionInfo, TaxRate, DayTrade, \
+	SwingTrade
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	StatsReportAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonths
 from irpf.report.earnings import EarningsReportMonth
@@ -20,6 +19,9 @@ from irpf.views.import_list import AdminImportListModelView
 from irpf.views.report_irpf import AdminReportIrpfModelView
 from irpf.views.xlsx_viewer import AdminXlsxViewer
 from irpf.widgets import MonthYearField, MonthYearWidget
+from moneyfield import MoneyModelForm
+from xadmin import sites, site
+from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
 
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
 site.register_view("^irpf/report/(?P<model_app_label>.+)/$", AdminReportIrpfModelView, "reportirpf")
@@ -108,6 +110,23 @@ class BaseIRPFAdmin:
 		if getattr(self, "org_obj", None):
 			readonly_fields.append('user')
 		return readonly_fields
+
+
+class DayTradeInline:
+	form = MoneyModelForm
+	model = DayTrade
+	style = "one"
+
+
+class SwingTradeInline:
+	form = MoneyModelForm
+	model = SwingTrade
+	style = "one"
+
+
+@sites.register(TaxRate)
+class TaxRateAdmin(BaseIRPFAdmin):
+	inlines = [DayTradeInline, SwingTradeInline]
 
 
 @sites.register(Asset)
