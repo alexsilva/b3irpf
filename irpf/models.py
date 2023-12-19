@@ -791,6 +791,7 @@ class TaxRate(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Alíquota"
 		verbose_name_plural = verbose_name + "s"
+		ordering = ('-valid_until',)
 
 	def __str__(self):
 		return f"{self.valid_until}"
@@ -821,7 +822,7 @@ class TaxRate(BaseIRPFModel):
 	def get_from_date(cls, end_date):
 		key = f"__current_tax_rate[{end_date}]"
 		if (tax_rate := getattr(cls, key, None)) is None:
-			if (tax_rate := cls.objects.filter(valid_until__gte=end_date).last()) is None:
+			if (tax_rate := cls.objects.filter(valid_until__gte=end_date).first()) is None:
 				tax_rate = cls.create_instance()
 			setattr(cls, key, tax_rate)
 		return tax_rate
