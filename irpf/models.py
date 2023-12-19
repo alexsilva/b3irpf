@@ -877,7 +877,7 @@ class DayTrade(AbstractTaxRate):
 	tax_rate = models.OneToOneField(TaxRate, on_delete=models.CASCADE)
 
 	class Meta:
-		verbose_name = "Day trade"
+		verbose_name = "Day trade (negociações)"
 		verbose_name_plural = verbose_name
 
 
@@ -885,5 +885,5 @@ class SwingTrade(AbstractTaxRate):
 	tax_rate = models.OneToOneField(TaxRate, on_delete=models.CASCADE)
 
 	class Meta:
-		verbose_name = "Swing trade"
+		verbose_name = "Swing trade (negociações)"
 		verbose_name_plural = verbose_name
