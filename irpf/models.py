@@ -832,11 +832,15 @@ class TaxRate(BaseIRPFModel):
 			cls.valid_ranges[user][(start_date, end_date)] = tax_rate
 		return tax_rate
 
+	@classmethod
+	def cache_clear(cls, user):
+		cls.valid_ranges[user].clear()
+
 	def save(self, *args, **kwargs):
 		try:
 			return super().save(*args, **kwargs)
 		finally:
-			type(self).valid_ranges[self.user].clear()
+			type(self).cache_clear(self.user)
 
 
 class AbstractTaxRate(BaseIRPFModel):
