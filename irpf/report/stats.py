@@ -23,7 +23,7 @@ class StatsReport(Base):
 		self.results = OrderedDict()
 		self.start_date = self.report.get_opts('start_date')
 		self.end_date = self.report.get_opts('end_date')
-		self.tax_rate = self.tax_rate_model.get_from_date(self.start_date, self.end_date)
+		self.tax_rate = self.tax_rate_model.get_from_date(user, self.start_date, self.end_date)
 
 	def _get_statistics(self, date: datetime.date, category: int, **options):
 		query = dict(
@@ -258,7 +258,7 @@ class StatsReports(Base):
 		super().__init__(user, **options)
 		self.start_date: datetime.date = reports.start_date
 		self.end_date: datetime.date = reports.end_date
-		self.tax_rate: TaxRate = self.tax_rate_model.get_from_date(reports.start_date, reports.end_date)
+		self.tax_rate: TaxRate = self.tax_rate_model.get_from_date(user, reports.start_date, reports.end_date)
 		self.reports: BaseReportMonth = reports
 		self.results = OrderedDict()
 

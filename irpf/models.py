@@ -1,4 +1,6 @@
+import datetime
 import decimal
+from collections import defaultdict
 from decimal import Decimal
 
 from django.conf import settings
@@ -789,7 +791,7 @@ class TaxRate(BaseIRPFModel):
 	valid_start = models.DateField(verbose_name="Começa em", default=timezone.now)
 	valid_until = models.DateField(verbose_name="Válido até", default=timezone.now)
 
-	valid_ranges = {}
+	valid_ranges = defaultdict(dict)
 
 	class Meta:
 		verbose_name = "Alíquota"
@@ -822,19 +824,19 @@ class TaxRate(BaseIRPFModel):
 		return tax_rate
 
 	@classmethod
-	def get_from_date(cls, start_date, end_date):
-		if (tax_rate := cls.valid_ranges.get((start_date, end_date))) is None:
+	def get_from_date(cls, user, start_date: datetime.date, end_date: datetime.date):
+		if (tax_rate := cls.valid_ranges[user].get((start_date, end_date))) is None:
 			qs = cls.objects.filter(valid_start__lte=start_date, valid_until__gte=end_date)
 			if (tax_rate := qs.first()) is None:
 				tax_rate = cls.create_instance()
-			cls.valid_ranges[(start_date, end_date)] = tax_rate
+			cls.valid_ranges[user][(start_date, end_date)] = tax_rate
 		return tax_rate
 
 	def save(self, *args, **kwargs):
 		try:
 			return super().save(*args, **kwargs)
 		finally:
-			type(self).valid_ranges.clear()
+			type(self).valid_ranges[self.user].clear()
 
 
 class AbstractTaxRate(BaseIRPFModel):
