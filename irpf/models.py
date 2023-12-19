@@ -830,6 +830,12 @@ class TaxRate(BaseIRPFModel):
 			cls.valid_ranges[(start_date, end_date)] = tax_rate
 		return tax_rate
 
+	def save(self, *args, **kwargs):
+		try:
+			return super().save(*args, **kwargs)
+		finally:
+			type(self).valid_ranges.clear()
+
 
 class AbstractTaxRate(BaseIRPFModel):
 	stock = models.DecimalField(verbose_name="Ações",
