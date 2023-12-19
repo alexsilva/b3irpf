@@ -113,13 +113,11 @@ class BaseIRPFAdmin:
 
 
 class DayTradeInline:
-	form = MoneyModelForm
 	model = DayTrade
 	style = "one"
 
 
 class SwingTradeInline:
-	form = MoneyModelForm
 	model = SwingTrade
 	style = "one"
 
