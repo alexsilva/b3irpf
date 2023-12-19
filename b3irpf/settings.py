@@ -85,30 +85,28 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # alíquotas de imposto
-TAX_RATES = {
-    'darf': {
-      'min_value': '10'
-    },
-    'stocks': {
+TAX_RATE = {
+    'darf_min_value': '10',
+    'stock': {
         'exempt_profit': '20000',  # 20.000,00
-        'swing_trade': '0.15',  # 15%
-        'day_trade': '0.2'  # 20%
+        'swing_trade': '15',  # 15%
+        'day_trade': '20'  # 20%
     },
-    'subscription_stocks': {
-        'swing_trade': '0.15',  # 15%
-        'day_trade': '0.2'  # 20%
+    'stock_subscription': {
+        'swing_trade': '15',  # 15%
+        'day_trade': '20'  # 20%
     },
-    'bdrs': {
-        'swing_trade': '0.15',  # 15%
-        'day_trade': '0.2'  # 20%
+    'bdr': {
+        'swing_trade': '15',  # 15%
+        'day_trade': '20'  # 20%
     },
-    'fiis': {
-        'swing_trade': '0.2',  # 20%
-        'day_trade': '0.2'  # 20%
+    'fii': {
+        'swing_trade': '20',  # 20%
+        'day_trade': '20'  # 20%
     },
-    'subscription_fiis': {
-        'swing_trade': '0.2',  # 20%
-        'day_trade': '0.2'  # 20%
+    'fii_subscription': {
+        'swing_trade': '20',  # 20%
+        'day_trade': '20'  # 20%
     },
 }
 
