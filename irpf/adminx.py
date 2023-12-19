@@ -112,6 +112,10 @@ class BaseIRPFAdmin:
 		return readonly_fields
 
 
+class BaseHorizontalInline:
+	horizontal_form_layout = True
+
+
 class TradeModelForm(ModelForm):
 	def has_changed(self, *args, **kwargs):
 		# sempre cria uma nova instância para o inline
@@ -120,13 +124,13 @@ class TradeModelForm(ModelForm):
 		return super().has_changed(*args, **kwargs)
 
 
-class DayTradeInline:
+class DayTradeInline(BaseHorizontalInline):
 	form = TradeModelForm
 	model = DayTrade
 	style = "one"
 
 
-class SwingTradeInline:
+class SwingTradeInline(BaseHorizontalInline):
 	form = TradeModelForm
 	model = SwingTrade
 	style = "one"
@@ -211,7 +215,7 @@ class PositionAdmin(BaseIRPFAdmin):
 	asset_name.short_description = _get_field_opts("name", Asset).verbose_name
 
 
-class NegotiationInline:
+class NegotiationInline(BaseHorizontalInline):
 	form = MoneyModelForm
 	model = Negotiation
 	style = "accordion"
@@ -275,7 +279,7 @@ class NegotiationAdmin(BaseIRPFAdmin):
 	)
 
 
-class BonusInfoInline:
+class BonusInfoInline(BaseHorizontalInline):
 	form = MoneyModelForm
 	model = BonusInfo
 	style = "one"
@@ -315,7 +319,7 @@ class BonusAdmin(BaseIRPFAdmin):
 		view.inlines_options = value
 
 
-class SubscriptionInfoInline:
+class SubscriptionInfoInline(BaseHorizontalInline):
 	"""Inline dos modelos [Subscription]"""
 	form = MoneyModelForm
 	model = SubscriptionInfo
