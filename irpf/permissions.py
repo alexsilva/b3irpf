@@ -14,12 +14,18 @@ from irpf.models import (
 	Subscription,
 	BonusInfo,
 	SubscriptionInfo,
-	Statistic
+	Statistic,
+	TaxRate,
+	DayTrade,
+	SwingTrade
 )
 
 permission_all = ('view', 'add', 'change', 'delete')
 
 permission_models = {
+	TaxRate: permission_all,
+	DayTrade: permission_all,
+	SwingTrade: permission_all,
 	AssetEarningHistory: permission_all,
 	Bookkeeping: ('view', 'add'),
 	FoundsAdministrator: ('view', 'add'),
