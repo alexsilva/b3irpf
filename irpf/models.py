@@ -863,6 +863,7 @@ class AbstractTaxRate(BaseIRPFModel):
 	bdr = models.DecimalField(verbose_name="BDRS",
 	                          max_digits=DECIMAL_MAX_DIGITS,
 	                          decimal_places=2)
+	alias: str = None
 
 	@staticmethod
 	def _get_percent(value: Decimal) -> Decimal:
@@ -888,12 +889,32 @@ class AbstractTaxRate(BaseIRPFModel):
 	def bdr_percent(self):
 		return self._get_percent(self.bdr)
 
+	@classmethod
+	def setup_defaults(cls):
+		stock = settings.TAX_RATE['stock']
+		fii = settings.TAX_RATE['fii']
+		bdr = settings.TAX_RATE['bdr']
+
+		stock_subscription = settings.TAX_RATE['stock_subscription']
+		fii_subscription = settings.TAX_RATE['fii_subscription']
+
+		opts = cls._meta
+
+		opts.get_field('stock').default = Decimal(stock[cls.alias])
+		opts.get_field('fii').default = Decimal(fii[cls.alias])
+		opts.get_field('bdr').default = Decimal(bdr[cls.alias])
+
+		opts.get_field('stock_subscription').default = Decimal(stock_subscription[cls.alias])
+		opts.get_field('fii_subscription').default = Decimal(fii_subscription[cls.alias])
+		return cls
+
 	class Meta:
 		abstract = True
 
 
 class DayTrade(AbstractTaxRate):
 	tax_rate = models.OneToOneField(TaxRate, on_delete=models.CASCADE)
+	alias = 'day_trade'
 
 	class Meta:
 		verbose_name = "Day trade (negociações)"
@@ -902,6 +923,7 @@ class DayTrade(AbstractTaxRate):
 
 class SwingTrade(AbstractTaxRate):
 	tax_rate = models.OneToOneField(TaxRate, on_delete=models.CASCADE)
+	alias = 'swing_trade'
 
 	class Meta:
 		verbose_name = "Swing trade (negociações)"
