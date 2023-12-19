@@ -808,6 +808,30 @@ class AbstractTaxRate(BaseIRPFModel):
 	                 max_digits=DECIMAL_MAX_DIGITS,
 	                 decimal_places=2)
 
+	@staticmethod
+	def _get_percent(value):
+		return value / Decimal(100)
+
+	@property
+	def stock_value(self):
+		return self._get_percent(self.stock)
+
+	@property
+	def stock_subscription_value(self):
+		return self._get_percent(self.stock_subscription)
+
+	@property
+	def fii_value(self):
+		return self._get_percent(self.fii)
+
+	@property
+	def fii_subscription_value(self):
+		return self._get_percent(self.fii_subscription)
+
+	@property
+	def bdr_value(self):
+		return self._get_percent(self.bdr)
+
 	class Meta:
 		abstract = True
 
