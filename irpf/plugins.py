@@ -77,6 +77,7 @@ class GuardianAdminPlugin(GuardianAdminPluginMixin):
 class AssignUserAdminPlugin(GuardianAdminPluginMixin):
 	"""Salva o usuário da sessão junto a instância do modelo recém-criada"""
 	assign_current_user = False
+	guardian_protected = False
 
 	def init_request(self, *args, **kwargs):
 		return self.assign_current_user
@@ -95,7 +96,8 @@ class AssignUserAdminPlugin(GuardianAdminPluginMixin):
 				if instance and hasattr(instance, 'user_id') and instance.user_id is None:
 					instance.user = self.user
 				instance.save()
-				self.set_guardian_object_perms(instance)
+				if self.guardian_protected:
+					self.set_guardian_object_perms(instance)
 			formset.save_m2m()
 
 
