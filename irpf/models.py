@@ -797,45 +797,45 @@ class TaxRate(BaseIRPFModel):
 
 
 class AbstractTaxRate(BaseIRPFModel):
-	stock = MoneyField(verbose_name="Ações",
-	                   max_digits=DECIMAL_MAX_DIGITS,
-	                   decimal_places=2)
-	stock_subscription = MoneyField(verbose_name="Ações (subscrições)",
-	                                max_digits=DECIMAL_MAX_DIGITS,
-	                                decimal_places=2)
-	fii = MoneyField(verbose_name="Fundos imobiliários",
-	                 max_digits=DECIMAL_MAX_DIGITS,
-	                 decimal_places=2)
+	stock = models.DecimalField(verbose_name="Ações",
+	                            max_digits=DECIMAL_MAX_DIGITS,
+	                            decimal_places=2)
+	stock_subscription = models.DecimalField(verbose_name="Ações (subscrições)",
+	                                         max_digits=DECIMAL_MAX_DIGITS,
+	                                         decimal_places=2)
+	fii = models.DecimalField(verbose_name="Fundos imobiliários",
+	                          max_digits=DECIMAL_MAX_DIGITS,
+	                          decimal_places=2)
 
-	fii_subscription = MoneyField(verbose_name="Fundos imobiliários (subscrições)",
-	                              max_digits=DECIMAL_MAX_DIGITS,
-	                              decimal_places=2)
-	bdr = MoneyField(verbose_name="BDRS",
-	                 max_digits=DECIMAL_MAX_DIGITS,
-	                 decimal_places=2)
+	fii_subscription = models.DecimalField(verbose_name="Fundos imobiliários (subscrições)",
+	                                       max_digits=DECIMAL_MAX_DIGITS,
+	                                       decimal_places=2)
+	bdr = models.DecimalField(verbose_name="BDRS",
+	                          max_digits=DECIMAL_MAX_DIGITS,
+	                          decimal_places=2)
 
 	@staticmethod
-	def _get_percent(value):
+	def _get_percent(value: Decimal) -> Decimal:
 		return value / Decimal(100)
 
-	@property
-	def stock_value(self):
+	@cached_property
+	def stock_percent(self):
 		return self._get_percent(self.stock)
 
-	@property
-	def stock_subscription_value(self):
+	@cached_property
+	def stock_subscription_percent(self):
 		return self._get_percent(self.stock_subscription)
 
-	@property
-	def fii_value(self):
+	@cached_property
+	def fii_percent(self):
 		return self._get_percent(self.fii)
 
-	@property
-	def fii_subscription_value(self):
+	@cached_property
+	def fii_subscription_percent(self):
 		return self._get_percent(self.fii_subscription)
 
-	@property
-	def bdr_value(self):
+	@cached_property
+	def bdr_percent(self):
 		return self._get_percent(self.bdr)
 
 	class Meta:
