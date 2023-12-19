@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
-from django.utils.formats import number_format, date_format
+from django.utils.formats import date_format
 from django.utils.functional import cached_property, classproperty
 from django.utils.text import slugify
 
@@ -318,9 +318,9 @@ class BonusInfo(BaseIRPFModel):
 	                                    max_digits=19,
 	                                    decimal_places=0)
 	from_total = MoneyField(verbose_name="Valor dos ativos",
-							max_digits=DECIMAL_MAX_DIGITS,
-							decimal_places=DECIMAL_PLACES,
-							amount_default=Decimal(0))
+	                        max_digits=DECIMAL_MAX_DIGITS,
+	                        decimal_places=DECIMAL_PLACES,
+	                        amount_default=Decimal(0))
 	quantity = models.DecimalField(verbose_name="Quantidade bonificada",
 	                               max_digits=DECIMAL_MAX_DIGITS,
 	                               decimal_places=DECIMAL_PLACES)
@@ -396,15 +396,15 @@ class SubscriptionInfo(BaseIRPFModel):
 	                                    max_digits=19,
 	                                    decimal_places=0)
 	from_total = MoneyField(verbose_name="Valor dos ativos",
-							max_digits=DECIMAL_MAX_DIGITS,
-							decimal_places=DECIMAL_PLACES,
-							amount_default=Decimal(0))
+	                        max_digits=DECIMAL_MAX_DIGITS,
+	                        decimal_places=DECIMAL_PLACES,
+	                        amount_default=Decimal(0))
 	quantity = models.DecimalField(verbose_name="Quantidade (subscritas)",
 	                               max_digits=DECIMAL_MAX_DIGITS,
 	                               decimal_places=DECIMAL_PLACES)
 	quantity_proportional = models.DecimalField(verbose_name="Quantidade (direitos)",
-				                                max_digits=DECIMAL_MAX_DIGITS,
-				                                decimal_places=DECIMAL_PLACES,
+	                                            max_digits=DECIMAL_MAX_DIGITS,
+	                                            decimal_places=DECIMAL_PLACES,
 	                                            default=Decimal(0))
 	total = MoneyField(verbose_name="Valor da subscrição",
 	                   max_digits=DECIMAL_MAX_DIGITS,
@@ -770,3 +770,59 @@ class Taxes(BaseIRPFModel):
 		verbose_name = "Imposto"
 		verbose_name_plural = verbose_name + "s"
 		ordering = ('-created_date', 'category')
+
+
+class TaxRate(BaseIRPFModel):
+	darf = MoneyField(verbose_name="Valor mínimo (DARF)",
+	                  max_digits=DECIMAL_MAX_DIGITS,
+	                  amount_default=Decimal('10'),
+	                  decimal_places=2)
+
+	stock_exempt_profit = MoneyField(
+		verbose_name="Ações (Lucro isento)",
+		max_digits=DECIMAL_MAX_DIGITS,
+		amount_default=Decimal('20000'),
+		decimal_places=2
+	)
+
+	class Meta:
+		verbose_name = "Alíquota"
+		verbose_name_plural = verbose_name + "s"
+
+
+class AbstractTaxRate(BaseIRPFModel):
+	stock = MoneyField(verbose_name="Ações",
+	                   max_digits=DECIMAL_MAX_DIGITS,
+	                   decimal_places=2)
+	stock_subscription = MoneyField(verbose_name="Ações (subscrições)",
+	                                max_digits=DECIMAL_MAX_DIGITS,
+	                                decimal_places=2)
+	fii = MoneyField(verbose_name="Fundos imobiliários",
+	                 max_digits=DECIMAL_MAX_DIGITS,
+	                 decimal_places=2)
+
+	fii_subscription = MoneyField(verbose_name="Fundos imobiliários (subscrições)",
+	                              max_digits=DECIMAL_MAX_DIGITS,
+	                              decimal_places=2)
+	bdr = MoneyField(verbose_name="BDRS",
+	                 max_digits=DECIMAL_MAX_DIGITS,
+	                 decimal_places=2)
+
+	class Meta:
+		abstract = True
+
+
+class DayTrade(AbstractTaxRate):
+	tax_rate = models.OneToOneField(TaxRate, on_delete=models.CASCADE)
+
+	class Meta:
+		verbose_name = "Day trade"
+		verbose_name_plural = verbose_name
+
+
+class SwingTrade(AbstractTaxRate):
+	tax_rate = models.OneToOneField(TaxRate, on_delete=models.CASCADE)
+
+	class Meta:
+		verbose_name = "Swing trade"
+		verbose_name_plural = verbose_name
