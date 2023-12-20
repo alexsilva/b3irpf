@@ -451,13 +451,9 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		for category_name in stats_results:
 			stats_category: Stats = stats_results[category_name]
 			category = self.asset_model.get_category_by_name(category_name)
-
-			# perdas do ano anterior com o mês
-			cumulative_losses = stats_category.cumulative_losses
-			cumulative_losses += stats_category.compensated_losses
 			defaults = {
 				'residual_taxes': stats_category.taxes.residual,
-				'cumulative_losses': cumulative_losses,
+				'cumulative_losses': stats_category.cumulative_losses,
 				'valid': True
 			}
 			instance, created = self.statistic_model.objects.get_or_create(

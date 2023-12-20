@@ -112,9 +112,7 @@ class StatsReport(Base):
 				stats_results = stats_last_month.get_results()
 				if category_name in stats_results:
 					st: Stats = stats_results[category_name]
-					cumulative_losses = st.cumulative_losses
-					cumulative_losses += st.compensated_losses
-					stats.cumulative_losses = cumulative_losses
+					stats.cumulative_losses = st.cumulative_losses
 					stats.taxes.residual = st.taxes.residual
 					if not st.taxes.paid:
 						stats.taxes.items.update(st.taxes.items)
@@ -153,10 +151,12 @@ class StatsReport(Base):
 			# compensação de prejuízos acumulados
 			if cumulative_losses >= profits:
 				stats.compensated_losses += profits
+				stats.cumulative_losses += profits
 				profits = Decimal(0)
 			else:
 				profits -= cumulative_losses
 				stats.compensated_losses += cumulative_losses
+				stats.cumulative_losses = Decimal(0)
 		return profits
 
 	def generate_taxes(self):
@@ -308,8 +308,7 @@ class StatsReports(Base):
 					stats_categories[category_name] = stats = Stats()
 				stats.update(stats_category)
 				stats.taxes.residual = stats_category.taxes.residual
-				if stats_category.cumulative_losses:
-					stats.cumulative_losses = stats_category.cumulative_losses
+				stats.cumulative_losses = stats_category.cumulative_losses
 				stats.patrimony = stats_category.patrimony
 		asset_model = self.report_class.asset_model
 		category_choices = asset_model.category_choices
