@@ -101,7 +101,7 @@ TAX_RATE = {
         'day_trade': '20'  # 20%
     },
     'fii': {
-        'swing_trade': '20',  # 20%
+        'swing_trade': '15',  # 15%
         'day_trade': '20'  # 20%
     },
     'fii_subscription': {
