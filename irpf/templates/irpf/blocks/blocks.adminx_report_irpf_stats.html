@@ -1,12 +1,11 @@
-{% extends "irpf/adminx_report_irpf_asset_box.html" %}
 {% load irpf_tags %}
 
-{% block card_list_group %}
+<ul class="list-group list-group-flush">
   {% if stats.buy %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-muted">Compras do período</div>
-        <div class="col-sm-4 text-center text-sm-right">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-muted">Compras do período</div>
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.buy }}</span>
         </div>
       </div>
@@ -14,9 +13,9 @@
   {% endif %}
   {% if stats.sell %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-muted">Vendas do período</div>
-        <div class="col-sm-4 text-center text-sm-right">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-muted">Vendas do período</div>
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.sell }}</span>
         </div>
       </div>
@@ -24,12 +23,12 @@
   {% endif %}
   {% if stats.profits %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-danger">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-danger">
           Lucro do período
           <span class="badge badge-light" title="Lucro que exige pagamento de imposto">TRIBUTÁVEL</span>
         </div>
-        <div class="col-sm-4 text-center text-sm-right">
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.profits }}</span>
         </div>
       </div>
@@ -37,12 +36,12 @@
   {% endif %}
   {% if stats.exempt_profit %}
   <li class="list-group-item py-2">
-    <div class="row">
-      <div class="col-sm-8 text-center text-sm-left text-success">
+    <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+      <div class="text-center text-sm-left text-success">
         Lucro do período
         <span class="badge badge-success" title="Geralmente em vendas de ações de até {{ report.stock_exempt_profit }}">ISENTO</span>
       </div>
-      <div class="col-sm-4 text-center text-sm-right">
+      <div class="text-center text-sm-right">
         <span class="text-muted">{{ stats.exempt_profit }}</span>
       </div>
     </div>
@@ -50,11 +49,11 @@
   {% endif %}
   {% if stats.losses %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-danger">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-danger">
           Prejuízo do período
         </div>
-        <div class="col-sm-4 text-center text-sm-right">
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.losses }}</span>
         </div>
       </div>
@@ -62,11 +61,11 @@
   {% endif %}
   {% if stats.compensated_losses %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-success" title="Abatido do lucro para redução do imposto">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-success" title="Abatido do lucro para redução do imposto">
           Prejuízo <span class="badge badge-success" title="Abatido do lucro para redução o imposto">COMPENSADO</span>
         </div>
-        <div class="col-sm-4 text-center text-sm-right">
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.compensated_losses }}</span>
         </div>
       </div>
@@ -74,11 +73,11 @@
   {% endif %}
   {% if stats.cumulative_losses %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-danger">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-danger">
           Prejuízo <span class="badge badge-danger" title="Que vem dos meses e/ou anos anteriores">ACUMULADO</span>
         </div>
-        <div class="col-sm-4 text-center text-sm-right">
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.cumulative_losses }}</span>
         </div>
       </div>
@@ -86,12 +85,12 @@
   {% endif %}
   {% if stats.taxes.residual %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-danger">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-danger">
           Imposto residual
           <span class="badge badge-light" title="Que vem dos meses e/ou anos anteriores">ACUMULADO</span>
         </div>
-        <div class="col-sm-4 text-center text-sm-right">
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.taxes.residual }}</span>
         </div>
       </div>
@@ -99,12 +98,12 @@
   {% endif %}
   {% if stats.taxes_results %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-info">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-info">
           Resultado do período
           <span class="badge badge-light">DECLARAR</span>
         </div>
-        <div class="col-sm-4 text-center text-sm-right">
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.taxes_results }}</span>
         </div>
       </div>
@@ -112,12 +111,12 @@
   {% endif %}
   {% if stats.taxes.value %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-danger">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-danger">
           Imposto
           <span class="badge badge-pill badge-light" title="Pagar até final o último dia útil do mês seguinte cod: 6015">DARF</span>
         </div>
-        <div class="col-sm-4 text-center text-sm-right">
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.taxes.value }}</span>
         </div>
       </div>
@@ -125,11 +124,11 @@
   {% endif %}
   {% if stats.bonus %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-muted">{{ stats.bonus.title }}
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-muted">{{ stats.bonus.title }}
           <span class="badge badge-pill badge-light" title="Ativos">{{ stats.bonus.quantity|smart_desc }}</span>
         </div>
-        <div class="col-sm-4 text-center text-sm-right">
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.bonus.value }}</span>
         </div>
       </div>
@@ -137,9 +136,9 @@
   {% endif %}
   {% if stats.tax %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-muted">Taxas</div>
-        <div class="col-sm-4 text-center text-sm-right">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-muted">Taxas</div>
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.tax }}</span>
         </div>
       </div>
@@ -147,12 +146,12 @@
   {% endif %}
   {% if stats.patrimony %}
     <li class="list-group-item py-2">
-      <div class="row">
-        <div class="col-sm-8 text-center text-sm-left text-muted">Patrimônio investido</div>
-        <div class="col-sm-4 text-center text-sm-right">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-muted">Patrimônio investido</div>
+        <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.patrimony }}</span>
         </div>
       </div>
     </li>
   {% endif %}
-{% endblock %}
+</ul>

@@ -521,11 +521,11 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 				stats_category[category_fiis_name] = fiis
 			stats_category.update(stats_categories)
 			stats_category_results = collections.OrderedDict([
-				('RESULTADOS', stats_results[0]),
+				('OPERAÇÕES COMUNS', stats_results[0]),
 				('FII OU FIAGRO', stats_results[1])
 			])
+			stats_category.update(stats_category_results)
 			context['report']['stats_category'] = stats_category
-			context['report']['stats_category_results'] = stats_category_results
 			context['report']['stock_exempt_profit'] = self.admin_view.stats.tax_rate.stock_exempt_profit
 		return context
 

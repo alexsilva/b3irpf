@@ -1,52 +1,42 @@
-{% if report.stats_category %}
-{% include 'irpf/blocks/blocks.adminx_report_irpf_date_stats.html' %}
+{% extends "irpf/adminx_report_irpf_asset_box.html" %}
 
-<ul class="nav nav-pills" id="stats" role="tablist">
-  {% for category, stats in report.stats_category.items %}
-    {% if stats %}
-    <li class="nav-item" role="presentation">
-      <button class="nav-link {% if forloop.first %}active{% endif %}" id="{{ category|slugify }}-tab" data-bs-toggle="tab"
-              data-target="#{{ category|slugify }}" data-toggle="pill" type="button" role="tab"
-              aria-controls="pills-{{ category|slugify }}" aria-selected="{{ forloop.first|yesno:"true,false" }}">
-        {{ category }}
-      </button>
-    </li>
-    {% endif %}
-  {% endfor %}
-</ul>
-<div class="tab-content" id="stats-content">
-  {% for category, stats in report.stats_category.items %}
-  {% if stats %}
-  <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="{{ category|slugify }}"
-       role="tabpanel" aria-labelledby="pills-{{ category|slugify }}-tab">
-      {% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=stats %}
+{% block card_header %}
+  <div class="card-header text-center">
+    {% include 'irpf/blocks/blocks.adminx_report_irpf_date_stats.html' %}
+  </div>
+{% endblock %}
+
+{% block card_body %}
+<div class="card-body">
+  {% if report.stats_category %}
+  <div class="row ">
+    <div class="col-sm-5 col-md-4">
+      <div class="nav flex-column nav-pills" id="stats" role="tablist" aria-orientation="vertical">
+        {% for category, stats in report.stats_category.items %}
+          {% if stats %}
+            <button class="nav-link btn-block text-truncate text-left text-sm-center {% if forloop.first %}active{% endif %}"
+              id="{{ category|slugify }}-tab" data-bs-toggle="tab" data-target="#{{ category|slugify }}"
+              data-toggle="pill" role="tab" type="button" aria-controls="pills-{{ category|slugify }}"
+              aria-selected="{{ forloop.first|yesno:"true,false" }}" title="{{ category }}">
+              {{ category }}
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-sm-7 col-md-8">
+      <div class="tab-content" id="stats-content">
+        {% for category, stats in report.stats_category.items %}
+        {% if stats %}
+        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="{{ category|slugify }}"
+             role="tabpanel" aria-labelledby="pills-{{ category|slugify }}-tab">
+            {% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=stats %}
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
   </div>
   {% endif %}
-  {% endfor %}
 </div>
-{% endif %}
-{% if report.stats_category_results %}
-<ul class="nav nav-pills" id="stats" role="tablist">
-  {% for category, stats in report.stats_category_results.items %}
-    {% if stats %}
-    <li class="nav-item" role="presentation">
-      <button class="nav-link {% if forloop.first %}active{% endif %}" id="{{ category|slugify }}-tab" data-bs-toggle="tab"
-              data-target="#{{ category|slugify }}" data-toggle="pill" type="button" role="tab"
-              aria-controls="pills-{{ category|slugify }}" aria-selected="{{ forloop.first|yesno:"true,false" }}">
-        {{ category }}
-      </button>
-    </li>
-    {% endif %}
-  {% endfor %}
-</ul>
-<div class="tab-content" id="stats-content">
-  {% for category, stats in report.stats_category_results.items %}
-  {% if stats %}
-  <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="{{ category|slugify }}"
-       role="tabpanel" aria-labelledby="pills-{{ category|slugify }}-tab">
-      {% include 'irpf/blocks/blocks.adminx_report_irpf_stats.html' with stats=stats %}
-  </div>
-  {% endif %}
-  {% endfor %}
-</div>
-{% endif %}
+{% endblock %}
