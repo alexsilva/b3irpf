@@ -160,47 +160,58 @@ class StatsReport(Base):
 		return profits
 
 	def generate_taxes(self):
-		"""Calcula os impostos a se serem pagos (quando aplicável)"""
-		category_bdr_name = self.asset_model.category_choices[self.asset_model.CATEGORY_BDR]
-		category_stock_name = self.asset_model.category_choices[self.asset_model.CATEGORY_STOCK]
-		tax_rate = self.tax_rate
+		"""Calcula os impostos a se serem pagos (quando aplicável)
+		Obs:
+		Solução de Consulta Cosit nº 166, de 27 de setembro de 2021
+		"""
+		category_choices = self.asset_model.category_choices
+		category_bdr_name = category_choices[self.asset_model.CATEGORY_BDR]
+		category_stock_name = category_choices[self.asset_model.CATEGORY_STOCK]
 
 		for category_name in self.results:
 			stats: Stats = self.results[category_name]
 			category = self.asset_model.get_category_by_name(category_name)
 			if category == self.asset_model.CATEGORY_STOCK:
 				# vendeu mais que R$ 20.000,00 e teve lucro?
-				if stats.sell > tax_rate.stock_exempt_profit:
-					if profits := self.calc_profits(stats.profits, stats):
+				if stats.sell > self.tax_rate.stock_exempt_profit:
+					# compensação de prejuízos da categoria
+					if ((profits := self.calc_profits(stats.profits, stats)) and
 						# compensação de prejuízos de bdrs
-						if profits := self.calc_profits(profits, self.results[category_bdr_name]):
-							# paga 15% sobre o lucro no swing trade
-							stats.taxes.value += profits * tax_rate.swingtrade.stock_percent
+						(profits := self.calc_profits(profits, self.results[category_bdr_name]))):
+						# paga 15% sobre o lucro no swing trade
+						stats.taxes.value += profits * self.tax_rate.swingtrade.stock_percent
 				else:
 					# lucro isento no swing trade
 					stats.exempt_profit += stats.profits
 					stats.profits = MoneyLC(0)
-			elif category == self.asset_model.CATEGORY_SUBSCRIPTION_STOCK:
-				# não tem isenção e não pode compensar com outras categorias
-				if profits := self.calc_profits(stats.profits, stats):
-					# paga 15% sobre o lucro no swing trade
-					stats.taxes.value += profits * tax_rate.swingtrade.stock_subscription_percent
 			elif category == self.asset_model.CATEGORY_BDR:
 				# compensação de prejuízos da categoria
-				if profits := self.calc_profits(stats.profits, stats):
+				if ((profits := self.calc_profits(stats.profits, stats)) and
 					# compensação de prejuízos de ações
-					if profits := self.calc_profits(profits, self.results[category_stock_name]):
-						# paga 15% sobre o lucro no swing trade
-						stats.taxes.value += profits * tax_rate.swingtrade.bdr_percent
+					(profits := self.calc_profits(profits, self.results[category_stock_name]))):
+					# paga 15% sobre o lucro no swing trade
+					stats.taxes.value += profits * self.tax_rate.swingtrade.bdr_percent
 			elif category == self.asset_model.CATEGORY_FII:
 				if profits := self.calc_profits(stats.profits, stats):
 					# paga 20% sobre o lucro no swing trade / day trade
-					stats.taxes.value += profits * tax_rate.swingtrade.fii_percent
+					stats.taxes.value += profits * self.tax_rate.swingtrade.fii_percent
+			# cálculo das taxas de subscrição
+			elif category == self.asset_model.CATEGORY_SUBSCRIPTION_STOCK:
+				if ((profits := self.calc_profits(stats.profits, stats)) and
+					# compensação de prejuízos de ações
+					(profits := self.calc_profits(profits, self.results[category_stock_name])) and
+					# compensação de prejuízos de bdrs
+					(profits := self.calc_profits(profits, self.results[category_bdr_name]))):
+					# paga 15% sobre o lucro no swing trade
+					stats.taxes.value += profits * self.tax_rate.swingtrade.stock_subscription_percent
 			elif category == self.asset_model.CATEGORY_SUBSCRIPTION_FII:
-				# não tem isenção e não pode compensar com outras categorias
-				if profits := self.calc_profits(stats.profits, stats):
-					# paga 20% sobre o lucro no swing trade
-					stats.taxes.value += profits * tax_rate.swingtrade.fii_subscription_percent
+				if ((profits := self.calc_profits(stats.profits, stats)) and
+					# compensação de prejuízos de ações
+					(profits := self.calc_profits(profits, self.results[category_stock_name])) and
+					# compensação de prejuízos de bdrs
+					(profits := self.calc_profits(profits, self.results[category_bdr_name]))):
+					# paga 15% sobre o lucro no swing trade
+					stats.taxes.value += profits * self.tax_rate.swingtrade.fii_subscription_percent
 
 	def generate(self, **options) -> dict:
 		consolidation = self.report.get_opts("consolidation", None)
@@ -241,6 +252,7 @@ class StatsReport(Base):
 
 			# total de todos os períodos
 			stats.patrimony += asset.buy.total
+
 		# taxas de período
 		self.generate_taxes()
 		self.generate_residual_taxes(**self.options)
@@ -276,26 +288,6 @@ class StatsReports(Base):
 			self.results[month] = stats
 		return self.results
 
-	@staticmethod
-	def _compile_subscription(stats_categories: OrderedDict[str],
-	                          subscription_category_name: str,
-	                          category_name: str):
-		"""Junta direitos de subscrições vendidos aos ativos correspondentes.
-		ações - direitos de subscrição de ações.
-		fiis - direitos de subscrição de fiis.
-		"""
-		if (subscription_stats := stats_categories.get(subscription_category_name)) is not None:
-			try:
-				stats = stats_categories[category_name]
-				stats.update(subscription_stats)
-				stats.taxes.residual += subscription_stats.taxes.residual
-				stats.cumulative_losses += subscription_stats.cumulative_losses
-				stats.patrimony += subscription_stats.patrimony
-
-				del stats_categories[subscription_category_name]
-			except KeyError:
-				...
-
 	def compile(self) -> OrderedDict[str]:
 		"""Une os resultados de cada mês para cada categoria em um único objeto 'Stats' por categoria"""
 		stats_categories = OrderedDict()
@@ -310,14 +302,6 @@ class StatsReports(Base):
 				stats.taxes.residual = stats_category.taxes.residual
 				stats.cumulative_losses = stats_category.cumulative_losses
 				stats.patrimony = stats_category.patrimony
-		asset_model = self.report_class.asset_model
-		category_choices = asset_model.category_choices
-		self._compile_subscription(stats_categories,
-		                           category_choices[asset_model.CATEGORY_SUBSCRIPTION_STOCK],
-		                           category_choices[asset_model.CATEGORY_STOCK])
-		self._compile_subscription(stats_categories,
-		                           category_choices[asset_model.CATEGORY_SUBSCRIPTION_FII],
-		                           category_choices[asset_model.CATEGORY_FII])
 		return stats_categories
 
 	@staticmethod
