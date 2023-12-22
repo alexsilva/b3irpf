@@ -14,6 +14,11 @@ $(function () {
             });
         }
 
+    // botão que faz cópia de dados
+    $("button.copy").click(function () {
+        $(this).copyClipboard();
+    });
+
     $form.find("#position_locked").click(function () {
         var $el = $(this),
             is_checked = $el.is(":checked"),
