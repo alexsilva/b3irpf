@@ -2,9 +2,6 @@
 {% load irpf_tags %}
 
 {% block card_list_group %}
-  {% if show_interval %}
-  {% include "irpf/blocks/blocks.adminx_report_irpf_date_stats.html" %}
-  {% endif %}
   {% if stats.buy %}
     <li class="list-group-item py-2">
       <div class="row">
