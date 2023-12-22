@@ -8,7 +8,7 @@
             $el.setSelectionRange(0, 99999); // For mobile devices
             text = $el.val()
         } catch (e) {
-            text = $el.data("content")
+            text = $el.data("copytext") || $el.data("content");
         }
         // Copy the text inside the text field
         if (text) {
