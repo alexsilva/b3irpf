@@ -17,6 +17,7 @@ $(function () {
     // botão que faz cópia de dados
     $("button.copy").click(function () {
         $(this).copyClipboard();
+        $(this).popover('show');
     });
 
     $form.find("#position_locked").click(function () {
