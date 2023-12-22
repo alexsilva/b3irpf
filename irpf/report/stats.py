@@ -315,6 +315,25 @@ class StatsReports(Base):
 			stats_all.patrimony += stats.patrimony
 		return stats_all
 
+	def compile_results(self, stats_categories: OrderedDict[str]) -> tuple[Stats, Stats]:
+		asset_model = self.report_class.asset_model
+		category_choices = asset_model.category_choices
+		category_fii = [category_choices[asset_model.CATEGORY_FII]]
+		stats_all_results, stats_fii_results = Stats(), Stats()
+		for category_name in stats_categories:
+			stats_category = stats_categories[category_name]
+			if category_name in category_fii:
+				stats = stats_fii_results
+			else:
+				stats = stats_all_results
+			stats.update(stats_category)
+			stats.taxes.residual += stats_category.taxes.residual
+			stats.cumulative_losses += stats_category.cumulative_losses
+			stats.patrimony += stats_category.patrimony
+			# O prejuízo é sempre negativo, enquanto os lucro é positivo.
+			stats.taxes_results += (stats_category.losses + stats_category.profits)
+		return stats_all_results, stats_fii_results
+
 	def get_first(self) -> Stats:
 		"""Retorna o relatório do primeiro mês"""
 		return self.results[self.start_date.month]

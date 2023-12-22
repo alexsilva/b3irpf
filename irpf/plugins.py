@@ -508,7 +508,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			stats_categories = self.admin_view.stats.compile()
 			# compilas as categorias de estatística em um objeto 'Stats'
 			stats_all = self.admin_view.stats.compile_all(stats_categories)
-
+			stats_results = self.admin_view.stats.compile_results(stats_categories)
 			stats_category = collections.OrderedDict([('TODOS', stats_all)])
 
 			category_choices = self.asset_model.category_choices
@@ -520,8 +520,12 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 			if fiis := stats_categories.pop(category_fiis_name, None):
 				stats_category[category_fiis_name] = fiis
 			stats_category.update(stats_categories)
-
+			stats_category_results = collections.OrderedDict([
+				('RESULTADOS', stats_results[0]),
+				('FII OU FIAGRO', stats_results[1])
+			])
 			context['report']['stats_category'] = stats_category
+			context['report']['stats_category_results'] = stats_category_results
 			context['report']['stock_exempt_profit'] = self.admin_view.stats.tax_rate.stock_exempt_profit
 		return context
 
