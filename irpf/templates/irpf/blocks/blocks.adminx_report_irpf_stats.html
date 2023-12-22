@@ -7,6 +7,7 @@
         <div class="text-center text-sm-left text-muted">Compras do período</div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.buy }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.buy.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -17,6 +18,7 @@
         <div class="text-center text-sm-left text-muted">Vendas do período</div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.sell }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.sell.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -30,6 +32,7 @@
         </div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.profits }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.profits.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -43,6 +46,7 @@
       </div>
       <div class="text-center text-sm-right">
         <span class="text-muted">{{ stats.exempt_profit }}</span>
+        {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.exempt_profit.amount|floatformat:2 %}
       </div>
     </div>
   </li>
@@ -55,6 +59,7 @@
         </div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.losses }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.losses.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -67,6 +72,7 @@
         </div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.compensated_losses }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.compensated_losses.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -79,6 +85,7 @@
         </div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.cumulative_losses }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.cumulative_losses.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -92,6 +99,7 @@
         </div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.taxes.residual }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.taxes.residual.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -105,6 +113,7 @@
         </div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.taxes_results }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.taxes_results.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -118,6 +127,7 @@
         </div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.taxes.value }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.taxes.value.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -130,6 +140,7 @@
         </div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.bonus.value }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.bonus.value.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -140,6 +151,7 @@
         <div class="text-center text-sm-left text-muted">Taxas</div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.tax }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.tax.amount|floatformat:2 %}
         </div>
       </div>
     </li>
@@ -150,6 +162,7 @@
         <div class="text-center text-sm-left text-muted">Patrimônio investido</div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.patrimony }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.patrimony.amount|floatformat:2 %}
         </div>
       </div>
     </li>
