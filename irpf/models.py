@@ -591,6 +591,30 @@ class AssetEvent(BaseIRPFModel):
 		verbose_name_plural = verbose_name + "s"
 
 
+class AssetConvert(BaseIRPFModel):
+	"""Modelo usado na conversão de ativos.
+	Na data dado por 'date' o ativo de origem sofre conversão para o ativo de destino.
+	"""
+	origin = models.ForeignKey(Asset, on_delete=models.CASCADE,
+	                           verbose_name="Ativo (origem)",
+	                           related_name="origin")
+	target = models.ForeignKey(Asset, on_delete=models.CASCADE,
+	                           related_name="target",
+	                           verbose_name="Ativo (alvo)")
+
+	date = models.DateField(verbose_name="Data do evento")
+
+	factor_from = models.IntegerField(verbose_name="De", default=1)
+	factor_to = models.IntegerField(verbose_name="Para", default=1)
+
+	def __str__(self):
+		return
+
+	class Meta:
+		verbose_name = "Conversão de ativo"
+		verbose_name_plural = verbose_name + "s"
+
+
 class Position(BaseIRPFModel):
 	CONSOLIDATION_YEARLY = 1
 	CONSOLIDATION_MONTHLY = 2
