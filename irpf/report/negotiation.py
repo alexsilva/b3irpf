@@ -19,7 +19,11 @@ class NegotiationReport(BaseReport):
 	bonus_model = Bonus
 	bonus_info_model = BonusInfo
 
-	def get_asset(self, code: str):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.assets = {}
+
+	def get_asset(self, code: str) -> Asset:
 		"""Retorna o registro do ativo (vindo do banco de dados)"""
 		try:
 			asset = self.asset_model.objects.get(code__iexact=code)
@@ -27,16 +31,16 @@ class NegotiationReport(BaseReport):
 			asset = None
 		return asset
 
-	def get_assets(self, ticker: str, assets: dict,  instance: Asset = None, institution=None, **options):
+	def get_assets(self, ticker: str, instance: Asset = None, institution=None, **options):
 		"""Retorna o registro de asset (agrupamentos de todas as negociações)"""
 		try:
-			asset = assets[ticker]
+			asset = self.assets[ticker]
 		except KeyError:
 			asset = Assets(ticker=ticker,
 			               institution=institution,
 			               instance=(instance or self.get_asset(ticker)),
 			               **options)
-			assets[ticker] = asset
+			self.assets[ticker] = asset
 		return asset
 
 	def get_queryset(self, **options):
@@ -104,12 +108,12 @@ class NegotiationReport(BaseReport):
 			by_date.setdefault(instance.bonus.date, []).append(instance)
 		return by_date
 
-	def add_bonus(self, date, assets, **options):
+	def add_bonus(self, date, **options):
 		"""Adiciona ações bonificadas na data considerando o histórico"""
 		bonus_by_date = self.get_bonus_by_date(**options)
 		for bonus_info in bonus_by_date.get(date, ()):
 			bonus = bonus_info.bonus
-			asset = self.get_assets(bonus.asset.code, assets,
+			asset = self.get_assets(bonus.asset.code,
 			                        instance=bonus.asset,
 			                        institution=options.get('institution'))
 			# ignora os registros que já foram contabilizados na posição
@@ -148,11 +152,11 @@ class NegotiationReport(BaseReport):
 					'event': event
 				})
 
-	def registry_bonus(self, date, assets, **options):
+	def registry_bonus(self, date, **options):
 		"""Adiciona ações bonificadas na data considerando o histórico"""
 		bonus_by_date = self.get_bonus_registry_by_date(**options)
 		for bonus in bonus_by_date.get(date, ()):
-			asset = self.get_assets(bonus.asset.code, assets,
+			asset = self.get_assets(bonus.asset.code,
 			                        instance=bonus.asset,
 			                        institution=options.get('institution'))
 			# ignora os registros que já foram contabilizados na posição
@@ -227,12 +231,12 @@ class NegotiationReport(BaseReport):
 			by_date.setdefault(instance.subscription.date, []).append(instance)
 		return by_date
 
-	def add_subscription(self, date, assets, **options):
+	def add_subscription(self, date, **options):
 		"""Adiciona ativos da subscrição na data da incorporação (composição do preço médio)"""
 		subscription_by_date = self.get_subscription_by_date(**options)
 		for subscription_info in subscription_by_date.get(date, ()):
 			subscription = subscription_info.subscription
-			asset = self.get_assets(subscription.asset.code, assets,
+			asset = self.get_assets(subscription.asset.code,
 			                        instance=subscription.asset,
 			                        institution=options.get('institution'))
 			# ignora os registros que já foram contabilizados na posição
@@ -268,11 +272,11 @@ class NegotiationReport(BaseReport):
 					'event': event
 				})
 
-	def registry_subscription(self, date, assets, **options):
+	def registry_subscription(self, date, **options):
 		"""Registra subscrições na 'data com'"""
 		get_subscription_by_date = self.get_subscription_registry_by_date(**options)
 		for subscription in get_subscription_by_date.get(date, ()):
-			asset = self.get_assets(subscription.asset.code, assets,
+			asset = self.get_assets(subscription.asset.code,
 			                        instance=subscription.asset,
 			                        institution=options.get('institution'))
 			# ignora os registros que já foram contabilizados na posição
@@ -340,12 +344,12 @@ class NegotiationReport(BaseReport):
 			by_date.setdefault(instance.date, []).append(instance)
 		return by_date
 
-	def apply_events(self, date, assets, **options):
+	def apply_events(self, date, **options):
 		"""Eventos de desdobramento/grupamento"""
 		events_group_by_date = self.get_events_group_by_date(**options)
 		for instance in events_group_by_date.get(date, ()):
 			try:
-				asset = assets[instance.asset.code]
+				asset = self.assets[instance.asset.code]
 			except KeyError:
 				continue
 			# posição na data
@@ -454,11 +458,11 @@ class NegotiationReport(BaseReport):
 				# debito do frações
 				...
 
-	def apply_earnings(self, date, assets, **options):
+	def apply_earnings(self, date, **options):
 		earnings_group_by_date = self.get_earnings_group_by_date(**options)
 		for instance in earnings_group_by_date.get(date, ()):
 			try:
-				self.calc_earnings(instance, assets[instance.code])
+				self.calc_earnings(instance, self.assets[instance.code])
 			except KeyError:
 				continue
 
@@ -530,7 +534,7 @@ class NegotiationReport(BaseReport):
 		self.options.update(options)
 
 		# cache
-		assets = self.get_assets_position(date=start_date, **self.options)
+		self.assets = self.get_assets_position(date=start_date, **self.options)
 		assets_queryset = self.get_queryset(**self.options)
 
 		institution = self.options.get('institution')
@@ -538,15 +542,15 @@ class NegotiationReport(BaseReport):
 
 		for date in range_dates(start_date, end_date):  # calcula um dia por vez
 			# inclusão de bônus considera a data da incorporação
-			self.add_bonus(date, assets, **self.options)
+			self.add_bonus(date, **self.options)
 			# inclusão de subscrições na data de incorporação
-			self.add_subscription(date, assets, **self.options)
+			self.add_subscription(date, **self.options)
 
 			queryset = assets_queryset.filter(date=date)
 			for instance in queryset:
-				asset = self.get_assets(instance.code, assets,
-				                        institution=institution,
-				                        instance=instance.asset or asset_instance)
+				asset = self.get_assets(instance.code,
+				                        instance=instance.asset or asset_instance,
+				                        institution=institution)
 				# ignora os registros que já foram contabilizados na posição
 				if asset.is_position_interval(instance.date):
 					continue
@@ -554,16 +558,16 @@ class NegotiationReport(BaseReport):
 				# cálculo de compra e venda
 				self.consolidate(instance, asset)
 
-			self.apply_earnings(date, assets, **self.options)
-			self.apply_events(date, assets, **self.options)
+			self.apply_earnings(date, **self.options)
+			self.apply_events(date, **self.options)
 			# cria um registro de bônus para os ativos do dia
-			self.registry_bonus(date, assets, **self.options)
+			self.registry_bonus(date, **self.options)
 			# cria um registro de subscrição para os ativos do dia
-			self.registry_subscription(date, assets, **self.options)
+			self.registry_subscription(date, **self.options)
 
 		# limpeza de resultados anteriores
 		self.results.clear()
-		self.results.extend(assets.values())
+		self.results.extend(self.assets.values())
 		self.results.sort(key=self.results_sorted)
 		# reset cache
 		self.cache.clear()
