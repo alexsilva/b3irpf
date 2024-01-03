@@ -39,13 +39,22 @@ class NegotiationReport(BaseReport):
 			assets[ticker] = asset
 		return asset
 
-	def get_queryset(self, *args, **kwargs):
-		return self.model.objects.filter(*args, **kwargs)
+	def get_queryset(self, **options):
+		qs_options = self.get_common_qs_options(**options)
+		qs_options['date__range'] = [options['start_date'], options['end_date']]
+
+		# Permite filtrar pelo ativo
+		if asset_instance := qs_options.pop('asset', None):
+			qs_options['code__iexact'] = asset_instance.code
+		if institution := self.options.get('institution'):
+			qs_options['institution_name'] = institution.name
+
+		return self.model.objects.filter(**qs_options)
 
 	def get_common_qs_options(self, **options) -> dict:
 		qs_options = {'user': self.user}
-		if assetft := options.get('asset'):
-			qs_options['asset'] = assetft
+		if asset_instance := options.get('asset'):
+			qs_options['asset'] = asset_instance
 		if categories := options['categories']:
 			qs_options['asset__category__in'] = categories
 		return qs_options
@@ -520,17 +529,12 @@ class NegotiationReport(BaseReport):
 		self.options.setdefault('categories', ())
 		self.options.update(options)
 
-		qs_options = self.get_common_qs_options(**self.options)
-		qs_options['date__range'] = [start_date, end_date]
-
-		if assetft := qs_options.pop('asset', None):  # Permite filtrar por empresa (ativo)
-			qs_options['code__iexact'] = assetft.code
-		if institution := self.options.get('institution'):
-			qs_options['institution_name'] = institution.name
-
 		# cache
 		assets = self.get_assets_position(date=start_date, **self.options)
-		assets_queryset = self.get_queryset(**qs_options)
+		assets_queryset = self.get_queryset(**self.options)
+
+		institution = self.options.get('institution')
+		asset_instance = self.options.get('asset')
 
 		for date in range_dates(start_date, end_date):  # calcula um dia por vez
 			# inclusão de bônus considera a data da incorporação
@@ -542,7 +546,7 @@ class NegotiationReport(BaseReport):
 			for instance in queryset:
 				asset = self.get_assets(instance.code, assets,
 				                        institution=institution,
-				                        instance=instance.asset or assetft)
+				                        instance=instance.asset or asset_instance)
 				# ignora os registros que já foram contabilizados na posição
 				if asset.is_position_interval(instance.date):
 					continue
