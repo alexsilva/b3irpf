@@ -606,6 +606,9 @@ class AssetConvert(BaseIRPFModel):
 
 	factor_from = models.IntegerField(verbose_name="De", default=1)
 	factor_to = models.IntegerField(verbose_name="Para", default=1)
+	limit = models.IntegerField(verbose_name="Limite", null=True, blank=True,
+	                            help_text="Define um limite de conversão do ativo "
+	                                      "de origem (deixe vazio para todos)")
 
 	def __str__(self):
 		return
