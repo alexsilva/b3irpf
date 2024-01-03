@@ -8,7 +8,7 @@ from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from irpf import permissions
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, SubscriptionInfo, TaxRate, DayTrade, \
-	SwingTrade
+	SwingTrade, AssetConvert
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	StatsReportAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonths
 from irpf.report.earnings import EarningsReportMonth
@@ -379,6 +379,20 @@ class AssetEventAdmin(BaseIRPFAdmin):
 	asset_name.is_column = True
 	asset_name.admin_order_field = "asset__name"
 	asset_name.short_description = _get_field_opts("name", Asset).verbose_name
+
+
+@sites.register(AssetConvert)
+class AssetConvertAdmin(BaseIRPFAdmin):
+	form = ModelForm
+	model_icon = "fab fa-sith"
+	list_display = (
+		'origin',
+		'target',
+		'date',
+		'factor_from',
+		'factor_to',
+		'limit'
+	)
 
 
 @sites.register(Earnings)
