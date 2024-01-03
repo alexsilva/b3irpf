@@ -616,7 +616,7 @@ class AssetConvert(BaseIRPFModel):
 	                                      "de origem (deixe vazio para todos).")
 
 	def __str__(self):
-		return
+		return f'{self.origin.code} x {self.target.code}'
 
 	class Meta:
 		verbose_name = "Conversão de ativo"
