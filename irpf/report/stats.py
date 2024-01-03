@@ -196,7 +196,7 @@ class StatsReport(Base):
 					# paga 20% sobre o lucro no swing trade / day trade
 					stats.taxes.value += profits * self.tax_rate.swingtrade.fii_percent
 			# cálculo das taxas de subscrição
-			elif category == self.asset_model.CATEGORY_SUBSCRIPTION_STOCK:
+			elif category == self.asset_model.CATEGORY_STOCK_SUBSCRIPTION_RIGHTS:
 				if ((profits := self.calc_profits(stats.profits, stats)) and
 					# compensação de prejuízos de ações
 					(profits := self.calc_profits(profits, self.results[category_stock_name])) and
@@ -204,7 +204,7 @@ class StatsReport(Base):
 					(profits := self.calc_profits(profits, self.results[category_bdr_name]))):
 					# paga 15% sobre o lucro no swing trade
 					stats.taxes.value += profits * self.tax_rate.swingtrade.stock_subscription_percent
-			elif category == self.asset_model.CATEGORY_SUBSCRIPTION_FII:
+			elif category == self.asset_model.CATEGORY_FII_SUBSCRIPTION_RIGHTS:
 				if ((profits := self.calc_profits(stats.profits, stats)) and
 					# compensação de prejuízos de ações
 					(profits := self.calc_profits(profits, self.results[category_stock_name])) and
