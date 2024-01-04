@@ -5,7 +5,9 @@
       <button class="btn btn-link btn-block text-left text-truncate" type="button" data-toggle="collapse"
               data-target="#collapsebody-{{ forloop.counter }}"
           aria-expanded="true" aria-controls="collapsebody-{{ forloop.counter }}">
-          {{ asset.ticker }}{% if asset.instance %} - {{ asset.instance.name }} ({{ asset.instance.cnpj }}){% endif %}
+          {{ asset.ticker }}
+          {% if asset.conv %} / {{ asset.conv.0.instance.code }}{% endif %}
+          {% if asset.instance %} - {{ asset.instance.name }} ({{ asset.instance.cnpj }}){% endif %}
       </button>
       <div class="d-flex flex-row justify-content-end">
         <button type="button" class="btn btn-link btn-sm mr-1" data-toggle="popover"
