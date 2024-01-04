@@ -543,7 +543,7 @@ class NegotiationReport(BaseReport):
 		"""Retorna dados de posição para caculo do período"""
 		positions = {}
 		# usa a posição do mês anterior em cache (sempre calculada para relatório anual).
-		if assets_position := options.get('assets_position', None):
+		if assets_position := options.get('assets_position'):
 			for asset in assets_position:
 				assets = Assets(
 					ticker=asset.ticker,
