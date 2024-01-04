@@ -543,8 +543,8 @@ class NegotiationReport(BaseReport):
 		"""Retorna dados de posição para caculo do período"""
 		positions = {}
 		# usa a posição do mês anterior em cache (sempre calculada para relatório anual).
-		if report_month := self.cache.get(f'report_month[{date.month - 1}]', None):
-			for asset in report_month.get_results():
+		if assets_position := options.get('assets_position', None):
+			for asset in assets_position:
 				assets = Assets(
 					ticker=asset.ticker,
 					institution=asset.institution,
@@ -578,6 +578,7 @@ class NegotiationReport(BaseReport):
 		self.options.setdefault('start_date', start_date)
 		self.options.setdefault('end_date', end_date)
 		self.options.setdefault('consolidation', self.position_model.CONSOLIDATION_MONTHLY)
+		self.options.setdefault('assets_position', None)
 		self.options.setdefault('categories', ())
 		self.options.update(options)
 
@@ -636,12 +637,12 @@ class NegotiationReportMonth(BaseReportMonth):
 
 		for start_date, end_date in months_range:
 			report = self.report_class(self.user, self.model)
+			opts = dict(self.options, consolidation=self.report_class.position_model.CONSOLIDATION_MONTHLY)
 
 			# relatório do mês anterior (usado como posição para o mês atual)
-			last_month = start_date.month - 1
-			report.cache.set(f'report_month[{last_month}]', self.results.get(last_month))
+			if report_month := self.results.get(start_date.month - 1):
+				opts['assets_position'] = report_month.get_results()
 
-			opts = dict(self.options, consolidation=self.report_class.position_model.CONSOLIDATION_MONTHLY)
 			report.generate(start_date, end_date, **opts)
 
 			self.results[start_date.month] = report
