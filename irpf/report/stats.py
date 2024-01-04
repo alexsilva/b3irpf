@@ -108,14 +108,12 @@ class StatsReport(Base):
 		if (stats := self.results.get(category_name)) is None:
 			stats = Stats()
 			# quando os dados de prejuízo ainda não estão salvos usamos o último mês processado
-			if stats_last_month := self.cache.get(f'stats_month[{date.month - 1}]', None):
-				stats_results = stats_last_month.get_results()
-				if category_name in stats_results:
-					st: Stats = stats_results[category_name]
-					stats.cumulative_losses = st.cumulative_losses
-					stats.taxes.residual = st.taxes.residual
-					if not st.taxes.paid:
-						stats.taxes.items.update(st.taxes.items)
+			if stats_position := options.get('stats_position'):
+				if stats_category := stats_position.get(category_name):
+					stats.cumulative_losses = stats_category.cumulative_losses
+					stats.taxes.residual = stats_category.taxes.residual
+					if not stats_category.taxes.paid:
+						stats.taxes.items.update(stats_category.taxes.items)
 			else:
 				# busca dados no histórico
 				statistics: Statistic = self._get_statistics(
@@ -215,8 +213,9 @@ class StatsReport(Base):
 
 	def generate(self, **options) -> dict:
 		consolidation = self.report.get_opts("consolidation", None)
-		options.setdefault('consolidation', consolidation)
 		categories: tuple[int] = self.report.get_opts('categories', ())
+		options.setdefault('consolidation', consolidation)
+		options.setdefault('stats_position', None)
 		self.options.update(options)
 		self.results.clear()
 
@@ -281,9 +280,11 @@ class StatsReports(Base):
 			report = self.reports[month]
 			stats = self.report_class(self.user, report, self.tax_rate)
 
-			last_month = month - 1
-			stats.cache.set(f'stats_month[{last_month}]', self.results.get(last_month))
-			stats.generate(**options)
+			opts = dict(options)
+			if stats_month := self.results.get(month - 1):
+				opts['stats_position'] = stats_month.get_results()
+
+			stats.generate(**opts)
 
 			self.results[month] = stats
 		return self.results
