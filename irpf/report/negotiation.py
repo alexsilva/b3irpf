@@ -2,7 +2,8 @@ import calendar
 import datetime
 from collections import OrderedDict
 from decimal import Decimal
-from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, SubscriptionInfo
+from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, SubscriptionInfo, \
+	AssetConvert
 from irpf.report.base import BaseReport, BaseReportMonth
 from irpf.report.cache import EmptyCacheError
 from irpf.report.utils import Event, Assets, Buy, MoneyLC
@@ -11,6 +12,7 @@ from irpf.utils import range_dates
 
 class NegotiationReport(BaseReport):
 	asset_model = Asset
+	asset_convert_model = AssetConvert
 	earnings_model = Earnings
 	position_model = Position
 	event_model = AssetEvent
@@ -374,6 +376,51 @@ class NegotiationReport(BaseReport):
 				# reduz a fração valor da fração com o novo preço médio
 				asset.buy.total -= fraction * asset.buy.avg_price
 
+	def get_asset_convert_group_by_date(self, **options) -> dict:
+		"""Agrupamento de todos os registros de eventos de conversão do intervalo pela data"""
+		try:
+			return self.cache.get('asset_convert_by_date')
+		except EmptyCacheError:
+			by_date = self.cache.set('asset_convert_by_date', {})
+		related_fields = ['origin', 'target']
+		qs_options = self.get_common_qs_options(**options)
+		qs_options['date__range'] = [options['start_date'], options['end_date']]
+		if asset_instance := qs_options.pop('asset', None):
+			qs_options['target'] = asset_instance
+		if categories := qs_options.pop('asset__category__in', None):
+			qs_options['target__category__in'] = categories
+		queryset = self.asset_convert_model.objects.filter(**qs_options)
+		queryset = queryset.select_related(*related_fields)
+		for instance in queryset:
+			by_date.setdefault(instance.date, []).append(instance)
+		return by_date
+
+	def apply_asset_convert(self, date, **options):
+		"""Aplica a conversão de ativo na data"""
+		asset_convert_by_date = self.get_asset_convert_group_by_date(**options)
+		for convert in asset_convert_by_date.get(date, ()):
+			origin, target = convert.origin, convert.target
+
+			asset_origin = self.get_assets(origin.code, instance=origin,
+			                               institution=options.get('institution'))
+			asset_target = self.get_assets(target.code, instance=target,
+			                               institution=options.get('institution'))
+
+			# ignora os registros que já foram contabilizados na posição
+			if asset_target.is_position_interval(convert.date):
+				continue
+
+			# factores de conversão
+			factor_from = convert.factor_from if convert.factor_from > 0 else 1
+			factor_to = convert.factor_to if convert.factor_to > 0 else 1
+
+			asset_target.buy.quantity += int((asset_origin.buy.quantity / factor_from) / factor_to)
+			asset_target.buy.total += asset_origin.buy.total
+			asset_target.buy.tax += asset_origin.buy.tax
+
+			# o ativo deixa de existir a partir da data
+			del self.assets[convert.origin.code]
+
 	def consolidate(self, instance, asset: Assets):
 		if instance.is_buy:
 			# valores de compras
@@ -541,6 +588,7 @@ class NegotiationReport(BaseReport):
 		asset_instance = self.options.get('asset')
 
 		for date in range_dates(start_date, end_date):  # calcula um dia por vez
+			self.apply_asset_convert(date, **self.options)
 			# inclusão de bônus considera a data da incorporação
 			self.add_bonus(date, **self.options)
 			# inclusão de subscrições na data de incorporação
