@@ -609,8 +609,8 @@ class AssetConvert(BaseIRPFModel):
 
 	date = models.DateField(verbose_name="Data do evento")
 
-	factor_from = models.IntegerField(verbose_name="De", default=1)
-	factor_to = models.IntegerField(verbose_name="Para", default=1)
+	factor_from = models.IntegerField(verbose_name="De (origem)", default=1)
+	factor_to = models.IntegerField(verbose_name="Para (alvo)", default=1)
 	limit = models.IntegerField(verbose_name="Limite", null=True, blank=True,
 	                            help_text="Define um limite de conversão do ativo "
 	                                      "de origem (deixe vazio para todos).")
