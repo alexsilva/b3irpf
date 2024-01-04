@@ -410,16 +410,32 @@ class NegotiationReport(BaseReport):
 			if asset_target.is_position_interval(convert.date):
 				continue
 
+			origin_buy_avg_price = asset_origin.buy.avg_price
+			origin_buy_tax_avg_price = asset_origin.buy.avg_tax
+
+			origin_buy_quantity = asset_origin.buy.quantity
+			origin_buy_total = asset_origin.buy.total
+			origin_buy_tax = asset_origin.buy.tax
+
 			# factores de conversão
 			factor_from = convert.factor_from if convert.factor_from > 0 else 1
 			factor_to = convert.factor_to if convert.factor_to > 0 else 1
 
-			asset_target.buy.quantity += int((asset_origin.buy.quantity / factor_from) / factor_to)
-			asset_target.buy.total += asset_origin.buy.total
-			asset_target.buy.tax += asset_origin.buy.tax
+			convert_limit = convert.limit if convert.limit and 0 < convert.limit < origin_buy_quantity else 0
+
+			if convert_limit and convert_limit < origin_buy_quantity:
+				asset_origin.buy.quantity -= convert_limit
+				asset_origin.buy.total = asset_origin.buy.quantity * origin_buy_avg_price
+				origin_buy_quantity = convert_limit
+				origin_buy_total = origin_buy_quantity * origin_buy_avg_price
+				origin_buy_tax = origin_buy_quantity * origin_buy_tax_avg_price
+
+			asset_target.buy.quantity += int((origin_buy_quantity / factor_from) / factor_to)
+			asset_target.buy.total += origin_buy_total
+			asset_target.buy.tax += origin_buy_tax
 
 			# o ativo deixa de existir a partir da data
-			if (asset := self.assets.pop(convert.origin.code)) not in asset_target.conv:
+			if not convert_limit and (asset := self.assets.pop(convert.origin.code)) not in asset_target.conv:
 				asset_target.conv.insert(0, asset)
 
 	def consolidate(self, instance, asset: Assets):
