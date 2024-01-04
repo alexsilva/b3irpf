@@ -419,7 +419,8 @@ class NegotiationReport(BaseReport):
 			asset_target.buy.tax += asset_origin.buy.tax
 
 			# o ativo deixa de existir a partir da data
-			del self.assets[convert.origin.code]
+			if (asset := self.assets.pop(convert.origin.code)) not in asset_target.conv:
+				asset_target.conv.insert(0, asset)
 
 	def consolidate(self, instance, asset: Assets):
 		if instance.is_buy:

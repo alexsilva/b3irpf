@@ -273,6 +273,7 @@ class Assets:
 		self.position = position
 		self.institution = institution
 		self.instance = instance
+		self.conv = []
 
 	def is_position_interval(self, date: datetime.date):
 		"""Se a data presenta uma posição já calculada"""
