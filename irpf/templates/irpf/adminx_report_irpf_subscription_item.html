@@ -9,28 +9,24 @@
 {% block card_body %}
 <div class="card-body py-1">
   {% for subscription in asset.events.subscription %}
-    <h6 class="card-text mb-1">
-      Proporção <span class="text-muted">{{ subscription.instance.proportion|floatformat:4 }}%</span> de
-      <span class="text-muted">{{ subscription.subscription_info.from_quantity }}</span> ativos no dia {{ subscription.instance.date_com }}
-    </h6>
     <ul class="list-group list-group-flush">
       <li class="list-group-item py-2">
         <div class="row">
           <div class="col-sm-6">
             <div class="d-flex flex-row align-items-center">
               <span class="text-nowrap text-truncate text-center text-sm-left flex-fill flex-sm-grow-0">
-                {{ subscription.event.title }}
+                {{ subscription.event.title }} - {{ subscription.event.quantity|smart_desc }} recibo{{ subscription.event.quantity|pluralize }}
               </span>
               <button type="button" class="btn btn-link" data-toggle="popover" data-placement="top"
-                      data-content="{% if subscription.active %}Já incorporada à carteira{% else %}Incoporação pendente{% endif %}">
+                      data-content="{% if subscription.active %}Incorporado à carteira{% else %}Incoporação pendente{% endif %}">
                 {{ subscription.active|boolean_icon }}
               </button>
             </div>
           </div>
           <div class="col-sm-6">
             <button type="button" class="text-muted btn btn-link btn-block text-nowrap text-truncate text-center text-sm-right"  data-toggle="popover" data-placement="top"
-                    data-content="{{ subscription.event.quantity|smart_desc }} ativo{{ subscription.event.quantity|pluralize }}, {{ subscription.event.value }}">
-              {{ subscription.event.quantity|smart_desc }} de {{ subscription.subscription_info.quantity_proportional|smart_desc }} ativo{{ subscription.event.quantity|pluralize }}, {{ subscription.event.value }}
+                    data-content="{{ subscription.event.quantity|smart_desc }} recibo{{ subscription.event.quantity|pluralize }}, {{ subscription.event.value }}">
+              {{ subscription.event.value }}
             </button>
           </div>
         </div>
