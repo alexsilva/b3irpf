@@ -2,7 +2,7 @@ import calendar
 import datetime
 from collections import OrderedDict
 from decimal import Decimal
-from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, SubscriptionInfo, \
+from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, \
 	AssetConvert
 from irpf.report.base import BaseReport, BaseReportMonth
 from irpf.report.cache import EmptyCacheError
@@ -17,7 +17,6 @@ class NegotiationReport(BaseReport):
 	position_model = Position
 	event_model = AssetEvent
 	subscription_model = Subscription
-	subscription_info_model = SubscriptionInfo
 	bonus_model = Bonus
 	bonus_info_model = BonusInfo
 
@@ -202,42 +201,22 @@ class NegotiationReport(BaseReport):
 				'event': event
 			})
 
-	def get_subscription_registry_by_date(self, **options) -> dict:
+	def get_subscription_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de subscrição pela 'data com'"""
 		try:
 			return self.cache.get('subscription_registry_by_date')
 		except EmptyCacheError:
 			by_date = self.cache.set('subscription_registry_by_date', {})
 		qs_options = self.get_common_qs_options(**options)
-		qs_options['date_com__range'] = [options['start_date'], options['end_date']]
+		qs_options['date__range'] = [options['start_date'], options['end_date']]
 		for instance in self.subscription_model.objects.filter(**qs_options):
-			by_date.setdefault(instance.date_com, []).append(instance)
-		return by_date
-
-	def get_subscription_by_date(self, **options) -> dict:
-		"""Cache dos registros de subscrição pela data da incorporação"""
-		try:
-			return self.cache.get('subscription_by_date')
-		except EmptyCacheError:
-			by_date = self.cache.set('subscription_by_date', {})
-		qs_options = self.get_common_qs_options(**options)
-		qs_options['subscription__date__range'] = [options['start_date'],
-		                                           options['end_date']]
-		if assetft := qs_options.pop('asset', None):
-			qs_options['subscription__asset'] = assetft
-		if categories := qs_options.pop('asset__category__in', None):
-			qs_options['subscription__asset__category__in'] = categories
-		queryset = self.subscription_info_model.objects.filter(**qs_options)
-		queryset = queryset.select_related("subscription")
-		for instance in queryset:
-			by_date.setdefault(instance.subscription.date, []).append(instance)
+			by_date.setdefault(instance.date, []).append(instance)
 		return by_date
 
 	def add_subscription(self, date, **options):
 		"""Adiciona ativos da subscrição na data da incorporação (composição do preço médio)"""
 		subscription_by_date = self.get_subscription_by_date(**options)
-		for subscription_info in subscription_by_date.get(date, ()):
-			subscription = subscription_info.subscription
+		for subscription in subscription_by_date.get(date, ()):
 			asset = self.get_assets(subscription.asset.code,
 			                        instance=subscription.asset,
 			                        institution=options.get('institution'))
@@ -245,86 +224,35 @@ class NegotiationReport(BaseReport):
 			if asset.is_position_interval(subscription.date):
 				continue
 
-			# rebalanceando a carteira
-			if active := subscription_info.quantity > 0:
-				asset.buy.quantity += subscription_info.quantity
-				asset.buy.total += subscription_info.total
+			subscription_info = None
+			for instance in subscription.negotiation_set.all():
+				if subscription_info is None:
+					subscription_info = Assets(ticker=instance.code,
+					                           institution=options.get('institution'),
+					                           instance=(instance or self.get_asset(instance.code)))
+				self.consolidate(instance, subscription_info)
 
-			try:
-				events = asset.events['subscription']
-			except KeyError:
-				events = asset.events['subscription'] = []
-
-			_events = []
-			for event in events:
-				if event['subscription_info'] == subscription_info:
-					event['active'] = active
-					_events.append(event)
-					break
-
-			# um evento proveniente do registro já existe
-			if not _events:
-				event = Event("Valor da subscrição",
-				              quantity=subscription_info.quantity,
-				              value=subscription_info.total)
-				events.append({
-					'instance': subscription,
-					'subscription_info': subscription_info,
-					'active': active,
-					'event': event
-				})
-
-	def registry_subscription(self, date, **options):
-		"""Registra subscrições na 'data com'"""
-		get_subscription_by_date = self.get_subscription_registry_by_date(**options)
-		for subscription in get_subscription_by_date.get(date, ()):
-			asset = self.get_assets(subscription.asset.code,
-			                        instance=subscription.asset,
-			                        institution=options.get('institution'))
-			# ignora os registros que já foram contabilizados na posição
-			if asset.is_position_interval(subscription.date):
-				continue
-
-			# valor quantidade e valores recebidos de bonificação
-			quantity = asset.buy.quantity * (subscription.proportion / 100)
-			quantity_proportional = int(quantity)
-			subscription_quantity = subscription.quantity or quantity_proportional
-			# o preço médio considera as taxas aplicadas.
-			subscription_total = subscription_quantity * subscription.price
-			defaults = {
-				'from_quantity': asset.buy.quantity,
-				'from_total': asset.buy.total,
-				'quantity_proportional': quantity_proportional,
-				'quantity': subscription_quantity,
-				'total': subscription_total,
-				'user': self.user
-			}
-			subscription_info, created = self.subscription_info_model.objects.get_or_create(
-				subscription=subscription,
-				defaults=defaults
-			)
-			if created:
-				# necessário remover o cache para incluir o novo registro
-				self.cache.remove('subscription_by_date')
-			# atualiza os dados sempre que necessário
-			elif self._update_defaults(subscription_info, defaults):
-				# necessário remover o cache para atualizar o registro existente
-				self.cache.remove('subscription_by_date')
-
-			if subscription_quantity > 0:
+			if subscription_info and subscription_info.buy.quantity > 0:
+				# rebalanceando a carteira
+				asset.buy.quantity += subscription_info.buy.quantity
+				asset.buy.total += subscription_info.buy.total
+				# o ativo deixar se existir porque foi incorporado
+				if subscription_asset := self.assets.get(subscription_info.ticker):
+					# zera o histórico de compras
+					subscription_asset.buy = Buy()
 				try:
 					events = asset.events['subscription']
 				except KeyError:
 					events = asset.events['subscription'] = []
 
-				event = Event("Valor da subscrição",
-				              quantity=subscription_quantity,
-				              value=subscription_total)
+				event = Event("Subscrição",
+				              quantity=subscription_info.buy.quantity,
+				              value=subscription_info.buy.total)
 				events.append({
 					'subscription_info': subscription_info,
 					'instance': subscription,
-					'active': False,
-					'event': event
+					'active': True,
+					'event': event,
 				})
 
 	def get_events_group_by_date(self, **options) -> dict:
@@ -628,8 +556,6 @@ class NegotiationReport(BaseReport):
 			self.apply_events(date, **self.options)
 			# cria um registro de bônus para os ativos do dia
 			self.registry_bonus(date, **self.options)
-			# cria um registro de subscrição para os ativos do dia
-			self.registry_subscription(date, **self.options)
 
 		# limpeza de resultados anteriores
 		self.results.clear()
@@ -678,6 +604,6 @@ class NegotiationReportMonth(BaseReportMonth):
 					               position=_asset.position,
 					               instance=_asset.instance)
 					assets[_asset.ticker] = asset
-				asset.buy = _asset.buy
 				asset.update(_asset)
+				asset.buy = _asset.buy
 		return sorted(assets.values(), key=self.report_class.results_sorted)
