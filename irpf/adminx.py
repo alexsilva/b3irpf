@@ -7,7 +7,7 @@ from django.forms import ModelForm
 from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from irpf import permissions
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
-	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, SubscriptionInfo, TaxRate, DayTrade, \
+	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, TaxRate, DayTrade, \
 	SwingTrade, AssetConvert
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
 	StatsReportAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonths
@@ -319,16 +319,10 @@ class BonusAdmin(BaseIRPFAdmin):
 		view.inlines_options = value
 
 
-class SubscriptionInfoInline(BaseHorizontalInline):
-	"""Inline dos modelos [Subscription]"""
-	form = MoneyModelForm
-	model = SubscriptionInfo
-	style = "one"
-
-
 @sites.register(Subscription)
 class SubscriptionAdmin(BaseIRPFAdmin):
-	inlines_options = []
+	inlines = [NegotiationInline]
+	form = ModelForm
 	search_fields = (
 		'asset__code',
 		'asset__name'
@@ -336,28 +330,8 @@ class SubscriptionAdmin(BaseIRPFAdmin):
 	list_filter = ("date", "asset")
 	list_display = (
 		'asset',
-		'price',
-		'proportion',
-		'date_com',
 		'date'
 	)
-
-	@property
-	def inlines(self):
-		view = getattr(self, "admin_view", self)
-		inlines = list(view.inlines_options)
-		subscription_info_inline = SubscriptionInfoInline
-		try:
-			if view.org_obj and view.org_obj.subscriptioninfo:
-				inlines.append(subscription_info_inline)
-		except subscription_info_inline.model.DoesNotExist:
-			...
-		return inlines
-
-	@inlines.setter
-	def inlines(self, value):
-		view = getattr(self, "admin_view", self)
-		view.inlines_options = value
 
 
 @sites.register(AssetEvent)
