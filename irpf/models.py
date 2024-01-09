@@ -239,6 +239,11 @@ class Negotiation(ImportModelMixin, BaseIRPFModel):
 	                                   verbose_name="Notas",
 	                                   null=True,
 	                                   editable=False)
+	subscription = models.ForeignKey("Subscription",
+	                                 on_delete=models.SET_NULL,
+	                                 verbose_name="Subscrição",
+	                                 null=True,
+	                                 editable=False)
 
 	# relates the name of the headers with the fields.
 	date.sheet_header = "Data do Negócio"
@@ -357,74 +362,23 @@ class Subscription(BaseIRPFModel):
 	sua participação no ativo geralmente em uma condição de preço melhor do que a
 	observada no mercado (secundário).
 	"""
-	asset = models.ForeignKey(Asset, on_delete=models.CASCADE,
-	                          verbose_name="Ativo",
-	                          null=False)
-
-	date_com = DateField(verbose_name="Data com", null=True, blank=False)
-	date_ex = DateField(verbose_name="Data ex", null=True, blank=False)
+	asset = models.ForeignKey(Asset, on_delete=models.CASCADE, verbose_name="Ativo")
 	date = DateField(verbose_name="Data de incorporação", blank=True, null=True)
-
-	quantity = models.DecimalField(verbose_name="Quantidade", max_digits=19, decimal_places=0,
-	                               help_text="Quantidade efetivamente subscrita "
-	                                         "(deixe vazio para incluir todos os direitos)",
-	                               null=True, blank=True)
-	price = MoneyField(verbose_name="Preço (unitário)",
-	                   max_digits=DECIMAL_MAX_DIGITS,
-	                   decimal_places=DECIMAL_PLACES)
-	proportion = models.DecimalField(verbose_name="Proporção",
-	                                 max_digits=15,
-	                                 decimal_places=12,
-	                                 default=Decimal(0),
-	                                 help_text="valor expresso em porcentagem.")
 
 	notice = models.FileField(verbose_name='Arquivo de anúncio',
 	                          upload_to='subscription/notice',
-	                          storage=FileSystemOverwriteStorage(),
 	                          null=True, blank=True)
 
 	class Meta:
 		verbose_name = "Subscrição"
 		verbose_name_plural = "Subscrições"
-		ordering = ("date", "date_com")
+		ordering = ("date",)
 		indexes = [
 			models.Index(fields=['-date'])
 		]
 
 	def __str__(self):
-		return f"{self.asset} / {self.price} {self.proportion}%"
-
-
-class SubscriptionInfo(BaseIRPFModel):
-	"""Modelo usado para guardar a posição histórica do ativo e rebalancear a
-	carteira quando a data de incorporação for calculada no relatório.
-	"""
-	subscription = models.OneToOneField(Subscription, on_delete=models.CASCADE)
-	from_quantity = models.DecimalField(verbose_name="Ativos",
-	                                    max_digits=19,
-	                                    decimal_places=0)
-	from_total = MoneyField(verbose_name="Valor dos ativos",
-	                        max_digits=DECIMAL_MAX_DIGITS,
-	                        decimal_places=DECIMAL_PLACES,
-	                        amount_default=Decimal(0))
-	quantity = models.DecimalField(verbose_name="Quantidade (subscritas)",
-	                               max_digits=DECIMAL_MAX_DIGITS,
-	                               decimal_places=DECIMAL_PLACES)
-	quantity_proportional = models.DecimalField(verbose_name="Quantidade (direitos)",
-	                                            max_digits=DECIMAL_MAX_DIGITS,
-	                                            decimal_places=DECIMAL_PLACES,
-	                                            default=Decimal(0))
-	total = MoneyField(verbose_name="Valor da subscrição",
-	                   max_digits=DECIMAL_MAX_DIGITS,
-	                   decimal_places=DECIMAL_PLACES,
-	                   amount_default=Decimal(0))
-
-	def __str__(self):
-		return str(self.subscription)
-
-	class Meta:
-		verbose_name = "Resultado da subscrição"
-		verbose_name_plural = verbose_name
+		return f"{self.asset}"
 
 
 class Earnings(ImportModelMixin, BaseIRPFModel):
