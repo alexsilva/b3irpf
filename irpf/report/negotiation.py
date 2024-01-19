@@ -242,7 +242,7 @@ class NegotiationReport(BaseReport):
 					# o ativo deixar se existir porque foi incorporado
 					if _subscription_asset := self.assets.get(subscription_asset.ticker):
 						# zera o histórico de compras
-						_subscription_asset.buy = Buy()
+						_subscription_asset.empty()
 					try:
 						events = asset.events['subscription']
 					except KeyError:
