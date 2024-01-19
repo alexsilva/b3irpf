@@ -224,36 +224,39 @@ class NegotiationReport(BaseReport):
 			if asset.is_position_interval(subscription.date):
 				continue
 
-			subscription_info = None
-			for instance in subscription.negotiation_set.all():
-				if subscription_info is None:
-					subscription_info = Assets(ticker=instance.code,
-					                           institution=options.get('institution'),
-					                           instance=(instance or self.get_asset(instance.code)))
-				self.consolidate(instance, subscription_info)
+			subscription_assets = OrderedDict()
+			for instance in subscription.negotiation_set.all().order_by('date'):
+				if (subscription_asset := subscription_assets.get(instance.code)) is None:
+					subscription_asset = Assets(ticker=instance.code,
+					                            institution=options.get('institution'),
+					                            instance=(instance or self.get_asset(instance.code)))
+					subscription_assets[instance.code] = subscription_asset
 
-			if subscription_info and subscription_info.buy.quantity > 0:
-				# rebalanceando a carteira
-				asset.buy.quantity += subscription_info.buy.quantity
-				asset.buy.total += subscription_info.buy.total
-				# o ativo deixar se existir porque foi incorporado
-				if subscription_asset := self.assets.get(subscription_info.ticker):
-					# zera o histórico de compras
-					subscription_asset.buy = Buy()
-				try:
-					events = asset.events['subscription']
-				except KeyError:
-					events = asset.events['subscription'] = []
+				self.consolidate(instance, subscription_asset)
 
-				event = Event("Subscrição",
-				              quantity=subscription_info.buy.quantity,
-				              value=subscription_info.buy.total)
-				events.append({
-					'subscription_info': subscription_info,
-					'instance': subscription,
-					'active': True,
-					'event': event,
-				})
+			for subscription_asset in subscription_assets.values():
+				if subscription_asset.buy.quantity > 0:
+					# rebalanceando a carteira
+					asset.buy.quantity += subscription_asset.buy.quantity
+					asset.buy.total += subscription_asset.buy.total
+					# o ativo deixar se existir porque foi incorporado
+					if _subscription_asset := self.assets.get(subscription_asset.ticker):
+						# zera o histórico de compras
+						_subscription_asset.buy = Buy()
+					try:
+						events = asset.events['subscription']
+					except KeyError:
+						events = asset.events['subscription'] = []
+
+					event = Event("Subscrição",
+					              quantity=subscription_asset.buy.quantity,
+					              value=subscription_asset.buy.total)
+					events.append({
+						'subscription_asset': subscription_asset,
+						'instance': subscription,
+						'active': True,
+						'event': event,
+					})
 
 	def get_events_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de eventos no intervalo pela data"""
