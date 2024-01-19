@@ -311,6 +311,12 @@ class Assets:
 		            self.events or self.bonus or
 		            self.items)
 
+	def empty(self):
+		"""Zera dados de negociações (controle sobre bool)"""
+		self.position = None
+		self.items = []
+		self.buy = Buy()
+
 	def __deepcopy__(self, memo):
 		memo[id(self)] = cpy = type(self)(
 			ticker=self.ticker,
