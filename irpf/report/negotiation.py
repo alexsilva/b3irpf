@@ -232,6 +232,7 @@ class NegotiationReport(BaseReport):
 					                            instance=(instance or self.get_asset(instance.code)))
 					subscription_assets[instance.code] = subscription_asset
 
+				subscription_asset.items.append(instance)
 				self.consolidate(instance, subscription_asset)
 
 			for subscription_asset in subscription_assets.values():
@@ -239,6 +240,7 @@ class NegotiationReport(BaseReport):
 					# rebalanceando a carteira
 					asset.buy.quantity += subscription_asset.buy.quantity
 					asset.buy.total += subscription_asset.buy.total
+					asset.items.extend(subscription_asset.items)
 					# o ativo deixar se existir porque foi incorporado
 					if _subscription_asset := self.assets.get(subscription_asset.ticker):
 						# zera o histórico de compras
