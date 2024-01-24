@@ -16,7 +16,7 @@ from irpf.report.negotiation import NegotiationReportMonth
 from irpf.themes import themes
 from irpf.utils import MonthYearDates
 from irpf.views.import_list import AdminImportListModelView
-from irpf.views.report_irpf import AdminReportIrpfModelView
+from irpf.views.report_irpf import ReportIRPFFAdminView
 from irpf.views.xlsx_viewer import AdminXlsxViewer
 from irpf.widgets import MonthYearField, MonthYearWidget
 from moneyfield import MoneyModelForm
@@ -24,16 +24,16 @@ from xadmin import sites, site
 from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
 
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
-site.register_view("^irpf/report/(?P<model_app_label>.+)/$", AdminReportIrpfModelView, "reportirpf")
+site.register_view("^irpf/report/(?P<model_app_label>.+)/$", ReportIRPFFAdminView, "reportirpf")
 site.register_view("^irpf/xlsx/viewer", AdminXlsxViewer, "xlsx_viewer")
 
 site.register_plugin(ListActionModelPlugin, ListAdminView)
 site.register_plugin(GuardianAdminPlugin, ListAdminView)
 site.register_plugin(GuardianAdminPlugin, ModelFormAdminView)
 site.register_plugin(AssignUserAdminPlugin, ModelFormAdminView)
-site.register_plugin(SaveReportPositionPlugin, AdminReportIrpfModelView)
-site.register_plugin(StatsReportAdminPlugin, AdminReportIrpfModelView)
-site.register_plugin(BreadcrumbMonths, AdminReportIrpfModelView)
+site.register_plugin(SaveReportPositionPlugin, ReportIRPFFAdminView)
+site.register_plugin(StatsReportAdminPlugin, ReportIRPFFAdminView)
+site.register_plugin(BreadcrumbMonths, ReportIRPFFAdminView)
 site.register_plugin(BrokerageNoteAdminPlugin, ModelFormAdminView)
 
 
@@ -41,7 +41,7 @@ def _get_field_opts(name, model):
 	return model._meta.get_field(name)
 
 
-@sites.register(AdminReportIrpfModelView)
+@sites.register(ReportIRPFFAdminView)
 class AdminReportIrpfModelViewOptions:
 	# Configuração de permissão para cada model (as mesmas usadas no setup_permission)
 	# Utilizadas para configurar permissões de objeto

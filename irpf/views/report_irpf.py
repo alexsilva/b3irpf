@@ -51,7 +51,7 @@ class ReportIRPFForm(django_forms.Form):
 	                               required=False)
 
 
-class AdminReportIrpfModelView(AdminFormView):
+class ReportIRPFFAdminView(AdminFormView):
 	"""View that produces the report with data consolidation (average cost, sum of earnings, etc)."""
 	template_name = "irpf/adminx_report_irpf_view.html"
 	form_class = ReportIRPFForm
