@@ -371,6 +371,7 @@ class Subscription(BaseIRPFModel):
 	observada no mercado (secundário).
 	"""
 	asset = models.ForeignKey(Asset, on_delete=models.CASCADE, verbose_name="Ativo")
+	created = DateField(verbose_name="Data de registro", default=timezone.now)
 	date = DateField(verbose_name="Data de incorporação", blank=True, null=True)
 
 	notice = models.FileField(verbose_name='Arquivo de anúncio',
@@ -380,7 +381,7 @@ class Subscription(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Subscrição"
 		verbose_name_plural = "Subscrições"
-		ordering = ("date",)
+		ordering = ("date", "-created")
 		indexes = [
 			models.Index(fields=['-date'])
 		]
