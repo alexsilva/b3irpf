@@ -363,7 +363,7 @@ class NegotiationReport(BaseReport):
 				origin_buy_total = origin_buy_quantity * origin_buy_avg_price
 				origin_buy_tax = origin_buy_quantity * origin_buy_tax_avg_price
 
-			asset_target.buy.quantity += int((origin_buy_quantity / factor_from) / factor_to)
+			asset_target.buy.quantity += int((origin_buy_quantity / factor_from) * factor_to)
 			asset_target.buy.total += origin_buy_total
 			asset_target.buy.tax += origin_buy_tax
 
