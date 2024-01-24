@@ -122,6 +122,14 @@ class Asset(models.Model):
 	def is_bdr(self) -> bool:
 		return self.category == self.CATEGORY_BDR
 
+	@property
+	def is_subscription(self) -> bool:
+		"""Se é um recibo de subscrição"""
+		return self.category in (
+			self.CATEGORY_STOCK_SUBSCRIPTION,
+			self.CATEGORY_FII_SUBSCRIPTION
+		)
+
 	def __str__(self):
 		return f"{self.code} - {self.name}"
 
