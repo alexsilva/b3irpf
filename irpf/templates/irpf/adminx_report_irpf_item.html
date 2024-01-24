@@ -17,6 +17,7 @@
             {% if asset.instance.is_fii %}cota{{ asset.buy.quantity|pluralize:"s" }}
             {% elif asset.instance.is_stock %}ações
             {% elif asset.instance.is_bdr %}bdr{{ asset.buy.quantity|pluralize:"s" }}
+            {% elif asset.instance.is_subscription %}recibo{{ asset.buy.quantity|pluralize:"s"}}
             {% endif %}
             {{ asset.ticker }} // {{ asset.instance.name }} - {{ asset.instance.cnpj }}
             {% if asset.instance.administrator %} // Administrador: {{ asset.instance.administrator.name }} - {{ asset.instance.administrator.cnpj }}{% endif %}
