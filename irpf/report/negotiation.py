@@ -332,12 +332,14 @@ class NegotiationReport(BaseReport):
 		"""Aplica a conversão de ativo na data"""
 		asset_convert_by_date = self.get_asset_convert_group_by_date(**options)
 		for convert in asset_convert_by_date.get(date, ()):
+			institution = options.get('institution')
+
 			origin, target = convert.origin, convert.target
 
 			asset_origin = self.get_assets(origin.code, instance=origin,
-			                               institution=options.get('institution'))
+			                               institution=institution)
 			asset_target = self.get_assets(target.code, instance=target,
-			                               institution=options.get('institution'))
+			                               institution=institution)
 
 			# ignora os registros que já foram contabilizados na posição
 			if asset_target.is_position_interval(convert.date):
