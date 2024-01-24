@@ -15,7 +15,7 @@
           <div class="col-sm-6">
             <div class="d-flex flex-row align-items-center">
               <span class="text-nowrap text-truncate text-center text-sm-left flex-fill flex-sm-grow-0">
-                {{ subscription.event.title }} - {{ subscription.event.quantity|smart_desc }} recibo{{ subscription.event.quantity|pluralize }} {{ subscription.subscription_asset.ticker }}
+                {{ subscription.event.quantity|smart_desc }} recibo{{ subscription.event.quantity|pluralize }} {{ subscription.subscription_asset.ticker }}
               </span>
               <button type="button" class="btn btn-link" data-toggle="popover" data-placement="top"
                       data-content="{% if subscription.active %}Incorporado à carteira{% else %}Incoporação pendente{% endif %}">
