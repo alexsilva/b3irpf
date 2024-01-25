@@ -42,7 +42,7 @@ def _get_field_opts(name, model):
 
 
 @sites.register(ReportIRPFFAdminView)
-class AdminReportIrpfModelViewOptions:
+class ReportIRPFFAdminViewOptions:
 	# Configuração de permissão para cada model (as mesmas usadas no setup_permission)
 	# Utilizadas para configurar permissões de objeto
 	guardian_permissions_models = permissions.permission_models
