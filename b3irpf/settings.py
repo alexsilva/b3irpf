@@ -48,8 +48,11 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
+# verão do projeto
+IRPF_VERSION = '1.0.0'
+
 XADMIN_TITLE = "B3 - IRPF"
-XADMIN_FOOTER_TITLE = 'irpf'
+XADMIN_FOOTER_TITLE = f'irpf - v{IRPF_VERSION}'
 
 XADMIN_DEFAULT_GROUP = 'investor'
 
