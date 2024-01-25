@@ -9,8 +9,8 @@ from irpf import permissions
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, TaxRate, DayTrade, \
 	SwingTrade, AssetConvert
-from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, SaveReportPositionPlugin, \
-	StatsReportAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonths
+from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, ReportSavePositionAdminPlugin, \
+	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonthsAdminPlugin
 from irpf.report.earnings import EarningsReportMonth
 from irpf.report.negotiation import NegotiationReportMonth
 from irpf.themes import themes
@@ -31,9 +31,9 @@ site.register_plugin(ListActionModelPlugin, ListAdminView)
 site.register_plugin(GuardianAdminPlugin, ListAdminView)
 site.register_plugin(GuardianAdminPlugin, ModelFormAdminView)
 site.register_plugin(AssignUserAdminPlugin, ModelFormAdminView)
-site.register_plugin(SaveReportPositionPlugin, ReportIRPFFAdminView)
-site.register_plugin(StatsReportAdminPlugin, ReportIRPFFAdminView)
-site.register_plugin(BreadcrumbMonths, ReportIRPFFAdminView)
+site.register_plugin(ReportSavePositionAdminPlugin, ReportIRPFFAdminView)
+site.register_plugin(ReportStatsAdminPlugin, ReportIRPFFAdminView)
+site.register_plugin(BreadcrumbMonthsAdminPlugin, ReportIRPFFAdminView)
 site.register_plugin(BrokerageNoteAdminPlugin, ModelFormAdminView)
 
 

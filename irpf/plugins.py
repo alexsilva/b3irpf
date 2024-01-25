@@ -186,7 +186,7 @@ class ReportBaseAdminPlugin(GuardianAdminPluginMixin):
 		...
 
 
-class SaveReportPositionPlugin(ReportBaseAdminPlugin):
+class ReportSavePositionAdminPlugin(ReportBaseAdminPlugin):
 	"""Salva os dados de posição do relatório"""
 	position_model = Position
 
@@ -416,7 +416,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 				self._parser_file(parser, instance)
 
 
-class StatsReportAdminPlugin(ReportBaseAdminPlugin):
+class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 	"""Gera dados estatísticos (compra, venda, etc)"""
 	stats_reports_class = StatsReports
 	statistic_model = Statistic
@@ -540,7 +540,7 @@ class StatsReportAdminPlugin(ReportBaseAdminPlugin):
 		                        context=context)
 
 
-class BreadcrumbMonths(BaseAdminPlugin):
+class BreadcrumbMonthsAdminPlugin(BaseAdminPlugin):
 	"""Plugin gera um breadcrumb com meses de posição de total de ativos"""
 	report_for_model = Negotiation
 	position_model = Position
