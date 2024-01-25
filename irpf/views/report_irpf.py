@@ -114,13 +114,22 @@ class ReportIRPFFAdminView(AdminFormView):
 			if consolidation == Position.CONSOLIDATION_YEARLY:
 				dates = MonthYearDates(dates.month, dates.year + 1)
 			elif consolidation == Position.CONSOLIDATION_MONTHLY:
-				dates = MonthYearDates(dates.month + 1 if dates.month < 12 else 12, dates.year)
+				dates = MonthYearDates(dates.month, dates.year)
+				if dates.month < 12:
+					dates.month += 1
+				else:
+					dates.month = 1
+					dates.year += 1
 		elif _dates == "prev":
 			if consolidation == Position.CONSOLIDATION_YEARLY:
 				dates = MonthYearDates(dates.month, dates.year - 1)
 			elif consolidation == Position.CONSOLIDATION_MONTHLY:
-				dates = MonthYearDates(dates.month - 1 if dates.month > 1 else 1, dates.year)
-
+				dates = MonthYearDates(dates.month, dates.year)
+				if dates.month > 1:
+					dates.month -= 1
+				else:
+					dates.month = 12
+					dates.year -= 1
 		if consolidation == Position.CONSOLIDATION_YEARLY:
 			months = dates.get_year_month_range(now)
 		elif consolidation == Position.CONSOLIDATION_MONTHLY:
