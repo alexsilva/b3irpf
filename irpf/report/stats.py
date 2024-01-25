@@ -46,23 +46,6 @@ class StatsReport(Base):
 			instance = None
 		return instance
 
-	def _get_statistics_month(self, date: datetime.date, category: int, **options):
-		qs_options = dict(
-			consolidation=Statistic.CONSOLIDATION_MONTHLY,
-			category=category,
-			user=self.user
-		)
-		max_day = calendar.monthrange(date.year, date.month)[1]
-		qs_options['date'] = datetime.date(date.year, date.month, max_day)
-
-		if institution := options.get('institution'):
-			qs_options['institution'] = institution
-		try:
-			instance = self.statistic_model.objects.get(**qs_options)
-		except self.statistic_model.DoesNotExist:
-			instance = None
-		return instance
-
 	def generate_residual_taxes(self, **options):
 		"""Atualiza impostos residuais (aqueles abaixo de R$ 10,00 que devem ser pagos posteriormente)
 		"""
