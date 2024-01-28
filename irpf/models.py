@@ -17,6 +17,17 @@ DECIMAL_MAX_DIGITS = 28
 DECIMAL_PLACES = 16
 
 
+class ProjectMigration(models.Model):
+	version = models.TextField(max_length=32)
+
+	class Meta:
+		indexes = [models.Index(fields=['version'])]
+		verbose_name = "Migração de dados"
+
+	def __str__(self):
+		return self.version
+
+
 class Bookkeeping(models.Model):
 	name = models.CharField(verbose_name="Nome", max_length=512)
 	cnpj = models.CharField(verbose_name="CNPJ", max_length=32,
