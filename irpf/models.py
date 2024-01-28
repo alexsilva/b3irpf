@@ -479,7 +479,9 @@ class BrokerageNote(BaseIRPFModel):
 	                                on_delete=models.CASCADE,
 	                                verbose_name="Corretora",
 	                                help_text="A corretora que gerou essa nota.")
-	reference_date = models.DateField(verbose_name="Data do pregão", null=True)
+	reference_id = models.DateField(verbose_name="Número da nota", null=True)
+	reference_date = models.DateField(verbose_name="Data do pregão")
+
 	settlement_fee = MoneyField(verbose_name="Taxa de liquidação",
 	                            max_digits=DECIMAL_MAX_DIGITS,
 	                            decimal_places=2)
