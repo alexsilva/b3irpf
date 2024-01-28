@@ -226,12 +226,19 @@ class NegotiationInline(BaseHorizontalInline):
 class BrokerageNoteAdmin(BaseIRPFAdmin):
 	model_icon = "fa fa-book"
 	fields = ('note', 'institution')
-	list_display = ('note', 'institution', 'reference_date', 'negotiation_count')
+	list_display = (
+		'reference_id',
+		'note',
+		'institution',
+		'reference_date',
+		'negotiation_count'
+	)
 	brokerage_note_parsers = {
 		# NU INVEST CORRETORA DE VALORES S.A.
 		'62169875000179': NunInvestParser
 	}
 	brokerage_note_field_update = [
+		'reference_id',
 		'reference_date',
 		'settlement_fee',
 		'registration_fee',
