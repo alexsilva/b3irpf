@@ -166,7 +166,7 @@ class Institution(models.Model):
 
 	@cached_property
 	def cnpj_nums(self):
-		return re.search('([0-9]+)', self.cnpj).group(1)
+		return ''.join(re.findall('([0-9]+)', self.cnpj))
 
 	class Meta:
 		verbose_name = "Corretora"
