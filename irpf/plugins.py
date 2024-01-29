@@ -7,6 +7,8 @@ import itertools
 import re
 
 import django.forms as django_forms
+
+from correpy.domain.entities.brokerage_note import BrokerageNote
 from correpy.domain.entities.security import Security
 from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import TransactionType
@@ -287,15 +289,16 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		return value
 
 	@atomic
-	def _parser_file(self, parser, instance):
-		with instance.note.file as fp:
-			parser = parser(brokerage_note=io.BytesIO(fp.read()))
-			for note in parser.parse_brokerage_note():
-				for field_name in self.brokerage_note_field_update:
-					setattr(instance, field_name, getattr(note, field_name))
-
-				instance.save()
-				self._add_transactions(note, instance)
+	def _parser_and_update(self, parser, instance) -> list[BrokerageNote]:
+		"""Atualiza a instância com os dados da nota"""
+		notes = []
+		parser = parser(brokerage_note=io.BytesIO(instance.note.file.read()))
+		for note in parser.parse_brokerage_note():
+			for field_name in self.brokerage_note_field_update:
+				setattr(instance, field_name, getattr(note, field_name))
+			notes.append(note)
+		instance.note.file.seek(0)
+		return notes
 
 	def get_asset(self, ticker: str):
 		"""O ativo"""
@@ -404,14 +407,24 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 					negotiation.brokerage_note = instance
 					negotiation.save()
 
-	def save_models(self):
-		instance = getattr(self.admin_view, "new_obj", None)
-		if instance and instance.pk:
+	def save_models(self, __):
+		if instance := getattr(self.admin_view, "new_obj", None):
 			try:
 				parser = self.brokerage_note_parsers[instance.institution.cnpj_nums]
 			except KeyError:
 				parser = B3Parser
-			self._parser_file(parser, instance)
+			try:
+				brokerage_notes = self._parser_and_update(parser, instance)
+			except Exception as exc:
+				raise exc from None
+			else:
+				# salva a instância
+				retval = __()
+				for note in brokerage_notes:
+					self._add_transactions(note, instance)
+				return retval
+		else:
+			return __()
 
 
 class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
