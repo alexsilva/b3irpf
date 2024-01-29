@@ -407,13 +407,11 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 	def save_models(self):
 		instance = getattr(self.admin_view, "new_obj", None)
 		if instance and instance.pk:
-			if parts := re.findall('([0-9]+)', instance.institution.cnpj):
-				cnpj = ''.join(parts)
-				try:
-					parser = self.brokerage_note_parsers[cnpj]
-				except KeyError:
-					parser = B3Parser
-				self._parser_file(parser, instance)
+			try:
+				parser = self.brokerage_note_parsers[instance.institution.cnpj_nums]
+			except KeyError:
+				parser = B3Parser
+			self._parser_file(parser, instance)
 
 
 class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
