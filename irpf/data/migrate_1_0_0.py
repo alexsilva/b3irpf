@@ -1,5 +1,5 @@
 import sys
-
+import io
 from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from irpf.models import BrokerageNote
@@ -21,11 +21,17 @@ def init(migration):
 			b3parser = B3Parser
 		try:
 			print(f"Extraindo dados da nota '{brokerage_note.note.name}'...")
-			parser = b3parser(brokerage_note=brokerage_note.note.read())
-			for note in parser.parse_brokerage_note():
-				brokerage_note.reference_id = note.reference_id
-			print("atualizando...")
-			brokerage_note.save()
+			with brokerage_note.note.file as note_file:
+				parser = b3parser(brokerage_note=io.BytesIO(note_file.read()))
+				has_changed = False
+				for note in parser.parse_brokerage_note():
+					brokerage_note.reference_id = note.reference_id
+					if brokerage_note.reference_id:
+						has_changed = True
+						break
+				if has_changed:
+					print("atualizando...")
+					brokerage_note.save()
 		except FileNotFoundError as exc:
 			print(f"Falha na leitura do arquivo '{brokerage_note.note.name}'", file=sys.stderr)
 			raise exc from None
