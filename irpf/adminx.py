@@ -233,6 +233,11 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 		'reference_date',
 		'negotiation_count'
 	)
+	list_filter = (
+		'reference_id',
+		'institution',
+		'reference_date'
+	)
 	brokerage_note_parsers = {
 		# NU INVEST CORRETORA DE VALORES S.A.
 		'62169875000179': NunInvestParser
