@@ -1,5 +1,6 @@
 import datetime
 import decimal
+import re
 from collections import defaultdict
 from decimal import Decimal
 
@@ -18,14 +19,14 @@ DECIMAL_PLACES = 16
 
 
 class ProjectMigration(models.Model):
-	version = models.TextField(max_length=32)
+	version = models.CharField(max_length=32)
 
 	class Meta:
 		indexes = [models.Index(fields=['version'])]
 		verbose_name = "Migração de dados"
 
 	def __str__(self):
-		return self.version
+		return f"v{self.version}"
 
 
 class Bookkeeping(models.Model):
@@ -162,6 +163,10 @@ class Institution(models.Model):
 
 	def __str__(self):
 		return f"{self.name[:2].upper()} - {self.cnpj}"
+
+	@cached_property
+	def cnpj_nums(self):
+		return re.search('([0-9]+)', self.cnpj).group(1)
 
 	class Meta:
 		verbose_name = "Corretora"
