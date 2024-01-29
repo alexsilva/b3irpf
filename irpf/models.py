@@ -259,12 +259,12 @@ class Negotiation(ImportModelMixin, BaseIRPFModel):
 	                  help_text="Imposto que pode ter sido retido na fonte")
 
 	brokerage_note = models.ForeignKey("BrokerageNote",
-	                                   on_delete=models.SET_NULL,
+	                                   on_delete=models.CASCADE,
 	                                   verbose_name="Notas",
 	                                   null=True,
 	                                   editable=False)
 	subscription = models.ForeignKey("Subscription",
-	                                 on_delete=models.SET_NULL,
+	                                 on_delete=models.CASCADE,
 	                                 verbose_name="Subscrição",
 	                                 null=True,
 	                                 editable=False)
