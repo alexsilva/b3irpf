@@ -295,7 +295,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 					setattr(instance, field_name, getattr(note, field_name))
 
 				instance.save()
-				self._add_transations(note, instance)
+				self._add_transactions(note, instance)
 
 	def get_asset(self, ticker: str):
 		"""O ativo"""
@@ -305,7 +305,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 			asset = None
 		return asset
 
-	def _save_trasaction(self, transaction: Transaction, instance, **options) -> Negotiation:
+	def _save_transaction(self, transaction: Transaction, instance, **options) -> Negotiation:
 		"""Cria uma nova 'transaction' com os dados da nota"""
 		ticker = options['code']
 		options.update(
@@ -338,7 +338,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		"""Retornao ticker (code) simplificado"""
 		return CharCodeField().to_python(asset.security.ticker)
 
-	def _get_transations_group(self, note_transactions) -> collections.OrderedDict:
+	def _get_transactions_group(self, note_transactions) -> collections.OrderedDict:
 		"""Agrupa transações que perceçam ao mesmo ativo"""
 		transactions = collections.OrderedDict()
 
@@ -364,7 +364,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 					)
 		return transactions
 
-	def _add_transations(self, note, instance):
+	def _add_transactions(self, note, instance):
 		queryset = self.brokerage_note_negotiation.objects.all()
 		tax = sum([note.settlement_fee,
 		           note.term_fee,
@@ -374,7 +374,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		           note.emoluments,
 		           note.others])
 
-		transactions = self._get_transations_group(note.transactions)
+		transactions = self._get_transactions_group(note.transactions)
 		paid = sum([(transactions[ticker].amount * transactions[ticker].unit_price)
 		            for ticker in transactions])
 		for ticker in transactions:
@@ -392,7 +392,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 			               kind__iexact=kind,
 			               quantity=transaction.amount)
 			if self.is_save_transactions and not qs.exists():
-				self._save_trasaction(
+				self._save_transaction(
 					transaction, instance,
 					code=ticker,
 					kind=kind,
