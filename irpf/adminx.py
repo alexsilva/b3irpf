@@ -228,9 +228,9 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 	fields = ('note', 'institution')
 	list_display = (
 		'reference_id',
+		'reference_date',
 		'note',
 		'institution',
-		'reference_date',
 		'negotiation_count'
 	)
 	list_filter = (
