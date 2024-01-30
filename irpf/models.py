@@ -535,6 +535,12 @@ class BrokerageNote(BaseIRPFModel):
 	class Meta:
 		verbose_name = "Nota de corretagem"
 		verbose_name_plural = "Notas de corretagem"
+		unique_together = (
+			'reference_id',
+			'reference_date',
+			'user',
+			'institution',
+		)
 		ordering = ('-reference_date',)
 
 
