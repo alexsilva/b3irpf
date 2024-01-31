@@ -525,10 +525,11 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 				instance.taxes_set.add(*stats_category.taxes.items)
 
 	def report_generate(self, reports: BaseReportMonth, form):
-		if self.is_save_position and reports:
-			# remove os dados salvos para o meses antes do recalculo.
-			self._remove_stats(reports.get_first())
-		self.admin_view.stats = self.get_stats(reports)
+		if reports:
+			if self.is_save_position:
+				# remove os dados salvos para o meses antes do recalculo.
+				self._remove_stats(reports.get_first())
+			self.admin_view.stats = self.get_stats(reports)
 		return super().report_generate(reports, form)
 
 	def save(self, reports: BaseReportMonth):
