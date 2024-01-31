@@ -266,9 +266,10 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 
 	def get_readonly_fields(self):
 		readonly_fields = list(super().get_readonly_fields())
-		for field_name in self.brokerage_note_field_update:
-			if field_name not in readonly_fields:
-				readonly_fields.append(field_name)
+		if self.org_obj and self.org_obj.pk is not None:
+			for field_name in self.brokerage_note_field_update:
+				if field_name not in readonly_fields:
+					readonly_fields.append(field_name)
 		return readonly_fields
 
 
