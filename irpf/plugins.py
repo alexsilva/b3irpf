@@ -548,6 +548,12 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 		stats.generate()
 		return stats
 
+	def render_to_response(self, __, context, **kwargs):
+		if not (self.admin_view.stats or self.admin_view.reports):
+			self.message_user('Nenhum resultado com encontrado para o relatório.',
+			                  level='warning')
+		return __()
+
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.stats:
 			# compila os meses de estatística em um conjunto de categorias
