@@ -1,7 +1,6 @@
 import datetime
-from collections import OrderedDict
-
 from irpf.report.cache import Cache
+from irpf.report.utils import OrderedDictResults
 from irpf.utils import MonthYearDates
 
 
@@ -71,7 +70,7 @@ class BaseReportMonth(Base):
 		self.model = model
 		self.start_date: datetime.date = None
 		self.end_date: datetime.date = None
-		self.results = OrderedDict()
+		self.results = OrderedDictResults()
 
 	def set_dates_range(self, months: list):
 		"""Configura as datas start e end"""
@@ -81,7 +80,7 @@ class BaseReportMonth(Base):
 			self.start_date, self.end_date = months[0]
 		return self.start_date, self.end_date
 
-	def generate(self, months_range: list) -> OrderedDict:
+	def generate(self, months_range: list) -> OrderedDictResults:
 		raise NotImplementedError
 
 	def compile(self) -> list:
