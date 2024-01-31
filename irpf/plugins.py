@@ -473,7 +473,7 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 		# guarda a referência na view
 		self.admin_view.stats = None
 
-	def _remove_stats(self, report: BaseReport):
+	def _invalidate_stats(self, report: BaseReport):
 		"""Remove todos os dados de Stats a partir da data 'end_date' relatório"""
 		institution = report.get_opts('institution', None)
 		consolidation = report.get_opts('consolidation')
@@ -527,7 +527,7 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 		if reports:
 			if self.is_save_position:
 				# remove os dados salvos para o meses antes do recalculo.
-				self._remove_stats(reports.get_first())
+				self._invalidate_stats(reports.get_first())
 			self.admin_view.stats = self.get_stats(reports)
 		return super().report_generate(reports, form)
 
