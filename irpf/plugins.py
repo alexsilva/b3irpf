@@ -551,11 +551,11 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 		stats.generate()
 		return stats
 
-	def render_to_response(self, __, context, **kwargs):
-		if not (self.admin_view.stats or self.admin_view.reports):
+	def render_to_response(self, response, context, **kwargs):
+		if self.admin_view.reports is not None and not (self.admin_view.stats or self.admin_view.reports):
 			self.message_user('Nenhum resultado com encontrado para o relatório.',
 			                  level='warning')
-		return __()
+		return response
 
 	def get_context_data(self, context, **kwargs):
 		if self.admin_view.stats:
