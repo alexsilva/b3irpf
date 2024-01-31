@@ -486,7 +486,6 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 			consolidation=consolidation,
 		).update(valid=False)
 
-	@atomic
 	def save_stats(self, report: BaseReport, stats: StatsReport):
 		"""Salva dados de estatística"""
 		institution = report.get_opts('institution', None)
@@ -532,6 +531,7 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 			self.admin_view.stats = self.get_stats(reports)
 		return super().report_generate(reports, form)
 
+	@atomic
 	def save(self, reports: BaseReportMonth):
 		if not self.admin_view.stats:
 			return
