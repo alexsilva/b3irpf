@@ -75,6 +75,16 @@ class TaxesStats:
 		return bool(self.value or self.residual or self.items)
 
 
+class OrderedDictResults(OrderedDict):
+	"""Resultados ordenados e com validação"""
+
+	def is_valid(self):
+		return any(self.values())
+
+	def __bool__(self):
+		return bool(self.is_valid())
+
+
 class Stats:
 	def __init__(self, buy: MoneyLC = MoneyLC(0),
 	             sell: MoneyLC = MoneyLC(0),
