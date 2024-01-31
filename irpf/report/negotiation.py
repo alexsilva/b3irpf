@@ -6,7 +6,7 @@ from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscripti
 	AssetConvert
 from irpf.report.base import BaseReport, BaseReportMonth
 from irpf.report.cache import EmptyCacheError
-from irpf.report.utils import Event, Assets, Buy, MoneyLC
+from irpf.report.utils import Event, Assets, Buy, MoneyLC, OrderedDictResults
 from irpf.utils import range_dates
 
 
@@ -577,7 +577,7 @@ class NegotiationReportMonth(BaseReportMonth):
 	"""Relatório de todos os meses de um range"""
 	report_class = NegotiationReport
 
-	def generate(self, months_range: list, **options) -> OrderedDict:
+	def generate(self, months_range: list, **options) -> OrderedDictResults:
 		"""Gera um relatório para cada mês
 		months: é uma lista com tuplas contendo meses
 			[(start_date, end_date, ...)]

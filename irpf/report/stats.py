@@ -7,7 +7,7 @@ from django.utils.functional import cached_property
 
 from irpf.models import Asset, Statistic, Taxes, TaxRate
 from irpf.report.base import Base, BaseReportMonth, BaseReport
-from irpf.report.utils import Stats, MoneyLC
+from irpf.report.utils import Stats, MoneyLC, OrderedDictResults
 
 
 class StatsReport(Base):
@@ -19,7 +19,7 @@ class StatsReport(Base):
 	def __init__(self, user, report: BaseReport, tax_rate: TaxRate, **options):
 		super().__init__(user, **options)
 		self.report = report
-		self.results = OrderedDict()
+		self.results = OrderedDictResults()
 		self.start_date = self.report.get_opts('start_date')
 		self.end_date = self.report.get_opts('end_date')
 		self.tax_rate = tax_rate
@@ -254,7 +254,7 @@ class StatsReports(Base):
 		self.end_date: datetime.date = reports.end_date
 		self.tax_rate: TaxRate = self.tax_rate_model.get_from_date(user, reports.start_date, reports.end_date)
 		self.reports: BaseReportMonth = reports
-		self.results = OrderedDict()
+		self.results = OrderedDictResults()
 
 	def generate(self, **options) -> OrderedDict[int]:
 		"""Gera dados de estatística para cada mês de relatório"""
@@ -325,3 +325,4 @@ class StatsReports(Base):
 	def get_last(self) -> Stats:
 		"""Retorna o relatório do último mês"""
 		return self.results[self.end_date.month]
+
