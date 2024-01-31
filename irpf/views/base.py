@@ -1,5 +1,6 @@
 from crispy_forms.helper import FormHelper
 from django.views.generic import FormView
+from xadmin.views import filter_hook
 
 from xadmin.views.base import CommAdminView
 
@@ -36,3 +37,7 @@ class AdminFormView(CommAdminView, FormView):
 		context['title'] = self.get_site_title()
 		context['form_method_post'] = self.form_method_post
 		return context
+
+	@filter_hook
+	def render_to_response(self, context, **response_kwargs):
+		return super().render_to_response(context, **response_kwargs)
