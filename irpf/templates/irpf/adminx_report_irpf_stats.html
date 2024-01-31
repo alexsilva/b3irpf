@@ -7,8 +7,8 @@
 {% endblock %}
 
 {% block card_body %}
+{% if report.stats_category %}
 <div class="card-body">
-  {% if report.stats_category %}
   <div class="row ">
     <div class="col-sm-5 col-md-4">
       <div class="nav flex-column nav-pills" id="stats" role="tablist" aria-orientation="vertical">
@@ -37,6 +37,6 @@
       </div>
     </div>
   </div>
-  {% endif %}
 </div>
+{% endif %}
 {% endblock %}
