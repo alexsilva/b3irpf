@@ -473,6 +473,14 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 		# guarda a referência na view
 		self.admin_view.stats = None
 
+	def report_generate(self, reports: BaseReportMonth, form):
+		if reports:
+			if self.is_save_position:
+				# remove os dados salvos para o meses antes do recalculo.
+				self._invalidate_stats(reports.get_first())
+			self.admin_view.stats = self.get_stats(reports)
+		return super().report_generate(reports, form)
+
 	def _invalidate_stats(self, report: BaseReport):
 		"""Remove todos os dados de Stats a partir da data 'end_date' relatório"""
 		institution = report.get_opts('institution', None)
@@ -522,14 +530,6 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 			elif stats_category.taxes.items:
 				# imposto cadastrado pelo usuário
 				instance.taxes_set.add(*stats_category.taxes.items)
-
-	def report_generate(self, reports: BaseReportMonth, form):
-		if reports:
-			if self.is_save_position:
-				# remove os dados salvos para o meses antes do recalculo.
-				self._invalidate_stats(reports.get_first())
-			self.admin_view.stats = self.get_stats(reports)
-		return super().report_generate(reports, form)
 
 	@atomic
 	def save(self, reports: BaseReportMonth):
