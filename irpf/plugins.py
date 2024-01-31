@@ -30,7 +30,7 @@ from irpf.models import Negotiation, Position, Asset, Statistic, Taxes, Institut
 from irpf.report import BaseReport
 from irpf.report.base import BaseReportMonth
 from irpf.report.stats import StatsReport, StatsReports
-from irpf.report.utils import Assets, Stats, MoneyLC
+from irpf.report.utils import Assets, Stats, MoneyLC, OrderedDictResults
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
@@ -554,7 +554,7 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 			# compilas as categorias de estatística em um objeto 'Stats'
 			stats_all = self.admin_view.stats.compile_all(stats_categories)
 			stats_results = self.admin_view.stats.compile_results(stats_categories)
-			stats_category = collections.OrderedDict([('TODOS', stats_all)])
+			stats_category = OrderedDictResults([('TODOS', stats_all)])
 
 			category_choices = self.asset_model.category_choices
 			category_stocks_name = category_choices[self.asset_model.CATEGORY_STOCK]
