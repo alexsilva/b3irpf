@@ -25,8 +25,9 @@ class StatsReport(Base):
 		self.tax_rate = tax_rate
 
 	def _get_statistics(self, date: datetime.date, category: int, **options):
+		options.setdefault('consolidation', self.report.get_opts('consolidation'))
 		query = dict(
-			consolidation=Statistic.CONSOLIDATION_MONTHLY,
+			consolidation=options['consolidation'],
 			category=category,
 			user=self.user
 		)

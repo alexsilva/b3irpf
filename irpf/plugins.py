@@ -497,6 +497,7 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 	def save_stats(self, report: BaseReport, stats: StatsReport):
 		"""Salva dados de estatística"""
 		institution = report.get_opts('institution', None)
+		consolidation = report.get_opts('consolidation')
 		end_date = report.get_opts('end_date')
 
 		stats_results = stats.get_results()
@@ -510,7 +511,7 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 			}
 			instance, created = self.statistic_model.objects.get_or_create(
 				category=category,
-				consolidation=self.statistic_model.CONSOLIDATION_MONTHLY,
+				consolidation=consolidation,
 				institution=institution,
 				date=end_date,
 				user=self.user,
