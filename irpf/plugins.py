@@ -15,7 +15,7 @@ from correpy.domain.enums import TransactionType
 from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from django.conf import settings
 from django.contrib.auth import get_permission_codename
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.management import get_commands
 from django.db.models import Count
 from django.db.models.functions import ExtractMonth
@@ -23,8 +23,10 @@ from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from guardian.shortcuts import get_objects_for_user, assign_perm
+
+from correpy.parsers.brokerage_notes.base_parser import BaseBrokerageNoteParser
 from irpf.fields import CharCodeField
-from irpf.models import Negotiation, Position, Asset, Statistic, Taxes
+from irpf.models import Negotiation, Position, Asset, Statistic, Taxes, Institution
 from irpf.report import BaseReport
 from irpf.report.base import BaseReportMonth
 from irpf.report.stats import StatsReport, StatsReports
@@ -292,12 +294,14 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 	def _parser_and_update(self, parser, instance) -> list[BrokerageNote]:
 		"""Atualiza a instância com os dados da nota"""
 		notes = []
-		parser = parser(brokerage_note=io.BytesIO(instance.note.file.read()))
+		try:
+			parser = parser(brokerage_note=io.BytesIO(instance.note.read()))
+		finally:
+			instance.note.seek(0)
 		for note in parser.parse_brokerage_note():
 			for field_name in self.brokerage_note_field_update:
 				setattr(instance, field_name, getattr(note, field_name))
 			notes.append(note)
-		instance.note.file.seek(0)
 		return notes
 
 	def get_asset(self, ticker: str):
@@ -367,7 +371,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 					)
 		return transactions
 
-	def _add_transactions(self, note, instance):
+	def _add_transactions(self, note: BrokerageNote, instance):
 		queryset = self.brokerage_note_negotiation.objects.all()
 		tax = sum([note.settlement_fee,
 		           note.term_fee,
@@ -407,13 +411,43 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 					negotiation.brokerage_note = instance
 					negotiation.save()
 
+	def _get_parser(self, institution: Institution) -> BaseBrokerageNoteParser:
+		"""Retorna o parser da nota corretamente para uma data corretora (instituição)"""
+		try:
+			parser = self.brokerage_note_parsers[institution.cnpj_nums]
+		except KeyError:
+			parser = B3Parser
+		return parser
+
+	def valid_forms(self, is_valid: bool):
+		if is_valid:
+			# valida se a nota é única
+			self.admin_view.save_forms()
+			new_obj = self.admin_view.new_obj
+			cleaned_data = self.admin_view.form_obj.cleaned_data
+			parser_cls = self._get_parser(cleaned_data['institution'])
+			note_file = cleaned_data['note']
+			try:
+				parser = parser_cls(brokerage_note=io.BytesIO(note_file.read()))
+			finally:
+				note_file.seek(0)
+			for note in parser.parse_brokerage_note():
+				new_obj.reference_date = note.reference_date
+				new_obj.reference_id = note.reference_id
+				new_obj.user = self.user
+				break
+			if new_obj.reference_id and new_obj.reference_date and new_obj.user:
+				try:
+					new_obj.validate_unique()
+				except ValidationError as exc:
+					self.message_user('//'.join(exc.message_dict['__all__']), level='error')
+					is_valid = False
+		return is_valid
+
 	def save_models(self, __):
 		if instance := getattr(self.admin_view, "new_obj", None):
 			try:
-				parser = self.brokerage_note_parsers[instance.institution.cnpj_nums]
-			except KeyError:
-				parser = B3Parser
-			try:
+				parser = self._get_parser(instance.institution)
 				brokerage_notes = self._parser_and_update(parser, instance)
 			except Exception as exc:
 				raise exc from None
