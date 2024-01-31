@@ -1,19 +1,10 @@
 import calendar
 import collections
 import datetime
-import hashlib
 import io
 import itertools
-import re
 
 import django.forms as django_forms
-
-from correpy.domain.entities.brokerage_note import BrokerageNote
-from correpy.domain.entities.security import Security
-from correpy.domain.entities.transaction import Transaction
-from correpy.domain.enums import TransactionType
-from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
-from django.conf import settings
 from django.contrib.auth import get_permission_codename
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.management import get_commands
@@ -24,13 +15,18 @@ from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from guardian.shortcuts import get_objects_for_user, assign_perm
 
+from correpy.domain.entities.brokerage_note import BrokerageNote
+from correpy.domain.entities.security import Security
+from correpy.domain.entities.transaction import Transaction
+from correpy.domain.enums import TransactionType
+from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from correpy.parsers.brokerage_notes.base_parser import BaseBrokerageNoteParser
 from irpf.fields import CharCodeField
-from irpf.models import Negotiation, Position, Asset, Statistic, Taxes, Institution
+from irpf.models import Negotiation, Position, Asset, Statistic, Institution
 from irpf.report import BaseReport
 from irpf.report.base import BaseReportMonth
 from irpf.report.stats import StatsReport, StatsReports
-from irpf.report.utils import Assets, Stats, MoneyLC, OrderedDictResults
+from irpf.report.utils import Assets, Stats, OrderedDictResults
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
