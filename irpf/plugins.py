@@ -533,6 +533,8 @@ class ReportStatsAdminPlugin(ReportBaseAdminPlugin):
 		return super().report_generate(reports, form)
 
 	def save(self, reports: BaseReportMonth):
+		if not self.admin_view.stats:
+			return
 		for month in reports:
 			report: BaseReport = reports[month]
 			# só salva para relatório fechado (mês completo)
