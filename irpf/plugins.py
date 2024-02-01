@@ -26,7 +26,7 @@ from irpf.models import Negotiation, Position, Asset, Statistic, Institution
 from irpf.report import BaseReport
 from irpf.report.base import BaseReportMonth
 from irpf.report.stats import StatsReport, StatsReports
-from irpf.report.utils import Assets, Stats, OrderedDictResults
+from irpf.report.utils import Assets, Stats, OrderedDictResults, TransactionGroup
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
@@ -337,35 +337,33 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 			kind = self.brokerage_note_negotiation.KIND_SELL
 		return kind
 
-	def _get_clean_ticker(self, asset):
-		"""Retornao ticker (code) simplificado"""
-		return CharCodeField().to_python(asset.security.ticker)
+	@staticmethod
+	def _get_clean_ticker(transaction: Transaction):
+		"""Retorna o ticker (code) simplificado"""
+		return CharCodeField().to_python(transaction.security.ticker)
 
-	def _get_transactions_group(self, note_transactions) -> collections.OrderedDict:
-		"""Agrupa transações que perceçam ao mesmo ativo"""
-		transactions = collections.OrderedDict()
+	def _get_transactions_group(self, note_transactions: list[Transaction]) -> collections.OrderedDict:
+		"""Agrupa transações que pertençam ao mesmo ativo (com compra e venda separado)"""
+		results = collections.OrderedDict()
 
-		def key_group(ts):
-			return self._get_clean_ticker(ts), ts.transaction_type
+		def transaction_group_by(tns: Transaction):
+			return self._get_clean_ticker(tns), tns.transaction_type
 
-		for key, group in itertools.groupby(note_transactions, key=key_group):
-			ticker, transaction_type = key
-			for transaction in group:
-				try:
-					asset = transactions[ticker]
-					asset_total = asset.amount * asset.unit_price
-					transaction_total = transaction.amount * transaction.unit_price
-					# atualização do preço médio e quantidade
-					asset.amount += transaction.amount
-					asset.unit_price = (asset_total + transaction_total) / asset.amount
-				except KeyError:
-					transactions[ticker] = Transaction(
-						transaction_type=transaction.transaction_type,
-						amount=transaction.amount,
-						unit_price=transaction.unit_price,
-						security=Security(ticker)
-					)
-		return transactions
+		for (ticker, transaction_type), items in itertools.groupby(note_transactions, key=transaction_group_by):
+			ts = TransactionGroup()
+			# soma as quantidade e totais para cada categoria (compra, venda)
+			# calcula o preço médio final com base no total de todas as negociações do ativo
+			for transaction in items:
+				ts.quantity += transaction.amount
+				ts.total += transaction.amount * transaction.unit_price
+
+			results[ticker] = Transaction(
+				transaction_type=transaction_type,
+				amount=ts.quantity,
+				unit_price=ts.avg_price,
+				security=Security(ticker)
+			)
+		return results
 
 	def _add_transactions(self, note: BrokerageNote, instance):
 		queryset = self.brokerage_note_negotiation.objects.all()
