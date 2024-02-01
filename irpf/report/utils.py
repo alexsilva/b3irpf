@@ -4,6 +4,7 @@ import decimal
 from collections import OrderedDict
 from decimal import Decimal
 import moneyfield.fields
+from correpy.domain.enums import TransactionType
 
 
 class MoneyLC(moneyfield.fields.MoneyLC):
@@ -155,6 +156,21 @@ class Debit(OrderedStorage):
 
 class Events(OrderedDict):
 	"""Eventos"""
+
+
+class TransactionGroup:
+	"""Transações agrupadas para cálculo de preço médio"""
+	def __init__(self, quantity: Decimal = decimal.Decimal(0),
+	             total: MoneyLC = MoneyLC(0)):
+		self.quantity = quantity
+		self.total = total
+
+	@property
+	def avg_price(self) -> MoneyLC:
+		if self.quantity > 0:
+			return self.total / self.quantity
+		else:
+			return MoneyLC(0)
 
 
 class Buy:
