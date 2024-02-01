@@ -26,7 +26,8 @@ from irpf.models import Negotiation, Position, Asset, Statistic, Institution
 from irpf.report import BaseReport
 from irpf.report.base import BaseReportMonth
 from irpf.report.stats import StatsReport, StatsReports
-from irpf.report.utils import Assets, Stats, OrderedDictResults, TransactionGroup
+from irpf.report.utils import Assets, Stats, OrderedDictResults, TransactionGroup, MoneyLC
+from irpf.utils import update_defaults
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
@@ -330,11 +331,12 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 
 	def _get_transaction_type(self, transaction: Transaction) -> str:
 		# filtro para a categoria de transação
-		kind = None
 		if transaction.transaction_type == TransactionType.BUY:
 			kind = self.brokerage_note_negotiation.KIND_BUY
 		elif transaction.transaction_type == TransactionType.SELL:
 			kind = self.brokerage_note_negotiation.KIND_SELL
+		else:
+			kind = None
 		return kind
 
 	@staticmethod
@@ -380,18 +382,18 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		            for ticker in transactions])
 		for ticker in transactions:
 			transaction = transactions[ticker]
-			qs = queryset.filter(
-				date=instance.reference_date,
-				institution_name=instance.institution.name,
-				user=self.user)
-			kind = self._get_transaction_type(transaction)
-			if kind is None:
+			if (kind := self._get_transaction_type(transaction)) is None:
 				continue
 			# rateio de taxas proporcional ao valor pago
-			avg_tax = tax * ((transaction.amount * transaction.unit_price) / paid)
-			qs = qs.filter(code__iexact=ticker,
-			               kind__iexact=kind,
-			               quantity=transaction.amount)
+			avg_tax = MoneyLC(tax * ((transaction.amount * transaction.unit_price) / paid))
+			qs = queryset.filter(
+				date=instance.reference_date,
+				code__iexact=ticker,
+				kind__iexact=kind,
+				quantity=transaction.amount,
+				institution_name=instance.institution.name,
+				user=self.user
+			)
 			if self.is_save_transactions and not qs.exists():
 				self._save_transaction(
 					transaction, instance,
@@ -401,9 +403,10 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 				)
 			else:
 				for negotiation in qs:
-					negotiation.tax = avg_tax
-					negotiation.brokerage_note = instance
-					negotiation.save()
+					update_defaults(negotiation, {
+						'brokerage_note': instance,
+						'tax': avg_tax,
+					})
 
 	def _get_parser(self, institution: Institution) -> BaseBrokerageNoteParser:
 		"""Retorna o parser da nota corretamente para uma data corretora (instituição)"""
