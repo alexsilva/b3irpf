@@ -160,17 +160,17 @@ class Events(OrderedDict):
 
 class TransactionGroup:
 	"""Transações agrupadas para cálculo de preço médio"""
-	def __init__(self, quantity: Decimal = decimal.Decimal(0),
-	             total: MoneyLC = MoneyLC(0)):
+	def __init__(self, quantity: Decimal = Decimal(0),
+	             total: Decimal = Decimal(0)):
 		self.quantity = quantity
 		self.total = total
 
 	@property
-	def avg_price(self) -> MoneyLC:
+	def avg_price(self) -> Decimal:
 		if self.quantity > 0:
 			return self.total / self.quantity
 		else:
-			return MoneyLC(0)
+			return Decimal(0)
 
 
 class Buy:
