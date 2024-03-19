@@ -23,5 +23,7 @@ class Command(BaseCommand):
 			for user in User.objects.filter(is_superuser=True):
 				user.groups.add(Group.objects.get(name=settings.XADMIN_DEFAULT_GROUP))
 
+		call_command('setup_widgets')
+
 		# configuração assets
 		call_command("setup_assets")
