@@ -10,7 +10,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-*migrations
+migrations/
+!migrations/__init__.py
 irpf/management/commands/project.py
 
 # C extensions
