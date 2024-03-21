@@ -7,9 +7,10 @@ python pip install git+https://github.com/alexsilva/b3irpf.git@master
 python pip install -r requirements.txt
 ### Configuração
 
-Criar o arquivo `irpf.env` na raíz do projeto com as configurações do banco de dados
+Alterar o nome do arquivo `example.env` para `irpf.env` na raíz do projeto com as configurações do banco de dados
 * DATABASE_URL=engine://usr:pass@host:port/dbname
 * DEBUG=ON
+* API_URL=''
 
 python manage.py makemigrations
 
