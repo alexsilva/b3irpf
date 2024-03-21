@@ -36,11 +36,11 @@ Em https://www.investidor.b3.com.br/extrato/movimentacao
 * baixar o extrato em Excel com todos os provendos/outros recebidos.
 
 ## Na tela administração (Negociações).
-* importar com o comando `importar lista de dados` os dados do arquivo Excel.
+* importar com o comando no menu **Negociações** / Opções **Ações em Grupo** / **importar lista de dados** do arquivo Excel.
 
 
 ## Na tela administração (Proventos).
-* importar com o comando `importar lista de dados` os dados do arquivo Excel.
+* importar com o comando no menu **Proventos** / Opções **Ações em Grupo** / **importar lista de dados** do arquivo Excel.
 
 
 Gerar o relatório com a compilação dos dados em Negociações (comando Relatório IRPF).
