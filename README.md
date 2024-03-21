@@ -8,7 +8,8 @@ python -m pip install git+https://github.com/alexsilva/b3irpf.git@master
 python pip install -r requirements.txt
 ### Configuração
 
-Alterar o nome do arquivo `example.env` para `irpf.env` na raíz do projeto com as configurações do banco de dados
+Alterar o nome do arquivo `example.env` para `irpf.env` na raíz do projeto com as configurações do banco de dados, conforme a [doc](https://django-environ.readthedocs.io/en/latest/quickstart.html).
+
 * DATABASE_URL=engine://usr:pass@host:port/dbname
 * DEBUG=ON
 * API_URL=''
