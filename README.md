@@ -2,7 +2,8 @@
 Ferramenta auxiliar da declaração do imposto anual pessoa física.
 
 ## Instalação do projeto
-python pip install git+https://github.com/alexsilva/b3irpf.git@master
+python -m pip install git+https://github.com/alexsilva/b3irpf.git@master
+
 ### Instalação de dependências
 python pip install -r requirements.txt
 ### Configuração
