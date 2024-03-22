@@ -1,12 +1,14 @@
 from datetime import datetime
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth import get_permission_codename
 from django.core.management import call_command
 from django.forms import ModelForm
+from xadmin.plugins.auth import UserAdmin
+
 from xadmin.sites import NotRegistered
 
 from xadmin.models import Log
-
 from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from irpf import permissions
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
@@ -40,6 +42,9 @@ site.register_plugin(ReportSavePositionAdminPlugin, ReportIRPFFAdminView)
 site.register_plugin(ReportStatsAdminPlugin, ReportIRPFFAdminView)
 site.register_plugin(BreadcrumbMonthsAdminPlugin, ReportIRPFFAdminView)
 site.register_plugin(BrokerageNoteAdminPlugin, ModelFormAdminView)
+
+
+User = get_user_model()
 
 
 def _get_field_opts(name, model):
@@ -465,3 +470,19 @@ else:
 		def queryset(self):
 			# permite somente os logs do usuário
 			return super().queryset().filter(user=self.user)
+
+
+try:
+	site.unregister(User)
+except NotRegistered:
+	...
+else:
+	@sites.register(User)
+	class UserIRPFAdmin(UserAdmin):
+
+		def queryset(self):
+			# restringe admins
+			qs = super().queryset()
+			if not self.request.user.is_superuser:
+				qs = qs.exclude(is_superuser=True)
+			return qs
