@@ -3,13 +3,17 @@ from datetime import datetime
 from django.contrib.auth import get_permission_codename
 from django.core.management import call_command
 from django.forms import ModelForm
+from xadmin.sites import NotRegistered
+
+from xadmin.models import Log
 
 from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from irpf import permissions
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, TaxRate, DayTrade, \
 	SwingTrade, AssetConvert
-from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, ReportSavePositionAdminPlugin, \
+from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, \
+	ReportSavePositionAdminPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonthsAdminPlugin
 from irpf.report.earnings import EarningsReportMonth
 from irpf.report.negotiation import NegotiationReportMonth
@@ -21,6 +25,7 @@ from irpf.views.xlsx_viewer import AdminXlsxViewer
 from irpf.widgets import MonthYearField, MonthYearWidget
 from moneyfield import MoneyModelForm
 from xadmin import sites, site
+from xadmin.adminx import LogAdmin
 from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
 
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
@@ -448,3 +453,15 @@ class TaxesAdmin(BaseIRPFAdmin):
 			initial.setdefault('pay_date', (current_date.month, current_date.year))
 		return data
 
+
+try:
+	site.unregister(Log)
+except NotRegistered:
+	...
+else:
+	@sites.register(Log)
+	class LogIRPFAdmin(LogAdmin):
+
+		def queryset(self):
+			# permite somente os logs do usuário
+			return super().queryset().filter(user=self.user)
