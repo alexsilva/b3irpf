@@ -1,7 +1,7 @@
 # Custom
 *.secret
 *.sqlite3
-*.env
+irpf.env
 .idea
 /media
 
