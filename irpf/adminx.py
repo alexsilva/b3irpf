@@ -28,7 +28,7 @@ from irpf.widgets import MonthYearField, MonthYearWidget
 from moneyfield import MoneyModelForm
 from xadmin import sites, site
 from xadmin.adminx import LogAdmin
-from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView
+from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView, ModelAdminView
 
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
 site.register_view("^irpf/report/(?P<model_app_label>.+)/$", ReportIRPFFAdminView, "reportirpf")
@@ -49,6 +49,11 @@ User = get_user_model()
 
 def _get_field_opts(name, model):
 	return model._meta.get_field(name)
+
+
+@sites.register(ModelAdminView)
+class ModelIRPFAdminViewOpts:
+	horizontal_form_layout = True
 
 
 @sites.register(ReportIRPFFAdminView)
@@ -471,6 +476,9 @@ else:
 			# permite somente os logs do usuário
 			return super().queryset().filter(user=self.user)
 
+		def has_change_permission(self, obj=None):
+			return False
+
 
 try:
 	site.unregister(User)
@@ -479,6 +487,7 @@ except NotRegistered:
 else:
 	@sites.register(User)
 	class UserIRPFAdmin(UserAdmin):
+		horizontal_form_layout = False
 
 		def queryset(self):
 			# restringe admins
@@ -486,3 +495,9 @@ else:
 			if not self.request.user.is_superuser:
 				qs = qs.exclude(is_superuser=True)
 			return qs
+
+		def has_change_permission(self, obj=None):
+			has_perm = super().has_change_permission(obj=obj)
+			if has_perm and self.request.user != getattr(self, "org_obj", obj):
+				has_perm = False
+			return has_perm
