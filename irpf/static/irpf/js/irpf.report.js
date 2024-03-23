@@ -15,7 +15,7 @@ $(function () {
         }
 
     // botão que faz cópia de dados
-    $("button.copy").popover({
+    $("a.copy").popover({
         animation: true,
         trigger: "focus"
     }).click(function () {
