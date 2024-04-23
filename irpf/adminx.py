@@ -298,12 +298,12 @@ class NegotiationAdmin(BaseIRPFAdmin):
 	list_display = (
 		"code",
 		"kind",
-		"institution_name",
 		"quantity",
+		"date",
 		"price",
 		"total",
 		"tax",
-		"date",
+		"institution_name"
 	)
 
 
