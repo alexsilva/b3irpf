@@ -618,7 +618,7 @@ class AssetRefund(BaseIRPFModel):
 	value = MoneyField(verbose_name="Valor",
 	                   max_digits=DECIMAL_MAX_DIGITS,
 	                   decimal_places=DECIMAL_PLACES,
-	                   help_text="Valor total restituído/amortizado.",
+	                   help_text="Valor por ativo que será restituído/amortizado.",
 	                   amount_default=None)
 	date = models.DateField(verbose_name="Data do evento",
 	                        help_text="Data de fechamento para ocorrer a restituição.")
