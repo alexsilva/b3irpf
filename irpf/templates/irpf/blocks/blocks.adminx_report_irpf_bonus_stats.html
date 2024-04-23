@@ -1,4 +1,11 @@
 {% load irpf_tags %}
-<p class="card-text text-muted">
-  {{ asset.bonus.title }}: {{ asset.bonus.quantity|smart_desc }}, {{ asset.bonus.value }}
-</p>
+<div class="d-flex flex-row align-items-center">
+  <p class="my-0">{{ asset.bonus.title }}:
+    <span class="card-text text-muted"
+          data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações."
+          data-toggle="popover" data-placement="top" data-trigger="hover">
+      {{ asset.bonus.quantity|smart_desc }}, {{ asset.bonus.value }}
+    </span>
+  </p>
+  {% include "irpf/includes/adminx_copybtn.html" with copytext=asset.bonus.value|floatformat:2 %}
+</div>
