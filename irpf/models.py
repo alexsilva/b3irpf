@@ -614,18 +614,18 @@ class AssetRefund(BaseIRPFModel):
 	"""Restituição / Amortização de capital investido
 	"""
 	asset = models.ForeignKey(Asset, on_delete=models.CASCADE, verbose_name="Ativo")
-	date = models.DateField(verbose_name="Data do evento")
 	value = MoneyField(verbose_name="Valor",
 	                   max_digits=DECIMAL_MAX_DIGITS,
 	                   decimal_places=DECIMAL_PLACES,
 	                   help_text="Valor total restituído/amortizado.")
+	date = models.DateField(verbose_name="Data do evento")
 
 	def __str__(self):
 		return f'{self.asset.code} / {self.value}'
 
 	class Meta:
 		verbose_name = "Restituição"
-		verbose_name_plural = verbose_name
+		verbose_name_plural = "Restituições"
 
 
 class Position(BaseIRPFModel):
