@@ -75,6 +75,7 @@ class StatsReport(Base):
 
 		# Se o imposto do mês é maior ou igual ao limite para pagamento (R$ 10)
 		if self.stats_results.taxes.total >= self.tax_rate.darf:
+			# no fechamento do mês, o imposto residual passa para imposto a pagar (taxes.value) e tem seu valor zerado
 			if not self.report.is_closed:
 				return
 			for category_name in self.results:
