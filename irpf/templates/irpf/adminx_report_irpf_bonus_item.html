@@ -9,10 +9,6 @@
 {% block card_body %}
 <div class="card-body py-2">
   {% for bonus in asset.events.bonus %}
-    <h6 class="card-text mb-1">
-      Proporção <span class="text-muted">{{ bonus.instance.proportion|floatformat:4 }}%</span> de
-      <span class="text-muted">{{ bonus.bonus_info.from_quantity|smart_desc }}</span> ativos no dia {{ bonus.instance.date_com }}
-    </h6>
     <ul class="list-group list-group-flush">
       <li class="list-group-item py-2">
         <div class="row">
@@ -21,7 +17,7 @@
               <span class="text-nowrap text-truncate text-center text-sm-left flex-fill flex-sm-grow-0">
                 {{ bonus.event.title }}
               </span>
-              <button type="button" class="btn btn-link" data-toggle="popover" data-placement="top"
+              <button type="button" class="btn btn-link" data-toggle="popover" data-placement="top"data-trigger="hover"
                       data-content="{% if bonus.active %}Já incorporada à carteira{% else %}Incorporação pendente{% endif %}">
                 {{ bonus.active|boolean_icon }}
               </button>
@@ -34,8 +30,10 @@
                   data-content="{{ bonus.bonus_info.quantity|smart_desc }} ativo{{ bonus.event.quantity|pluralize }}, {{ bonus.event.value }}">
                 {{ bonus.event.quantity|smart_desc|floatformat:4 }} ativo{{ bonus.event.quantity|pluralize }}, {{ bonus.event.value }}
               </button>
-              <button type="button" class="btn btn-link" data-toggle="popover" data-placement="top"
-                      data-content="Rendimentos Isentos e Não-Tributáveis / Incorporação de reservas ao Capital / Bonificação em ações.">
+              <button type="button" class="btn btn-link" data-toggle="popover"
+                      data-placement="top" data-html="true" data-trigger="hover"
+                      data-content="Proporção <span class='text-muted'>{{ bonus.instance.proportion|floatformat:4 }}%</span> de
+                                    <span class='text-muted'>{{ bonus.bonus_info.from_quantity|smart_desc }}</span> ativos no dia {{ bonus.instance.date_com }}">
                 <i class="fa fa-info-circle text-success"></i>
               </button>
             </div>
