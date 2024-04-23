@@ -13,7 +13,7 @@ from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
 from irpf import permissions
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, TaxRate, DayTrade, \
-	SwingTrade, AssetConvert
+	SwingTrade, AssetConvert, AssetRefund
 from irpf.plugins import ListActionModelPlugin, GuardianAdminPlugin, AssignUserAdminPlugin, \
 	ReportSavePositionAdminPlugin, \
 	ReportStatsAdminPlugin, BrokerageNoteAdminPlugin, BreadcrumbMonthsAdminPlugin
@@ -361,6 +361,25 @@ class SubscriptionAdmin(BaseIRPFAdmin):
 		'created',
 		'date'
 	)
+
+
+@sites.register(AssetRefund)
+class AssetRefundAdmin(BaseIRPFAdmin):
+	model_icon = "fa fa-money-check-alt"
+	search_fields = ("asset__name",)
+	list_filter = ("date", "asset")
+	list_display = (
+		'date',
+		'asset_name',
+		'value',
+	)
+
+	def asset_name(self, instance):
+		return instance.asset.name
+
+	asset_name.is_column = True
+	asset_name.admin_order_field = "asset__name"
+	asset_name.short_description = _get_field_opts("name", Asset).verbose_name
 
 
 @sites.register(AssetEvent)
