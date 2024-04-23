@@ -127,6 +127,7 @@
         </div>
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.taxes.value }}</span>
+          {# o total dos imposto só será exibido no fechamento do mês #}
           {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.taxes.value.amount|floatformat:2 %}
         </div>
       </div>
