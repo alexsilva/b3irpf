@@ -3,7 +3,7 @@ import datetime
 from collections import OrderedDict
 from decimal import Decimal
 from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscription, BonusInfo, \
-	AssetConvert
+	AssetConvert, AssetRefund
 from irpf.report.base import BaseReport, BaseReportMonth
 from irpf.report.cache import EmptyCacheError
 from irpf.report.utils import Event, Assets, Buy, MoneyLC, OrderedDictResults
@@ -15,6 +15,7 @@ class NegotiationReport(BaseReport):
 	asset_convert_model = AssetConvert
 	earnings_model = Earnings
 	position_model = Position
+	refund_model = AssetRefund
 	event_model = AssetEvent
 	subscription_model = Subscription
 	bonus_model = Bonus
@@ -309,6 +310,37 @@ class NegotiationReport(BaseReport):
 				# reduz a fração valor da fração com o novo preço médio
 				asset.buy.total -= fraction * asset.buy.avg_price
 
+	def get_refund_group_by_date(self, **options) -> dict:
+		"""Agrupamento de todos os registros de restituição/amortização do intervalo pela data"""
+		try:
+			return self.cache.get('refund_by_date')
+		except EmptyCacheError:
+			by_date = self.cache.set('refund_by_date', {})
+		qs_options = self.get_common_qs_options(**options)
+		qs_options['date__range'] = [options['start_date'], options['end_date']]
+		related_fields = []
+		if (field_name := 'asset') in qs_options:
+			related_fields.append(field_name)
+		queryset = self.refund_model.objects.filter(**qs_options)
+		if related_fields:
+			queryset = queryset.select_related(*related_fields)
+		for instance in queryset:
+			by_date.setdefault(instance.date, []).append(instance)
+		return by_date
+
+	def apply_refund(self, date, **options):
+		"""Eventos de restituição/amortização"""
+		refund_group_by_date = self.get_refund_group_by_date(**options)
+		for instance in refund_group_by_date.get(date, ()):
+			try:
+				asset = self.assets[instance.asset.code]
+			except KeyError:
+				continue
+
+			# o preço médio é resultado de: total / quantity
+			# reduzir o total ajusta para novo preço médio.
+			asset.buy.total -= instance.value
+
 	def get_asset_convert_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de eventos de conversão do intervalo pela data"""
 		try:
@@ -546,6 +578,8 @@ class NegotiationReport(BaseReport):
 			self.add_bonus(date, **self.options)
 			# inclusão de subscrições na data de incorporação
 			self.add_subscription(date, **self.options)
+			# restituição/amortização de capital
+			self.apply_refund(date, **self.options)
 
 			queryset = assets_queryset.filter(date=date)
 			for instance in queryset:
