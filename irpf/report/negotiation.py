@@ -339,7 +339,7 @@ class NegotiationReport(BaseReport):
 
 			# o preço médio é resultado de: total / quantity
 			# reduzir o total ajusta para novo preço médio.
-			asset.buy.total -= instance.value
+			asset.buy.total -= (instance.value * asset.buy.quantity)
 
 	def get_asset_convert_group_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de eventos de conversão do intervalo pela data"""
