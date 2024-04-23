@@ -610,6 +610,21 @@ class AssetConvert(BaseIRPFModel):
 		verbose_name_plural = verbose_name + "s"
 
 
+class AssetRefund(BaseIRPFModel):
+	"""Restituição / Amortização de capital investido
+	"""
+	asset = models.ForeignKey(Asset, on_delete=models.CASCADE, verbose_name="Ativo")
+	date = models.DateField(verbose_name="Data do evento")
+	value = MoneyField(verbose_name="Valor", help_text="Valor total restituído ou amortizado.")
+
+	def __str__(self):
+		return f'{self.asset.code} / {self.value}'
+
+	class Meta:
+		verbose_name = "Restituição / amortização"
+		verbose_name_plural = verbose_name + "s"
+
+
 class Position(BaseIRPFModel):
 	CONSOLIDATION_YEARLY = 1
 	CONSOLIDATION_MONTHLY = 2
