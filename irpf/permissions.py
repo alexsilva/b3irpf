@@ -17,7 +17,8 @@ from irpf.models import (
 	Statistic,
 	TaxRate,
 	DayTrade,
-	SwingTrade
+	SwingTrade,
+	AssetRefund
 )
 
 permission_all = ('view', 'add', 'change', 'delete')
@@ -26,6 +27,7 @@ permission_models = {
 	TaxRate: permission_all,
 	DayTrade: permission_all,
 	SwingTrade: permission_all,
+	AssetRefund: permission_all,
 	AssetEarningHistory: permission_all,
 	AssetConvert: permission_all,
 	Bookkeeping: ('view', 'add'),
