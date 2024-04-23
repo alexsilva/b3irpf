@@ -613,12 +613,15 @@ class AssetConvert(BaseIRPFModel):
 class AssetRefund(BaseIRPFModel):
 	"""Restituição / Amortização de capital investido
 	"""
-	asset = models.ForeignKey(Asset, on_delete=models.CASCADE, verbose_name="Ativo")
+	asset = models.ForeignKey(Asset, on_delete=models.CASCADE, verbose_name="Ativo",
+	                          help_text="Ativo cujo valor total, sofrerá restituição/amortização.")
 	value = MoneyField(verbose_name="Valor",
 	                   max_digits=DECIMAL_MAX_DIGITS,
 	                   decimal_places=DECIMAL_PLACES,
-	                   help_text="Valor total restituído/amortizado.")
-	date = models.DateField(verbose_name="Data do evento")
+	                   help_text="Valor total restituído/amortizado.",
+	                   amount_default=None)
+	date = models.DateField(verbose_name="Data do evento",
+	                        help_text="Data de fechamento para ocorrer a restituição.")
 
 	def __str__(self):
 		return f'{self.asset.code} / {self.value}'
