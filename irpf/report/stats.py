@@ -81,6 +81,7 @@ class StatsReport(Base):
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
 				stats_category.taxes.value += stats_category.taxes.residual
+				stats_category.taxes.value -= stats_category.irrf
 				stats_category.taxes.residual = Decimal(0)
 				stats_category.taxes.paid = True
 		else:
@@ -221,10 +222,18 @@ class StatsReport(Base):
 
 			stats = self._get_stats(instance.category_name, date=self.start_date, **self.options)
 
+			# negociações do mês
 			asset_period = asset.period
+
+			# compras e vendas
 			stats.buy += asset_period.buy.total
 			stats.sell += asset.sell.total + asset.sell.fraction.total
+
+			# taxas e impostos
 			stats.tax += asset_period.buy.tax + asset.sell.tax
+			stats.irrf += asset.sell.irrf
+
+			# lucro e prejuízos
 			stats.profits += asset.sell.profits
 			stats.losses += asset.sell.losses
 

@@ -415,7 +415,10 @@ class NegotiationReport(BaseReport):
 			# valores de vendas
 			sell_total = instance.quantity * instance.price
 
+			# taxas de venda (proporcional ao total)
 			asset.sell.tax += instance.tax
+			# imposto de renda retido na fonte
+			asset.sell.irrf += instance.irrf
 			asset.sell.quantity += instance.quantity
 			asset.sell.total += sell_total
 

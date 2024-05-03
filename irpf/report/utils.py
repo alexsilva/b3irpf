@@ -95,6 +95,7 @@ class Stats:
 	             cumulative_losses: MoneyLC = MoneyLC(0),
 	             patrimony: MoneyLC = MoneyLC(0),
 	             tax: MoneyLC = MoneyLC(0),
+	             irrf: MoneyLC = MoneyLC(0),
 	             bonus: Event = None,
 	             instance=None):
 		self.buy = buy
@@ -103,6 +104,7 @@ class Stats:
 		self.losses = losses  # prejuízos
 		self.patrimony = patrimony
 		self.tax = tax
+		self.irrf = irrf
 		self.bonus = Event("Bonificação") if bonus is None else bonus
 		self.instance = instance
 		self.taxes = TaxesStats()
@@ -121,6 +123,7 @@ class Stats:
 		self.profits += stats.profits
 		self.losses += stats.losses
 		self.tax += stats.tax
+		self.irrf += stats.irrf
 		self.bonus.update(stats.bonus)
 		self.taxes.value += stats.taxes.value
 		self.taxes.items.update(stats.taxes.items)
@@ -235,12 +238,14 @@ class Sell:
 	             total: MoneyLC = MoneyLC(0),
 	             profits: MoneyLC = MoneyLC(0),
 	             losses: MoneyLC = MoneyLC(0),
-	             tax: MoneyLC = MoneyLC(0)):
+	             tax: MoneyLC = MoneyLC(0),
+	             irrf: MoneyLC = MoneyLC(0)):
 		self.quantity = quantity
 		self.profits = profits  # lucros
 		self.losses = losses  # prejuízos
 		self.total = total  # total vendas
 		self.tax = tax  # taxas
+		self.irrf = irrf
 		self.fraction = SellFrac()
 
 	def update(self, sell):
@@ -250,6 +255,7 @@ class Sell:
 		self.losses += sell.losses
 		self.total += sell.total
 		self.tax += sell.tax
+		self.irrf += sell.irrf
 		self.fraction.update(sell.fraction)
 		return self
 
