@@ -81,7 +81,8 @@ class StatsReport(Base):
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
 				stats_category.taxes.value += stats_category.taxes.residual
-				stats_category.taxes.value -= stats_category.irrf
+				if stats_category.taxes.value > MoneyLC(0):
+					stats_category.taxes.value -= stats_category.irrf
 				stats_category.taxes.residual = Decimal(0)
 				stats_category.taxes.paid = True
 		else:
