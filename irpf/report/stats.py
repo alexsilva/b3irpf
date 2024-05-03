@@ -81,6 +81,7 @@ class StatsReport(Base):
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
 				stats_category.taxes.value += stats_category.taxes.residual
+				# desconto do irrf (imposto retido na fonte - 0,005% do total de venda de ações no swing trade)
 				if stats_category.taxes.value > MoneyLC(0):
 					stats_category.taxes.value -= stats_category.irrf
 				stats_category.taxes.residual = Decimal(0)
