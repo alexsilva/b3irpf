@@ -81,10 +81,6 @@ class StatsReport(Base):
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
 				stats_category.taxes.value += stats_category.taxes.residual
-				# desconto do irrf (imposto retido na fonte - 0,005% do total de venda de ações no swing trade)
-				if (self.asset_model.get_category_by_name(category_name) in (self.asset_model.CATEGORY_STOCK,) and
-						stats_category.taxes.value > MoneyLC(0)):
-					stats_category.taxes.value -= stats_category.irrf
 				stats_category.taxes.residual = Decimal(0)
 				stats_category.taxes.paid = True
 		else:
@@ -167,6 +163,8 @@ class StatsReport(Base):
 						(profits := self.calc_profits(profits, self.results[category_bdr_name]))):
 						# paga 15% sobre o lucro no swing trade
 						stats.taxes.value += profits * self.tax_rate.swingtrade.stock_percent
+						# desconto do irrf (imposto retido na fonte - 0,005% swing trade)
+						stats.taxes.value -= stats.irrf
 				else:
 					# lucro isento no swing trade
 					stats.exempt_profit += stats.profits
@@ -191,6 +189,8 @@ class StatsReport(Base):
 					(profits := self.calc_profits(profits, self.results[category_bdr_name]))):
 					# paga 15% sobre o lucro no swing trade
 					stats.taxes.value += profits * self.tax_rate.swingtrade.stock_subscription_percent
+					# desconto do irrf (imposto retido na fonte - 0,005% swing trade)
+					stats.taxes.value -= stats.irrf
 			elif category == self.asset_model.CATEGORY_FII_SUBSCRIPTION_RIGHTS:
 				if ((profits := self.calc_profits(stats.profits, stats)) and
 					# compensação de prejuízos de ações
@@ -199,6 +199,8 @@ class StatsReport(Base):
 					(profits := self.calc_profits(profits, self.results[category_bdr_name]))):
 					# paga 15% sobre o lucro no swing trade
 					stats.taxes.value += profits * self.tax_rate.swingtrade.fii_subscription_percent
+					# desconto do irrf (imposto retido na fonte - 0,005% swing trade)
+					stats.taxes.value -= stats.irrf
 
 	def generate(self, **options) -> dict:
 		consolidation = self.report.get_opts("consolidation", None)
