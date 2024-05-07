@@ -1,7 +1,6 @@
 import calendar
 import datetime
 from collections import OrderedDict
-from decimal import Decimal
 
 from django.utils.functional import cached_property
 
@@ -81,13 +80,13 @@ class StatsReport(Base):
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
 				stats_category.taxes.value += stats_category.taxes.residual
-				stats_category.taxes.residual = Decimal(0)
+				stats_category.taxes.residual = MoneyLC(0)
 				stats_category.taxes.paid = True
 		else:
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
 				stats_category.taxes.residual += stats_category.taxes.value
-				stats_category.taxes.value = Decimal(0)
+				stats_category.taxes.value = MoneyLC(0)
 
 	def _get_stats(self, category_name: str, date: datetime.date, **options) -> Stats:
 		if (stats := self.results.get(category_name)) is None:
@@ -135,11 +134,11 @@ class StatsReport(Base):
 			if cumulative_losses >= profits:
 				stats.compensated_losses += profits
 				stats.cumulative_losses += profits
-				profits = Decimal(0)
+				profits = MoneyLC(0)
 			else:
 				profits -= cumulative_losses
 				stats.compensated_losses += cumulative_losses
-				stats.cumulative_losses = Decimal(0)
+				stats.cumulative_losses = MoneyLC(0)
 		return profits
 
 	def generate_taxes(self):
