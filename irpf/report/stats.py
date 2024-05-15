@@ -83,8 +83,19 @@ class StatsReport(Base):
 				stats_category.taxes.residual = MoneyLC(0)
 				stats_category.taxes.paid = True
 		else:
+			# categorias de renda variável que sofrem descontos do irrf
+			irrf_categories = (
+				self.asset_model.CATEGORY_STOCK_SUBSCRIPTION_RIGHTS,
+				self.asset_model.CATEGORY_FII_SUBSCRIPTION_RIGHTS,
+				self.asset_model.CATEGORY_STOCK,
+				self.asset_model.CATEGORY_BDR
+			)
 			for category_name in self.results:
 				stats_category: Stats = self.results[category_name]
+				# Faz a compensação do IRRF descontado por que o imposto será residual.
+				# O desconto o ocorre no momento do cálculo do imposto (generate_taxes).
+				if self.asset_model.get_category_by_name(category_name) in irrf_categories:
+					stats_category.taxes.value += stats_category.irrf
 				stats_category.taxes.residual += stats_category.taxes.value
 				stats_category.taxes.value = MoneyLC(0)
 
