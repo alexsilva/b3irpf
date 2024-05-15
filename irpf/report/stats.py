@@ -186,6 +186,8 @@ class StatsReport(Base):
 					(profits := self.calc_profits(profits, self.results[category_stock_name]))):
 					# paga 15% sobre o lucro no swing trade
 					stats.taxes.value += profits * self.tax_rate.swingtrade.bdr_percent
+					# desconto do irrf (imposto retido na fonte - 0,005% swing trade)
+					stats.taxes.value -= stats.irrf
 			elif category == self.asset_model.CATEGORY_FII:
 				if profits := self.calc_profits(stats.profits, stats):
 					# paga 20% sobre o lucro no swing trade / day trade
