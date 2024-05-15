@@ -267,6 +267,7 @@ class StatsReport(Base):
 
 		# taxas de período
 		self.generate_taxes()
+		_ = self.stats_results
 		self.generate_residual_taxes(**self.options)
 		self.cache.clear()
 		return self.results
