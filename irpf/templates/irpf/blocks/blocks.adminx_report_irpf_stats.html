@@ -64,19 +64,6 @@
       </div>
     </li>
   {% endif %}
-  {% if stats.compensated_losses %}
-    <li class="list-group-item py-2">
-      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
-        <div class="text-center text-sm-left text-success" title="Abatido do lucro para redução do imposto">
-          Prejuízo <span class="badge badge-success" title="Abatido do lucro para redução o imposto">COMPENSADO</span>
-        </div>
-        <div class="text-center text-sm-right">
-          <span class="text-muted">{{ stats.compensated_losses }}</span>
-          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.compensated_losses.amount|floatformat:2 %}
-        </div>
-      </div>
-    </li>
-  {% endif %}
   {% if stats.cumulative_losses %}
     <li class="list-group-item py-2">
       <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
@@ -86,6 +73,19 @@
         <div class="text-center text-sm-right">
           <span class="text-muted">{{ stats.cumulative_losses }}</span>
           {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.cumulative_losses.amount|floatformat:2 %}
+        </div>
+      </div>
+    </li>
+  {% endif %}
+  {% if stats.compensated_losses %}
+    <li class="list-group-item py-2">
+      <div class="d-flex flex-column justify-content-center flex-sm-row justify-content-sm-between">
+        <div class="text-center text-sm-left text-success" title="Abatido do lucro para redução do imposto">
+          Prejuízo <span class="badge badge-success" title="Abatido do lucro para redução o imposto">COMPENSADO</span>
+        </div>
+        <div class="text-center text-sm-right">
+          <span class="text-muted">{{ stats.compensated_losses }}</span>
+          {% include "irpf/includes/adminx_copybtn.html" with copytext=stats.compensated_losses.amount|floatformat:2 %}
         </div>
       </div>
     </li>
