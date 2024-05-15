@@ -180,6 +180,7 @@ class StatsReport(Base):
 					# lucro isento no swing trade
 					stats.exempt_profit += stats.profits
 					stats.profits = MoneyLC(0)
+					stats.irrf = MoneyLC(0)
 			elif category == self.asset_model.CATEGORY_BDR:
 				# compensação de prejuízos da categoria
 				if ((profits := self.calc_profits(stats.profits, stats)) and
