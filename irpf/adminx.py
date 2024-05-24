@@ -9,7 +9,7 @@ from xadmin.plugins.auth import UserAdmin
 from xadmin.sites import NotRegistered
 
 from xadmin.models import Log
-from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
+from correpy.parsers.brokerage_notes.nuinvest_parser.nuinvest import NuInvestParser
 from irpf import permissions
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, TaxRate, DayTrade, \
@@ -255,7 +255,7 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 	)
 	brokerage_note_parsers = {
 		# NU INVEST CORRETORA DE VALORES S.A.
-		'62169875000179': NunInvestParser
+		'62169875000179': NuInvestParser
 	}
 	brokerage_note_field_update = [
 		'reference_id',
