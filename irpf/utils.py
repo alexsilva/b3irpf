@@ -1,4 +1,5 @@
 import calendar
+import re
 from datetime import date, timedelta
 from typing import Sequence
 
@@ -90,3 +91,8 @@ def update_defaults(instance, defaults):
 	if updated:
 		instance.save(update_fields=list(defaults))
 	return updated
+
+
+def get_numbers(value: str):
+	"""Retorna todos os números de uma string"""
+	return ''.join(re.findall(r'(\d+)', value))
