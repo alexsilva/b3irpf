@@ -464,13 +464,14 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 				new_obj.reference_date = note.reference_date
 				new_obj.reference_id = note.reference_id
 				new_obj.user = self.user
-				break
-			if new_obj.reference_id and new_obj.reference_date and new_obj.user:
-				try:
-					new_obj.validate_unique()
-				except ValidationError as exc:
-					self.message_user('//'.join(exc.message_dict['__all__']), level='error')
-					is_valid = False
+
+				if new_obj.reference_id and new_obj.reference_date and new_obj.user:
+					try:
+						new_obj.validate_unique()
+					except ValidationError as exc:
+						self.message_user('//'.join(exc.message_dict['__all__']), level='error')
+						is_valid = False
+					break
 		return is_valid
 
 	def save_models(self, __):
