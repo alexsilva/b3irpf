@@ -270,8 +270,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 	brokerage_note_field_update = ()
 
 	def init_request(self, *args, **kwargs):
-		return bool(self.brokerage_note_negotiation and
-		            self.brokerage_note_parser_factory)
+		return bool(len(self.brokerage_note_field_update))
 
 	def setup(self, *args, **kwargs):
 		...
