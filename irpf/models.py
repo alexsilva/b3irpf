@@ -13,6 +13,7 @@ from django.utils.text import slugify
 
 from irpf.fields import CharCodeField, DateField, CharCodeNameField, DecimalBRField, MoneyField
 from irpf.storage import FileSystemOverwriteStorage
+from irpf.utils import get_numbers
 
 DECIMAL_MAX_DIGITS = 28
 DECIMAL_PLACES = 16
@@ -166,7 +167,7 @@ class Institution(models.Model):
 
 	@cached_property
 	def cnpj_nums(self):
-		return ''.join(re.findall('([0-9]+)', self.cnpj))
+		return get_numbers(self.cnpj)
 
 	class Meta:
 		verbose_name = "Corretora"
