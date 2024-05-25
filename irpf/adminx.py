@@ -9,7 +9,6 @@ from xadmin.plugins.auth import UserAdmin
 from xadmin.sites import NotRegistered
 
 from xadmin.models import Log
-from correpy.parsers.brokerage_notes.nuinvest_parser.nuinvest import NuInvestParser
 from irpf import permissions
 from irpf.models import Asset, Negotiation, Earnings, Position, Institution, Bonus, Bookkeeping, \
 	BrokerageNote, AssetEvent, FoundsAdministrator, Taxes, Subscription, BonusInfo, TaxRate, DayTrade, \
@@ -240,7 +239,7 @@ class NegotiationInline(BaseHorizontalInline):
 @sites.register(BrokerageNote)
 class BrokerageNoteAdmin(BaseIRPFAdmin):
 	model_icon = "fa fa-book"
-	fields = ('note', 'institution')
+	fields = ('note',)
 	list_display = (
 		'reference_id',
 		'reference_date',
@@ -253,10 +252,6 @@ class BrokerageNoteAdmin(BaseIRPFAdmin):
 		'institution',
 		'reference_date'
 	)
-	brokerage_note_parsers = {
-		# NU INVEST CORRETORA DE VALORES S.A.
-		'62169875000179': NuInvestParser
-	}
 	brokerage_note_field_update = [
 		'reference_id',
 		'reference_date',

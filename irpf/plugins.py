@@ -8,7 +8,7 @@ import django.forms as django_forms
 from django.contrib.auth import get_permission_codename
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.management import get_commands
-from django.db.models import Count
+from django.db.models import Count, Value
 from django.db.models.functions import ExtractMonth
 from django.db.transaction import atomic
 from django.template.loader import render_to_string
@@ -19,15 +19,16 @@ from correpy.domain.entities.brokerage_note import BrokerageNote
 from correpy.domain.entities.security import Security
 from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import TransactionType
-from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from correpy.parsers.brokerage_notes.base_parser import BaseBrokerageNoteParser
+from correpy.parsers.brokerage_notes.parser_factory import ParserFactory
 from irpf.fields import CharCodeField
-from irpf.models import Negotiation, Position, Asset, Statistic, Institution
+from irpf.funcs import RegexReplace
+from irpf.models import Negotiation, Position, Asset, Statistic, BrokerageNote as IrpfBrokerageNote, Institution
 from irpf.report import BaseReport
 from irpf.report.base import BaseReportMonth
 from irpf.report.stats import StatsReport, StatsReports
 from irpf.report.utils import Assets, Stats, OrderedDictResults, TransactionGroup, MoneyLC
-from irpf.utils import update_defaults
+from irpf.utils import update_defaults, get_numbers
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
@@ -263,14 +264,14 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 	"""Plugin que faz o registro da nota de corretagem
 	Distribui os valores proporcionais de taxas e registra negociações
 	"""
-	brokerage_note_parsers = None
-	brokerage_note_field_update = ()
+	brokerage_note_parser_factory = ParserFactory
 	brokerage_note_negotiation = Negotiation
 	brokerage_note_asset_model = Asset
+	brokerage_note_field_update = ()
 
 	def init_request(self, *args, **kwargs):
 		return bool(self.brokerage_note_negotiation and
-		            self.brokerage_note_parsers)
+		            self.brokerage_note_parser_factory)
 
 	def setup(self, *args, **kwargs):
 		...
@@ -287,14 +288,40 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 			value = field.initial
 		return value
 
+	@cached_property
+	def parser_map(self):
+		return dict([(v, k) for k, v in self.brokerage_note_parser_factory.CNPJ_PARSER_MAP.items()])
+
+	def _get_cnpj_from_parser(self, parser_cls: BaseBrokerageNoteParser) -> BaseBrokerageNoteParser:
+		return self.parser_map[parser_cls]
+
+	def _get_institution(self, parser: BaseBrokerageNoteParser) -> Institution:
+		"""Obtém e retorna a instituição (corretora) com base no 'parser' usado"""
+		cnpj = get_numbers(self._get_cnpj_from_parser(type(parser)))
+		# remove formatação do texto
+		institution = Institution.objects.annotate(
+			cnpj_nums=RegexReplace('cnpj',
+			                       Value(r'[^\d]'),
+			                       Value('')
+			                       ),
+		).get(
+			cnpj_nums=cnpj,
+		)
+		return institution
+
 	@atomic
-	def _parser_and_update(self, parser, instance) -> list[BrokerageNote]:
+	def _parser_and_update(self, instance: IrpfBrokerageNote) -> list[BrokerageNote]:
 		"""Atualiza a instância com os dados da nota"""
 		notes = []
 		try:
-			parser = parser(brokerage_note=io.BytesIO(instance.note.read()))
+			factory = self._get_parser_factory(io.BytesIO(instance.note.read()))
 		finally:
 			instance.note.seek(0)
+
+		parser = factory.get_parser()
+		if instance.institution_id is None:
+			instance.institution = self._get_institution(parser)
+
 		for note in parser.parse_brokerage_note():
 			for field_name in self.brokerage_note_field_update:
 				setattr(instance, field_name, getattr(note, field_name))
@@ -408,13 +435,10 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 						'tax': avg_tax,
 					})
 
-	def _get_parser(self, institution: Institution) -> BaseBrokerageNoteParser:
+	def _get_parser_factory(self, brokerage_note: io.BytesIO) -> ParserFactory:
 		"""Retorna o parser da nota corretamente para uma data corretora (instituição)"""
-		try:
-			parser = self.brokerage_note_parsers[institution.cnpj_nums]
-		except KeyError:
-			parser = B3Parser
-		return parser
+		factory = self.brokerage_note_parser_factory(brokerage_note=brokerage_note)
+		return factory
 
 	def valid_forms(self, is_valid: bool):
 		if is_valid:
@@ -422,12 +446,20 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 			self.admin_view.save_forms()
 			new_obj = self.admin_view.new_obj
 			cleaned_data = self.admin_view.form_obj.cleaned_data
-			parser_cls = self._get_parser(cleaned_data['institution'])
 			note_file = cleaned_data['note']
 			try:
-				parser = parser_cls(brokerage_note=io.BytesIO(note_file.read()))
+				factory = self._get_parser_factory(brokerage_note=io.BytesIO(note_file.read()))
 			finally:
 				note_file.seek(0)
+
+			parser = factory.get_parser()
+			if new_obj.institution_id is None:
+				try:
+					new_obj.institution = self._get_institution(parser)
+				except KeyError:
+					self.message_user(f"{self.opts.verbose_name} ainda não suportada!", level='error')
+					return False
+
 			for note in parser.parse_brokerage_note():
 				new_obj.reference_date = note.reference_date
 				new_obj.reference_id = note.reference_id
@@ -444,8 +476,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 	def save_models(self, __):
 		if instance := getattr(self.admin_view, "new_obj", None):
 			try:
-				parser = self._get_parser(instance.institution)
-				brokerage_notes = self._parser_and_update(parser, instance)
+				brokerage_notes = self._parser_and_update(instance)
 			except Exception as exc:
 				raise exc from None
 			else:
