@@ -7,7 +7,7 @@ from irpf.models import Asset, Earnings, Bonus, Position, AssetEvent, Subscripti
 from irpf.report.base import BaseReport, BaseReportMonth
 from irpf.report.cache import EmptyCacheError
 from irpf.report.utils import Event, Assets, Buy, MoneyLC, OrderedDictResults
-from irpf.utils import range_dates
+from irpf.utils import range_dates, update_defaults
 
 
 class NegotiationReport(BaseReport):
@@ -68,15 +68,7 @@ class NegotiationReport(BaseReport):
 	@staticmethod
 	def _update_defaults(instance, defaults):
 		"""Atualiza, se necessário a instância com valores padrão"""
-		updated = False
-		for key in defaults:
-			value = defaults[key]
-			if not updated and getattr(instance, key) != value:
-				updated = True
-			setattr(instance, key, value)
-		if updated:
-			instance.save(update_fields=list(defaults))
-		return updated
+		return update_defaults(instance, defaults)
 
 	def get_bonus_registry_by_date(self, **options) -> dict:
 		"""Agrupamento de todos os registros de bônus no intervalo pela data"""

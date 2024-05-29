@@ -159,15 +159,7 @@ class ReportBaseAdminPlugin(GuardianAdminPluginMixin):
 	@staticmethod
 	def _update_defaults(instance, defaults):
 		"""Atualiza, se necessário a instância com valores padrão"""
-		updated = False
-		for key in defaults:
-			value = defaults[key]
-			if not updated and getattr(instance, key) != value:
-				updated = True
-			setattr(instance, key, value)
-		if updated:
-			instance.save(update_fields=list(defaults))
-		return updated
+		return update_defaults(instance, defaults)
 
 	@cached_property
 	def is_save_position(self):
