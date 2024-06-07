@@ -1,7 +1,7 @@
 import sys
 import io
 from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
-from correpy.parsers.brokerage_notes.b3_parser.nuinvest import NunInvestParser
+from correpy.parsers.brokerage_notes.nuinvest_parser import NuInvestParser
 from irpf.models import BrokerageNote
 
 
@@ -11,7 +11,7 @@ def init(migration):
 	"""
 	brokerage_note_parsers = {
 		# NU INVEST CORRETORA DE VALORES S.A.
-		'62169875000179': NunInvestParser
+		'62169875000179': NuInvestParser
 	}
 
 	for brokerage_note in BrokerageNote.objects.all():
