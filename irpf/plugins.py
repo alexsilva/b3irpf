@@ -3,7 +3,8 @@ import collections
 import datetime
 import io
 import itertools
-
+import urllib
+import urllib.parse
 import django.forms as django_forms
 from django.contrib.auth import get_permission_codename
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -13,6 +14,8 @@ from django.db.models.functions import ExtractMonth
 from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from guardian.shortcuts import get_objects_for_user, assign_perm
 
 from correpy.domain.entities.brokerage_note import BrokerageNote
@@ -450,7 +453,14 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 				except KeyError:
 					self.message_user(f"{self.opts.verbose_name} ainda não suportada!", level='error')
 					return False
-
+				except Institution.DoesNotExist:
+					cnpj = get_numbers(self._get_cnpj_from_parser(type(parser)))
+					url = self.get_model_url(Institution, "add")
+					params = urllib.parse.urlencode({'cnpj': cnpj})
+					url = f"<a href='{url}?{params}'>{cnpj}</a>"
+					self.message_user(mark_safe(f"{escape(Institution._meta.verbose_name)} cnpj '{url}' ainda cadastrada!"),
+					                  level='error')
+					return False
 			for note in parser.parse_brokerage_note():
 				new_obj.reference_date = note.reference_date
 				new_obj.reference_id = note.reference_id
