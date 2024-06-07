@@ -1,7 +1,7 @@
 import sys
 import io
 from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
-from correpy.parsers.brokerage_notes.nuinvest_parser import NuInvestParser
+from correpy.parsers.brokerage_notes.nuinvest_parser.nuinvest import NuInvestParser
 from irpf.models import BrokerageNote
 
 
