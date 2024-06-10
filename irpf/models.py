@@ -88,6 +88,9 @@ class Asset(models.Model):
 	code = models.CharField(verbose_name="Código de negociação",
 	                        unique=True,
 	                        max_length=8)
+	description = models.CharField(verbose_name="Descrição",
+	                               max_length=32, null=True,
+	                               help_text="Nome, segmento e classificação.")
 	name = models.CharField(verbose_name="Nome", max_length=512)
 	cnpj = models.CharField(verbose_name="CNPJ", max_length=32)
 
