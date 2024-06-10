@@ -29,6 +29,7 @@ from irpf.funcs import RegexReplace
 from irpf.models import Negotiation, Position, Asset, Statistic, BrokerageNote as IrpfBrokerageNote, Institution
 from irpf.report import BaseReport
 from irpf.report.base import BaseReportMonth
+from irpf.report.cache import Cache
 from irpf.report.stats import StatsReport, StatsReports
 from irpf.report.utils import Assets, Stats, OrderedDictResults, TransactionGroup, MoneyLC
 from irpf.utils import update_defaults, get_numbers
@@ -268,7 +269,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		return bool(len(self.brokerage_note_field_update))
 
 	def setup(self, *args, **kwargs):
-		...
+		self._cache = Cache()
 
 	def block_submit_more_btns(self, context, nodes):
 		return render_to_string("irpf/blocks/blocks.form.save_transactions.html")
@@ -330,6 +331,18 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 			asset = None
 		return asset
 
+	def get_asset_by_name(self, name: str):
+		"""Obtém o ativo pela descrição"""
+		if (asset := self._cache.get(name, None)) is None:
+			try:
+				asset = self.brokerage_note_asset_model.objects.get(description__iregex="|".join([
+					n.strip() for n in name.split() if n.strip()
+				]))
+			except self.brokerage_note_asset_model.DoesNotExist:
+				asset = None
+			self._cache.set(name, asset)
+		return asset
+
 	def _save_transaction(self, transaction: Transaction, instance, **options) -> Negotiation:
 		"""Cria uma nova 'transaction' com os dados da nota"""
 		ticker = options['code']
@@ -360,10 +373,14 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 			kind = None
 		return kind
 
-	@staticmethod
-	def _get_clean_ticker(transaction: Transaction):
+	def _get_clean_ticker(self, transaction: Transaction):
 		"""Retorna o ticker (code) simplificado"""
-		return CharCodeField().to_python(transaction.security.ticker)
+		if transaction.security.ticker:
+			return CharCodeField().to_python(transaction.security.ticker)
+		elif asset := self.get_asset_by_name(transaction.security.name):
+			return asset.code
+		else:
+			raise ValueError(f"Não foi possível extrair o 'ticker' do ativo '{transaction.security.name}'")
 
 	def _get_transactions_group(self, note_transactions: list[Transaction]) -> collections.OrderedDict:
 		"""Agrupa transações que pertençam ao mesmo ativo (com compra e venda separado)"""
