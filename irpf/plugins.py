@@ -1,15 +1,17 @@
 import calendar
 import collections
 import datetime
+import functools
 import io
 import itertools
+import operator
 import urllib
 import urllib.parse
 import django.forms as django_forms
 from django.contrib.auth import get_permission_codename
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.management import get_commands
-from django.db.models import Count, Value
+from django.db.models import Count, Value, Q
 from django.db.models.functions import ExtractMonth
 from django.db.transaction import atomic
 from django.template.loader import render_to_string
@@ -335,9 +337,9 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		"""Obtém o ativo pela descrição"""
 		if (asset := self._cache.get(name, None)) is None:
 			try:
-				asset = self.brokerage_note_asset_model.objects.get(description__iregex="|".join([
-					n.strip() for n in name.split() if n.strip()
-				]))
+				query = functools.reduce(operator.and_, (Q(description__icontains=word.strip())
+				                                         for word in name.split() if word.strip()))
+				asset = self.brokerage_note_asset_model.objects.get(query)
 			except self.brokerage_note_asset_model.DoesNotExist:
 				asset = None
 			self._cache.set(name, asset)
