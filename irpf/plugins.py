@@ -449,7 +449,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 					})
 
 	def _get_parser_factory(self, brokerage_note: io.BytesIO) -> ParserFactory:
-		"""Retorna o parser da nota corretamente para uma data corretora (instituição)"""
+		"""Retorna o 'factory' de notas"""
 		factory = self.brokerage_note_parser_factory(brokerage_note=brokerage_note)
 		return factory
 
