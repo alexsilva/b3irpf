@@ -1,8 +1,8 @@
 import datetime
 import decimal
-import re
 from collections import defaultdict
 from decimal import Decimal
+from pathlib import Path
 
 from django.conf import settings
 from django.db import models
@@ -490,10 +490,18 @@ class Earnings(ImportModelMixin, BaseIRPFModel):
 		]
 
 
+def brokerage_note_upload_path(instance, filename):
+	"""Gera nomes únicos para notas de corretagem (por usuário e corretora)"""
+	filepath = Path("notes", filename)
+	filename = slugify(f"{instance.institution.name}-{instance.institution.cnpj}"
+	                   f"-{instance.reference_id}-{instance.user.pk}")
+	return str(filepath.parent / filename) + filepath.suffix
+
+
 class BrokerageNote(BaseIRPFModel):
 	"""Modelo de notas de corretagem"""
 	note = models.FileField(verbose_name='Nota de corretagem (PDF)',
-	                        upload_to='notes',
+	                        upload_to=brokerage_note_upload_path,
 	                        storage=FileSystemOverwriteStorage())
 	institution = models.ForeignKey(Institution,
 	                                on_delete=models.CASCADE,
