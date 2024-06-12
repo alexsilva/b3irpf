@@ -287,14 +287,17 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 
 	@cached_property
 	def parser_map(self):
-		return dict([(v, k) for k, v in self.brokerage_note_parser_factory.CNPJ_PARSER_MAP.items()])
+		values = {}
+		for k, v in self.brokerage_note_parser_factory.CNPJ_PARSER_MAP.items():
+			values[v] = get_numbers(k)
+		return values
 
 	def _get_cnpj_from_parser(self, parser_cls: BaseBrokerageNoteParser) -> BaseBrokerageNoteParser:
 		return self.parser_map[parser_cls]
 
 	def _get_institution(self, parser: BaseBrokerageNoteParser) -> Institution:
 		"""Obtém e retorna a instituição (corretora) com base no 'parser' usado"""
-		cnpj = get_numbers(self._get_cnpj_from_parser(type(parser)))
+		cnpj = self._get_cnpj_from_parser(type(parser))
 		# remove formatação do texto
 		institution = Institution.objects.annotate(
 			cnpj_nums=RegexReplace('cnpj',
@@ -473,7 +476,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 					self.message_user(f"{self.opts.verbose_name} ainda não suportada!", level='error')
 					return False
 				except Institution.DoesNotExist:
-					cnpj = get_numbers(self._get_cnpj_from_parser(type(parser)))
+					cnpj = self._get_cnpj_from_parser(type(parser))
 					url = self.get_model_url(Institution, "add")
 					params = urllib.parse.urlencode({'cnpj': cnpj})
 					url = f"<a href='{url}?{params}'>{cnpj}</a>"
