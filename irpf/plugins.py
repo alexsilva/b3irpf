@@ -492,6 +492,10 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 						self.message_user('//'.join(exc.message_dict['__all__']), level='error')
 						is_valid = False
 					break
+			else:
+				if not (new_obj.reference_id and new_obj.reference_date and new_obj.user):
+					self.message_user(f"{self.opts.verbose_name} invalida!", level='error')
+					is_valid = False
 		return is_valid
 
 	def save_models(self, __):
