@@ -27,7 +27,7 @@ from irpf.widgets import MonthYearField, MonthYearWidget
 from moneyfield import MoneyModelForm
 from xadmin import sites, site
 from xadmin.adminx import LogAdmin
-from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView, ModelAdminView
+from xadmin.views import ListAdminView, ModelFormAdminView, BaseAdminView, ModelAdminView, CommAdminView
 
 site.register_view("^irpf/import/(?P<model_app_label>.+)/$", AdminImportListModelView, "import_listmodel")
 site.register_view("^irpf/report/(?P<model_app_label>.+)/$", ReportIRPFFAdminView, "reportirpf")
@@ -48,6 +48,12 @@ User = get_user_model()
 
 def _get_field_opts(name, model):
 	return model._meta.get_field(name)
+
+
+@sites.register(CommAdminView)
+class GlobalViewOptions:
+	# plugin TopNavPlugin
+	has_global_search_models = False
 
 
 @sites.register(ModelAdminView)
