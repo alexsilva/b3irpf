@@ -3,7 +3,6 @@ import collections
 import datetime
 import functools
 import io
-import itertools
 import operator
 import urllib
 import urllib.parse
@@ -34,7 +33,7 @@ from irpf.report.base import BaseReportMonth
 from irpf.report.cache import Cache
 from irpf.report.stats import StatsReport, StatsReports
 from irpf.report.utils import Assets, Stats, OrderedDictResults, TransactionGroup, MoneyLC
-from irpf.utils import update_defaults, get_numbers
+from irpf.utils import update_defaults, get_numbers, OrderedDefaultDict
 from xadmin.plugins.utils import get_context_dict
 from xadmin.views import BaseAdminPlugin
 
@@ -389,19 +388,22 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 
 	def _get_transactions_group(self, note_transactions: list[Transaction]) -> collections.OrderedDict:
 		"""Agrupa transações que pertençam ao mesmo ativo (com compra e venda separado)"""
-		results = collections.OrderedDict()
+		transaction_groups = OrderedDefaultDict(TransactionGroup)
 
-		def transaction_group_by(tns: Transaction):
-			return self._get_clean_ticker(tns), tns.transaction_type
+		for note_transaction in note_transactions:
+			ticker = self._get_clean_ticker(note_transaction)
 
-		for (ticker, transaction_type), items in itertools.groupby(note_transactions, key=transaction_group_by):
-			ts = TransactionGroup()
+			ts = transaction_groups[(ticker, note_transaction.transaction_type)]
+
 			# soma as quantidade e totais para cada categoria (compra, venda)
 			# calcula o preço médio final com base no total de todas as negociações do ativo
-			for transaction in items:
-				ts.quantity += transaction.amount
-				ts.total += transaction.amount * transaction.unit_price
+			ts.quantity += note_transaction.amount
+			ts.total += (note_transaction.amount * note_transaction.unit_price)
 
+		results = collections.OrderedDict()
+
+		for ticker, transaction_type in transaction_groups:
+			ts = transaction_groups[(ticker, transaction_type)]
 			results[ticker] = Transaction(
 				transaction_type=transaction_type,
 				amount=ts.quantity,
