@@ -1,4 +1,5 @@
 import calendar
+import collections
 import re
 from datetime import date, timedelta
 from typing import Sequence
@@ -96,3 +97,87 @@ def update_defaults(instance, defaults):
 def get_numbers(value: str):
 	"""Retorna todos os números de uma string"""
 	return ''.join(re.findall(r'(\d+)', value))
+
+
+class OrderedDefaultDict(collections.OrderedDict):
+	"""
+	An OrderedDict subclass that provides default values for missing keys,
+	similar to defaultdict, while preserving the order of insertion.
+
+	Attributes:
+	-----------
+	default_factory : callable, optional
+		A function that provides the default value for the dictionary when a key is missing.
+		If None, accessing a missing key will raise a KeyError.
+
+	Methods:
+	--------
+	__missing__(key):
+		Called when a key is not found. If `default_factory` is set, it creates a new
+		default value, assigns it to the key, and returns the value. If `default_factory`
+		is None, raises a KeyError.
+
+	__repr__():
+		Returns a string representation of the `OrderedDefaultDict`, including the `default_factory`
+		if it is set.
+
+	Example:
+	--------
+	>>> ordered_defaultdict = OrderedDefaultDict(list)
+	>>> ordered_defaultdict['missing_key']
+	[]
+	>>> ordered_defaultdict['existing_key'] = [1, 2, 3]
+	>>> ordered_defaultdict['existing_key']
+	[1, 2, 3]
+	"""
+
+	def __init__(self, default_factory=None, *args, **kwargs):
+		"""
+		Initializes the OrderedDefaultDict.
+
+		Parameters:
+		-----------
+		default_factory : callable, optional
+			A function that provides default values for missing keys. If None, accessing a missing key will raise a KeyError.
+
+		*args, **kwargs :
+			Additional positional and keyword arguments are passed to the OrderedDict constructor.
+		"""
+		super().__init__(*args, **kwargs)
+		self.default_factory = default_factory
+
+	def __missing__(self, key):
+		"""
+		Method called when the key is not present in the dictionary.
+
+		Parameters:
+		-----------
+		key : any hashable type
+			The key that is missing in the dictionary.
+
+		Returns:
+		--------
+		value : any type
+			The value corresponding to the missing key, created by default_factory.
+
+		Raises:
+		-------
+		KeyError
+			If `default_factory` is None, raises KeyError.
+		"""
+		if self.default_factory is None:
+			raise KeyError(key)
+		self[key] = self.default_factory()
+		return self[key]
+
+	def __repr__(self):
+		"""
+		Returns a string representation of the OrderedDefaultDict, showing the
+		default factory and the dictionary contents.
+
+		Returns:
+		--------
+		str
+			A string representation of the OrderedDefaultDict.
+		"""
+		return f'{self.__class__.__name__}({self.default_factory}, {super().__repr__()})'
