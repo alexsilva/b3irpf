@@ -386,7 +386,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		else:
 			raise ValueError(f"Não foi possível extrair o 'ticker' do ativo '{transaction.security.name}'")
 
-	def _get_transactions_group(self, note_transactions: list[Transaction]) -> collections.OrderedDict:
+	def _get_transactions_group(self, note_transactions: list[Transaction]) -> list[str, Transaction]:
 		"""Agrupa transações que pertençam ao mesmo ativo (com compra e venda separado)"""
 		transaction_groups = OrderedDefaultDict(TransactionGroup)
 
@@ -400,16 +400,16 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 			ts.quantity += note_transaction.amount
 			ts.total += (note_transaction.amount * note_transaction.unit_price)
 
-		results = collections.OrderedDict()
+		results = []
 
 		for ticker, transaction_type in transaction_groups:
 			ts = transaction_groups[(ticker, transaction_type)]
-			results[ticker] = Transaction(
+			results.append((ticker, Transaction(
 				transaction_type=transaction_type,
 				amount=ts.quantity,
 				unit_price=ts.avg_price,
 				security=Security(ticker)
-			)
+			)))
 		return results
 
 	def _add_transactions(self, note: BrokerageNote, instance):
@@ -421,12 +421,14 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		           note.taxes,
 		           note.emoluments,
 		           note.others])
+		# transações agrupadas
+		transaction_groups = self._get_transactions_group(note.transactions)
 
-		transactions = self._get_transactions_group(note.transactions)
-		paid = sum([(transactions[ticker].amount * transactions[ticker].unit_price)
-		            for ticker in transactions])
-		for ticker in transactions:
-			transaction = transactions[ticker]
+		# total pagos pelo ativos
+		paid = sum([(transaction.amount * transaction.unit_price)
+		            for ticker, transaction in transaction_groups])
+
+		for ticker, transaction in transaction_groups:
 			if (kind := self._get_transaction_type(transaction)) is None:
 				continue
 			# rateio de taxas proporcional ao valor pago
