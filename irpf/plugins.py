@@ -386,7 +386,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		else:
 			raise ValueError(f"Não foi possível extrair o 'ticker' do ativo '{transaction.security.name}'")
 
-	def _get_transactions_group(self, note_transactions: list[Transaction]) -> list[str, Transaction]:
+	def _get_transaction_groups(self, note_transactions: list[Transaction]) -> list[str, Transaction]:
 		"""Agrupa transações que pertençam ao mesmo ativo (com compra e venda separado)"""
 		transaction_groups = OrderedDefaultDict(TransactionGroup)
 
@@ -422,7 +422,7 @@ class BrokerageNoteAdminPlugin(GuardianAdminPluginMixin):
 		           note.emoluments,
 		           note.others])
 		# transações agrupadas
-		transaction_groups = self._get_transactions_group(note.transactions)
+		transaction_groups = self._get_transaction_groups(note.transactions)
 
 		# total pagos pelo ativos
 		paid = sum([(transaction.amount * transaction.unit_price)
